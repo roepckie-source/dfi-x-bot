@@ -38,3 +38,11 @@ me = client.get_me()
 
 print("X Verbindung erfolgreich")
 print(me.data)
+
+# Tweet senden
+response = client.create_tweet(
+    text=message
+)
+
+print("Tweet erfolgreich gesendet")
+print(response.data)
