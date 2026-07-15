@@ -4,18 +4,10 @@ import requests
 from datetime import datetime
 
 # X API Zugangsdaten aus GitHub Secrets laden
-API_KEY = os.environ["API_KEY"]
-API_SECRET = os.environ["API_SECRET"]
-ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
-ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
+
 
 # X Verbindung herstellen
-client = tweepy.Client(
-    consumer_key=API_KEY,
-    consumer_secret=API_SECRET,
-    access_token=ACCESS_TOKEN,
-    access_token_secret=ACCESS_TOKEN_SECRET
-)
+
 
 # DFI Preis abrufen
 def get_dfi_price():
