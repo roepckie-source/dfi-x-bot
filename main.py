@@ -33,7 +33,8 @@ message = (
     f"{datetime.now().strftime('%d.%m.%Y')}"
 )
 
-# Auf X posten
-client.create_tweet(text=message)
+# X Verbindung testen
+me = client.get_me()
 
-print("DFI Update erfolgreich gepostet")
+print("X Verbindung erfolgreich")
+print(me.data)
