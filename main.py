@@ -40,9 +40,33 @@ print("X Verbindung erfolgreich")
 print(me.data)
 
 # Tweet senden
-response = client.create_tweet(
-    text=message
+
+# Discord Nachricht senden
+import requests
+
+DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
+
+message = f"""
+🚀 DeFiChain DFI Update
+
+💰 DFI Preis: {dfi_price} USD
+
+🕒 Zeitpunkt:
+{datetime.now().strftime("%d.%m.%Y %H:%M")}
+
+🔗 DeFiChain:
+https://defichain.com
+"""
+
+response = requests.post(
+    DISCORD_WEBHOOK,
+    json={"content": message}
 )
 
-print("Tweet erfolgreich gesendet")
-print(response.data)
+if response.status_code == 204:
+    print("Discord Nachricht erfolgreich gesendet")
+else:
+    print("Discord Fehler:", response.text)
+
+
+
