@@ -4,6 +4,10 @@ import requests
 from datetime import datetime
 
 
+# =========================
+# Secrets
+# =========================
+
 API_KEY = os.environ["API_KEY"]
 API_SECRET = os.environ["API_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
@@ -12,9 +16,9 @@ ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
 
-# -------------------------
-# Marktdaten holen
-# -------------------------
+# =========================
+# DFI Daten holen
+# =========================
 
 def get_crypto_data():
 
@@ -27,7 +31,12 @@ def get_crypto_data():
         "include_market_cap": "true"
     }
 
-    response = requests.get(url, params=params, timeout=10)
+    response = requests.get(
+        url,
+        params=params,
+        timeout=10
+    )
+
     data = response.json()
 
     dfi = data.get("defichain", {})
@@ -41,9 +50,9 @@ def get_crypto_data():
     return price, change, marketcap, dusd
 
 
-# -------------------------
+# =========================
 # X Verbindung
-# -------------------------
+# =========================
 
 client = tweepy.Client(
     consumer_key=API_KEY,
@@ -63,9 +72,9 @@ except Exception as e:
     print("Fehler bei der X-Verbindung:", e)
 
 
-# -------------------------
-# Tweet erstellen
-# -------------------------
+# =========================
+# Report erstellen
+# =========================
 
 tweet = ""
 
@@ -77,10 +86,13 @@ try:
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
+    if change >= 0:
+        trend = "📈"
+    else:
+        trend = "📉"
 
-    trend = "📈" if change >= 0 else "📉"
 
-tweet = f"""
+    tweet = f"""
 📰 DeFiChain Daily Report
 
 📅 {now}
@@ -104,26 +116,13 @@ ${dusd:.4f}
 
 DeFiChain ecosystem update
 
+
 📌 Governance
 
 No new updates detected
 
 
 #DeFiChain #DFI
-"""
-
-💰 DFI Price: ${price:.5f}
-{trend} 24h: {change:.2f}%
-
-🏦 Market Cap:
-${marketcap_m:.2f} Mio.
-
-💵 DUSD:
-${dusd:.4f}
-
-🕒 {now}
-
-#DeFiChain #DFI #DeFi
 """
 
 
@@ -139,10 +138,9 @@ except Exception as e:
     print("Fehler beim Tweet:", e)
 
 
-
-# -------------------------
+# =========================
 # Discord
-# -------------------------
+# =========================
 
 try:
 
