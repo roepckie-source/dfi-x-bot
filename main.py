@@ -1,159 +1,76 @@
 import os
-import tweepy
 import requests
 from datetime import datetime
-from insights import get_daily_insight
 
-# =========================
-# Secrets
-# =========================
 
-API_KEY = os.environ["API_KEY"]
-API_SECRET = os.environ["API_SECRET"]
-ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
-ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
-
+# Discord Webhook aus GitHub Secrets laden
 DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
 
-# =========================
-# DFI Daten holen
-# =========================
-
-def get_crypto_data():
-
+# DFI Preis von CoinGecko abrufen
+def get_dfi_price():
     url = "https://api.coingecko.com/api/v3/simple/price"
-
+    
     params = {
-        "ids": "defichain,defichain-dusd",
-        "vs_currencies": "usd",
-        "include_24hr_change": "true",
-        "include_market_cap": "true"
+        "ids": "defichain",
+        "vs_currencies": "usd,eur",
+        "include_24hr_change": "true"
     }
 
-    response = requests.get(
-        url,
-        params=params,
-        timeout=10
-    )
-
+    response = requests.get(url, params=params)
     data = response.json()
 
-    dfi = data.get("defichain", {})
+    dfi = data["defichain"]
 
-    price = dfi.get("usd", 0)
-    change = dfi.get("usd_24h_change", 0)
-    marketcap = dfi.get("usd_market_cap", 0)
-
-    dusd = data.get("defichain-dusd", {}).get("usd", 0)
-
-    return price, change, marketcap, dusd
+    return (
+        dfi["usd"],
+        dfi["eur"],
+        dfi.get("usd_24h_change", 0)
+    )
 
 
-# =========================
-# X Verbindung
-# =========================
+# Discord Nachricht senden
+def send_discord(message):
+    response = requests.post(
+        DISCORD_WEBHOOK,
+        json={
+            "content": message
+        }
+    )
 
-client = tweepy.Client(
-    consumer_key=API_KEY,
-    consumer_secret=API_SECRET,
-    access_token=ACCESS_TOKEN,
-    access_token_secret=ACCESS_TOKEN_SECRET
-)
+    if response.status_code == 204:
+        print("Discord Nachricht erfolgreich gesendet")
+    else:
+        print("Discord Fehler:")
+        print(response.text)
 
 
+# Hauptprogramm
 try:
-    me = client.get_me()
-
-    print("X Verbindung erfolgreich")
-    print(me.data.username)
-
-except Exception as e:
-    print("Fehler bei der X-Verbindung:", e)
-
-
-# =========================
-# Report erstellen
-# =========================
-
-tweet = ""
-
-try:
-
-    price, change, marketcap, dusd = get_crypto_data()
-
-    marketcap_m = marketcap / 1_000_000
+    dfi_usd, dfi_eur, change = get_dfi_price()
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
-    if change >= 0:
-        trend = "📈"
-    else:
-        trend = "📉"
+    emoji = "🟢" if change >= 0 else "🔴"
 
+    message = f"""
+🚀 **DeFiChain DFI Update**
 
-    tweet = f"""
-📰 DeFiChain Daily Report
+💰 **DFI Preis**
+🇺🇸 USD: ${dfi_usd:.6f}
+🇪🇺 EUR: €{dfi_eur:.6f}
 
-📅 {now}
+{emoji} **24h Änderung:** {change:.2f}%
 
-💰 Market Data
+🕒 Zeit:
+{now}
 
-DFI Price:
-${price:.5f}
-
-24h Change:
-{trend} {change:.2f}%
-
-Market Cap:
-${marketcap_m:.2f} Mio.
-
-💵 DUSD:
-${dusd:.4f}
-
-
-🌐 Network
-
-DeFiChain ecosystem update
-
-📚 Daily Insight
-
-{get_daily_insight()}
-
-
-#DeFiChain #DFI
+🔗 https://defichain.com
 """
 
-
-    client.create_tweet(
-        text=tweet
-    )
-
-    print("Tweet erfolgreich gesendet")
+    send_discord(message)
 
 
 except Exception as e:
-
-    print("Fehler beim Tweet:", e)
-
-
-# =========================
-# Discord
-# =========================
-
-try:
-
-    requests.post(
-        DISCORD_WEBHOOK,
-        json={
-            "content": "✅ DFI Bot ausgeführt\n\n" + tweet
-        },
-        timeout=10
-    )
-
-    print("Discord Nachricht erfolgreich gesendet")
-
-
-except Exception as e:
-
-    print("Discord Fehler:", e)
+    print("Fehler:")
+    print(e)
