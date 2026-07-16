@@ -44,7 +44,6 @@ def send_discord(message):
         print("Discord Fehler:")
         print(response.text)
 
-
 # Hauptprogramm
 try:
     dfi_usd, dfi_eur, change = get_dfi_price()
