@@ -80,9 +80,37 @@ try:
 
     trend = "📈" if change >= 0 else "📉"
 
+tweet = f"""
+📰 DeFiChain Daily Report
 
-    tweet = f"""
-🚀 DeFiChain Daily Update
+📅 {now}
+
+💰 Market Data
+
+DFI Price:
+${price:.5f}
+
+24h Change:
+{trend} {change:.2f}%
+
+Market Cap:
+${marketcap_m:.2f} Mio.
+
+💵 DUSD:
+${dusd:.4f}
+
+
+🌐 Network
+
+DeFiChain ecosystem update
+
+📌 Governance
+
+No new updates detected
+
+
+#DeFiChain #DFI
+"""
 
 💰 DFI Price: ${price:.5f}
 {trend} 24h: {change:.2f}%
