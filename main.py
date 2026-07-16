@@ -4,7 +4,6 @@ import requests
 from datetime import datetime
 
 
-# X API Daten
 API_KEY = os.environ["API_KEY"]
 API_SECRET = os.environ["API_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
@@ -14,25 +13,32 @@ DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
 
 # -------------------------
-# DFI Kurs holen
+# Marktdaten holen
 # -------------------------
 
-def get_dfi_price():
+def get_crypto_data():
+
     url = "https://api.coingecko.com/api/v3/simple/price"
 
     params = {
-        "ids": "defichain",
+        "ids": "defichain,defichain-dusd",
         "vs_currencies": "usd",
-        "include_24hr_change": "true"
+        "include_24hr_change": "true",
+        "include_market_cap": "true"
     }
 
-    r = requests.get(url, params=params)
-    data = r.json()
+    response = requests.get(url, params=params, timeout=10)
+    data = response.json()
 
-    price = data["defichain"]["usd"]
-    change = data["defichain"]["usd_24h_change"]
+    dfi = data.get("defichain", {})
 
-    return price, change
+    price = dfi.get("usd", 0)
+    change = dfi.get("usd_24h_change", 0)
+    marketcap = dfi.get("usd_market_cap", 0)
+
+    dusd = data.get("defichain-dusd", {}).get("usd", 0)
+
+    return price, change, marketcap, dusd
 
 
 # -------------------------
@@ -47,10 +53,9 @@ client = tweepy.Client(
 )
 
 
-# Test Verbindung
-
 try:
     me = client.get_me()
+
     print("X Verbindung erfolgreich")
     print(me.data.username)
 
@@ -62,24 +67,39 @@ except Exception as e:
 # Tweet erstellen
 # -------------------------
 
+tweet = ""
+
 try:
 
-    price, change = get_dfi_price()
+    price, change, marketcap, dusd = get_crypto_data()
+
+    marketcap_m = marketcap / 1_000_000
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
-    tweet = f"""
-🚀 DFI Daily Update
 
-💰 Price: ${price:.5f}
-📈 24h Change: {change:.2f}%
+    trend = "📈" if change >= 0 else "📉"
+
+
+    tweet = f"""
+🚀 DeFiChain Daily Update
+
+💰 DFI Price: ${price:.5f}
+{trend} 24h: {change:.2f}%
+
+🏦 Market Cap:
+${marketcap_m:.2f} Mio.
+
+💵 DUSD:
+${dusd:.4f}
 
 🕒 {now}
 
-#DeFiChain #DFI
+#DeFiChain #DFI #DeFi
 """
 
-    response = client.create_tweet(
+
+    client.create_tweet(
         text=tweet
     )
 
@@ -87,26 +107,28 @@ try:
 
 
 except Exception as e:
+
     print("Fehler beim Tweet:", e)
 
 
+
 # -------------------------
-# Discord Nachricht
+# Discord
 # -------------------------
 
 try:
 
-    message = {
-        "content":
-        "✅ DFI Bot ausgeführt\n\n" + tweet
-    }
-
     requests.post(
         DISCORD_WEBHOOK,
-        json=message
+        json={
+            "content": "✅ DFI Bot ausgeführt\n\n" + tweet
+        },
+        timeout=10
     )
 
     print("Discord Nachricht erfolgreich gesendet")
 
+
 except Exception as e:
+
     print("Discord Fehler:", e)
