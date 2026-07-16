@@ -2,7 +2,7 @@ import os
 import tweepy
 import requests
 from datetime import datetime
-
+from insights import get_daily_insight
 
 # =========================
 # Secrets
@@ -116,10 +116,9 @@ ${dusd:.4f}
 
 DeFiChain ecosystem update
 
+📚 Daily Insight
 
-📌 Governance
-
-No new updates detected
+{get_daily_insight()}
 
 
 #DeFiChain #DFI
