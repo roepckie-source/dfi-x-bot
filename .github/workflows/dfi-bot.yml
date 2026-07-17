@@ -1,8 +1,8 @@
-name: DFI Discord Bot
+name: DFI Discord + X Bot
 
 on:
   schedule:
-    - cron: "0 21 * * *"   # täglich 23:00 Uhr deutscher Zeit (UTC+2 im Sommer)
+    - cron: "0 21 * * *"   # 23:00 Uhr deutsche Zeit im Sommer (UTC+2)
   workflow_dispatch:
 
 jobs:
@@ -25,5 +25,9 @@ jobs:
       - name: Bot starten
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          API_KEY: ${{ secrets.API_KEY }}
+          API_SECRET: ${{ secrets.API_SECRET }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
         run: |
           python main.py
