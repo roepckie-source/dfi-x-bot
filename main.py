@@ -201,7 +201,7 @@ ${dfi['volume']:,.0f}
 
     send_discord(discord_message)
 
-    send_x(x_message)
+    send_x("🚀 DeFiChain $DFI Test #DFI")
 
 
 
