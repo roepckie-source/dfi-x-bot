@@ -1,5 +1,6 @@
 import os
 import requests
+import tweepy
 from datetime import datetime
 
 
@@ -7,10 +8,17 @@ from datetime import datetime
 DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
 
+# X (Twitter) Zugangsdaten aus GitHub Secrets laden
+API_KEY = os.environ["API_KEY"]
+API_SECRET = os.environ["API_SECRET"]
+ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
+ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
+
+
 # DFI Preis von CoinGecko abrufen
 def get_dfi_price():
     url = "https://api.coingecko.com/api/v3/simple/price"
-    
+
     params = {
         "ids": "defichain",
         "vs_currencies": "usd,eur",
@@ -44,6 +52,29 @@ def send_discord(message):
         print("Discord Fehler:")
         print(response.text)
 
+
+# X Nachricht senden
+def send_x(message):
+    try:
+        client = tweepy.Client(
+            consumer_key=API_KEY,
+            consumer_secret=API_SECRET,
+            access_token=ACCESS_TOKEN,
+            access_token_secret=ACCESS_TOKEN_SECRET
+        )
+
+        response = client.create_tweet(
+            text=message
+        )
+
+        print("X Tweet erfolgreich gesendet")
+        print(response)
+
+    except Exception as e:
+        print("X Fehler:")
+        print(e)
+
+
 # Hauptprogramm
 try:
     dfi_usd, dfi_eur, change = get_dfi_price()
@@ -52,7 +83,9 @@ try:
 
     emoji = "🟢" if change >= 0 else "🔴"
 
-    message = f"""
+
+    # Discord Version
+    discord_message = f"""
 🚀 **DeFiChain DFI Update**
 
 💰 **DFI Preis**
@@ -61,13 +94,26 @@ try:
 
 {emoji} **24h Änderung:** {change:.2f}%
 
-🕒 Zeit:
-{now}
+🕒 {now}
 
 🔗 https://defichain.com
 """
 
-    send_discord(message)
+
+    # X Version (ohne Discord Markdown)
+    x_message = (
+        f"🚀 DeFiChain DFI Update\n\n"
+        f"💰 DFI Preis:\n"
+        f"🇺🇸 ${dfi_usd:.6f}\n"
+        f"🇪🇺 €{dfi_eur:.6f}\n\n"
+        f"{emoji} 24h: {change:.2f}%\n\n"
+        f"🕒 {now}\n"
+        f"🔗 https://defichain.com"
+    )
+
+
+    send_discord(discord_message)
+    send_x(x_message)
 
 
 except Exception as e:
