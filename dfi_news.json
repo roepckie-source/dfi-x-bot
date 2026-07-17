@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "category": "History",
+    "title": "DeFiChain Start",
+    "text": "DeFiChain wurde entwickelt, um dezentrale Finanzanwendungen auf einer eigenen Blockchain zu ermöglichen.",
+    "hashtags": "#DeFiChain #DFI"
+  },
+  {
+    "id": 2,
+    "category": "Tokenomics",
+    "title": "DFI Token",
+    "text": "DFI ist der native Token des DeFiChain Ökosystems und wird für Governance und verschiedene Funktionen genutzt.",
+    "hashtags": "#DFI #Crypto"
+  },
+  {
+    "id": 3,
+    "category": "Governance",
+    "title": "Community Entscheidungen",
+    "text": "Die DeFiChain Community kann über Vorschläge abstimmen und die Entwicklung des Ökosystems beeinflussen.",
+    "hashtags": "#DeFiChain #Governance"
+  },
+  {
+    "id": 4,
+    "category": "dUSD",
+    "title": "DeFiChain Stablecoin",
+    "text": "dUSD wurde als dezentrale Dollar-Einheit innerhalb des DeFiChain Finanzsystems eingeführt.",
+    "hashtags": "#DeFiChain #dUSD"
+  },
+  {
+    "id": 5,
+    "category": "Community Fund",
+    "title": "Community Finanzierung",
+    "text": "Der Community Fund unterstützt Projekte und Entwicklungen innerhalb des DeFiChain Ökosystems.",
+    "hashtags": "#DeFiChain #DFI"
+  }
+]
