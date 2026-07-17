@@ -1,7 +1,6 @@
 import os
 import requests
 import tweepy
-import json
 from datetime import datetime
 
 
@@ -45,60 +44,28 @@ def get_dfi_data():
     }
 
 
-# DeFiChain News laden
-def get_dfi_news():
-
-    try:
-        with open("dfi_news.json", "r", encoding="utf-8") as file:
-            news = json.load(file)
-
-        day = datetime.now().timetuple().tm_yday
-
-        index = (day - 1) % len(news)
-
-        return news[index]
-
-    except Exception as e:
-
-        print("News Fehler:")
-        print(e)
-
-        return {
-            "title": "Keine News verfügbar",
-            "text": "DeFiChain Daily Update",
-            "hashtags": "#DeFiChain"
-        }
-
-
 # Discord senden
 def send_discord(message):
 
     try:
-
         response = requests.post(
             DISCORD_WEBHOOK,
-            json={
-                "content": message
-            }
+            json={"content": message}
         )
 
         if response.status_code == 204:
             print("Discord Nachricht erfolgreich gesendet")
         else:
-            print("Discord Fehler:")
             print(response.text)
 
     except Exception as e:
-        print("Discord Fehler:")
-        print(e)
-
+        print("Discord Fehler:", e)
 
 
 # X senden
 def send_x(message):
 
     try:
-
         client = tweepy.Client(
             consumer_key=API_KEY,
             consumer_secret=API_SECRET,
@@ -106,25 +73,19 @@ def send_x(message):
             access_token_secret=ACCESS_TOKEN_SECRET
         )
 
-        response = client.create_tweet(
-            text=message
-        )
+        response = client.create_tweet(text=message)
 
         print("X Tweet erfolgreich gesendet")
         print(response)
 
     except Exception as e:
-        print("X Fehler:")
-        print(e)
+        print("X Fehler:", e)
 
 
 
-# Hauptprogramm
 try:
 
     dfi = get_dfi_data()
-
-    news = get_dfi_news()
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
@@ -134,19 +95,14 @@ try:
 
 
     # Schutz gegen extreme Datenfehler
-
     warning = ""
 
     if abs(change) > 20:
-
         warning = (
             "\n⚠️ Extreme Bewegung erkannt!\n"
             "Bitte Daten prüfen.\n"
         )
 
-
-
-    # Discord Nachricht
 
     discord_message = f"""
 🚀 **DeFiChain DFI Update**
@@ -158,28 +114,16 @@ try:
 
 {emoji} **24h Änderung:** {change:.2f}%
 
-
-📈 **24h Hoch**
+📈 24h Hoch:
 ${dfi['high']:.6f}
 
-📉 **24h Tief**
+📉 24h Tief:
 ${dfi['low']:.6f}
 
-💧 **Volumen 24h**
+💧 Volumen 24h:
 ${dfi['volume']:,.0f}
 
-
 {warning}
-
-
-📚 **DeFiChain Daily News**
-
-📰 **{news['title']}**
-
-{news['text']}
-
-{news['hashtags']}
-
 
 🕒 {now}
 
@@ -187,45 +131,26 @@ ${dfi['volume']:,.0f}
 """
 
 
-    # X Nachricht
-
     x_message = (
         f"🚀 DeFiChain $DFI Daily Update\n\n"
-
         f"💰 Price:\n"
         f"🇺🇸 ${dfi['usd']:.6f}\n"
         f"🇪🇺 €{dfi['eur']:.6f}\n\n"
-
         f"📊 24h:\n"
         f"{emoji} {change:.2f}%\n\n"
-
         f"📈 High: ${dfi['high']:.6f}\n"
         f"📉 Low: ${dfi['low']:.6f}\n\n"
-
-        f"💧 Volume: ${dfi['volume']:,.0f}\n\n"
-
-        f"📚 News:\n"
-        f"{news['title']}\n"
-        f"{news['text']}\n\n"
-
-        f"{warning}"
-
+        f"💧 Volume: ${dfi['volume']:,.0f}\n"
+        f"{warning}\n"
         f"🕒 {now} UTC\n\n"
-
         f"#DeFiChain #DFI #Crypto"
     )
 
 
-
-    # Senden
-
     send_discord(discord_message)
-
     send_x(x_message)
 
 
-
 except Exception as e:
-
     print("Fehler:")
     print(e)
