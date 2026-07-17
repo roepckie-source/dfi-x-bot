@@ -206,6 +206,7 @@ ${dfi['volume']:,.0f}
         f"📊 24h: {emoji} {change:.2f}%\n"
         f"📈 High: ${dfi['high']:.6f}\n"
         f"📉 Low: ${dfi['low']:.6f}\n\n"
+        f"💧 Volume: ${dfi['volume']:,.0f}\n"
         f"#DeFiChain #DFI"
     )
 
