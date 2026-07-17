@@ -198,20 +198,20 @@ ${dfi['volume']:,.0f}
     )
 
 
-
     send_discord(discord_message)
 
-   send_x(
-    f"🚀 DeFiChain $DFI Daily Update\n\n"
-    f"💰 Price: ${dfi['usd']:.6f}\n"
-    f"📊 24h: {emoji} {change:.2f}%\n"
-    f"📈 High: ${dfi['high']:.6f}\n"
-    f"📉 Low: ${dfi['low']:.6f}\n\n"
-    f"#DeFiChain #DFI"
-)
+    send_x(
+        f"🚀 DeFiChain $DFI Daily Update\n\n"
+        f"💰 Price: ${dfi['usd']:.6f}\n"
+        f"📊 24h: {emoji} {change:.2f}%\n"
+        f"📈 High: ${dfi['high']:.6f}\n"
+        f"📉 Low: ${dfi['low']:.6f}\n\n"
+        f"#DeFiChain #DFI"
+    )
 
 
 except Exception as e:
 
     print("Fehler:")
     print(e)
+  
