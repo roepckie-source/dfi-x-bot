@@ -4,25 +4,27 @@ import tweepy
 from datetime import datetime
 
 
-# Discord Webhook aus GitHub Secrets laden
+# Discord
 DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
-
-# X (Twitter) Zugangsdaten aus GitHub Secrets laden
+# X
 API_KEY = os.environ["API_KEY"]
 API_SECRET = os.environ["API_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
 
-# DFI Preis von CoinGecko abrufen
-def get_dfi_price():
-    url = "https://api.coingecko.com/api/v3/simple/price"
+# DFI Daten von CoinGecko holen
+def get_dfi_data():
+
+    url = "https://api.coingecko.com/api/v3/coins/defichain"
 
     params = {
-        "ids": "defichain",
-        "vs_currencies": "usd,eur",
-        "include_24hr_change": "true"
+        "localization": "false",
+        "tickers": "false",
+        "market_data": "true",
+        "community_data": "false",
+        "developer_data": "false"
     }
 
     response = requests.get(url, params=params)
@@ -30,38 +32,39 @@ def get_dfi_price():
 
     data = response.json()
 
-    dfi = data["defichain"]
+    market = data["market_data"]
 
-    return (
-        dfi["usd"],
-        dfi["eur"],
-        dfi.get("usd_24h_change", 0)
-    )
+    return {
+        "usd": market["current_price"]["usd"],
+        "eur": market["current_price"]["eur"],
+        "change": market["price_change_percentage_24h"],
+        "high": market["high_24h"]["usd"],
+        "low": market["low_24h"]["usd"],
+        "volume": market["total_volume"]["usd"]
+    }
 
 
-# Discord Nachricht senden
+# Discord senden
 def send_discord(message):
+
     try:
         response = requests.post(
             DISCORD_WEBHOOK,
-            json={
-                "content": message
-            }
+            json={"content": message}
         )
 
         if response.status_code == 204:
             print("Discord Nachricht erfolgreich gesendet")
         else:
-            print("Discord Fehler:")
             print(response.text)
 
     except Exception as e:
-        print("Discord Fehler:")
-        print(e)
+        print("Discord Fehler:", e)
 
 
-# Nachricht auf X posten
+# X senden
 def send_x(message):
+
     try:
         client = tweepy.Client(
             consumer_key=API_KEY,
@@ -70,60 +73,80 @@ def send_x(message):
             access_token_secret=ACCESS_TOKEN_SECRET
         )
 
-        response = client.create_tweet(
-            text=message
-        )
+        response = client.create_tweet(text=message)
 
         print("X Tweet erfolgreich gesendet")
         print(response)
 
     except Exception as e:
-        print("X Fehler:")
-        print(e)
+        print("X Fehler:", e)
 
 
-# Hauptprogramm
+
 try:
 
-    dfi_usd, dfi_eur, change = get_dfi_price()
+    dfi = get_dfi_data()
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
+
+    change = dfi["change"]
 
     emoji = "🟢" if change >= 0 else "🔴"
 
 
-    # Discord Nachricht
+    # Schutz gegen extreme Datenfehler
+    warning = ""
+
+    if abs(change) > 20:
+        warning = (
+            "\n⚠️ Extreme Bewegung erkannt!\n"
+            "Bitte Daten prüfen.\n"
+        )
+
+
     discord_message = f"""
 🚀 **DeFiChain DFI Update**
 
-💰 **DFI Preis**
+💰 **Preis**
 
-🇺🇸 USD: ${dfi_usd:.6f}
-🇪🇺 EUR: €{dfi_eur:.6f}
+🇺🇸 USD: ${dfi['usd']:.6f}
+🇪🇺 EUR: €{dfi['eur']:.6f}
 
 {emoji} **24h Änderung:** {change:.2f}%
 
-🕒 Zeit:
-{now}
+📈 24h Hoch:
+${dfi['high']:.6f}
+
+📉 24h Tief:
+${dfi['low']:.6f}
+
+💧 Volumen 24h:
+${dfi['volume']:,.0f}
+
+{warning}
+
+🕒 {now}
 
 🔗 https://defichain.com
 """
 
 
-    # X Nachricht optimiert
     x_message = (
         f"🚀 DeFiChain $DFI Daily Update\n\n"
         f"💰 Price:\n"
-        f"🇺🇸 ${dfi_usd:.6f}\n"
-        f"🇪🇺 €{dfi_eur:.6f}\n\n"
-        f"📊 24h Change:\n"
+        f"🇺🇸 ${dfi['usd']:.6f}\n"
+        f"🇪🇺 €{dfi['eur']:.6f}\n\n"
+        f"📊 24h:\n"
         f"{emoji} {change:.2f}%\n\n"
+        f"📈 High: ${dfi['high']:.6f}\n"
+        f"📉 Low: ${dfi['low']:.6f}\n\n"
+        f"💧 Volume: ${dfi['volume']:,.0f}\n"
+        f"{warning}\n"
         f"🕒 {now} UTC\n\n"
         f"#DeFiChain #DFI #Crypto"
     )
 
 
-    # Beide Plattformen senden
     send_discord(discord_message)
     send_x(x_message)
 
