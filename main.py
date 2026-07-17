@@ -26,6 +26,8 @@ def get_dfi_price():
     }
 
     response = requests.get(url, params=params)
+    response.raise_for_status()
+
     data = response.json()
 
     dfi = data["defichain"]
@@ -39,21 +41,26 @@ def get_dfi_price():
 
 # Discord Nachricht senden
 def send_discord(message):
-    response = requests.post(
-        DISCORD_WEBHOOK,
-        json={
-            "content": message
-        }
-    )
+    try:
+        response = requests.post(
+            DISCORD_WEBHOOK,
+            json={
+                "content": message
+            }
+        )
 
-    if response.status_code == 204:
-        print("Discord Nachricht erfolgreich gesendet")
-    else:
+        if response.status_code == 204:
+            print("Discord Nachricht erfolgreich gesendet")
+        else:
+            print("Discord Fehler:")
+            print(response.text)
+
+    except Exception as e:
         print("Discord Fehler:")
-        print(response.text)
+        print(e)
 
 
-# X Nachricht senden
+# Nachricht auf X posten
 def send_x(message):
     try:
         client = tweepy.Client(
@@ -77,6 +84,7 @@ def send_x(message):
 
 # Hauptprogramm
 try:
+
     dfi_usd, dfi_eur, change = get_dfi_price()
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
@@ -84,34 +92,38 @@ try:
     emoji = "🟢" if change >= 0 else "🔴"
 
 
-    # Discord Version
+    # Discord Nachricht
     discord_message = f"""
 🚀 **DeFiChain DFI Update**
 
 💰 **DFI Preis**
+
 🇺🇸 USD: ${dfi_usd:.6f}
 🇪🇺 EUR: €{dfi_eur:.6f}
 
 {emoji} **24h Änderung:** {change:.2f}%
 
-🕒 {now}
+🕒 Zeit:
+{now}
 
 🔗 https://defichain.com
 """
 
 
-    # X Version (ohne Discord Markdown)
+    # X Nachricht optimiert
     x_message = (
-        f"🚀 DeFiChain DFI Update\n\n"
-        f"💰 DFI Preis:\n"
+        f"🚀 DeFiChain $DFI Daily Update\n\n"
+        f"💰 Price:\n"
         f"🇺🇸 ${dfi_usd:.6f}\n"
         f"🇪🇺 €{dfi_eur:.6f}\n\n"
-        f"{emoji} 24h: {change:.2f}%\n\n"
-        f"🕒 {now}\n"
-        f"🔗 https://defichain.com"
+        f"📊 24h Change:\n"
+        f"{emoji} {change:.2f}%\n\n"
+        f"🕒 {now} UTC\n\n"
+        f"#DeFiChain #DFI #Crypto"
     )
 
 
+    # Beide Plattformen senden
     send_discord(discord_message)
     send_x(x_message)
 
