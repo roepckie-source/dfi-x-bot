@@ -201,7 +201,12 @@ ${dfi['volume']:,.0f}
 
     send_discord(discord_message)
 
-    send_x("🚀 DeFiChain $DFI Test #DFI")
+    send_x(
+    f"🚀 DeFiChain $DFI Daily Update\n\n"
+    f"💰 ${dfi['usd']:.6f}\n"
+    f"📊 24h: {emoji} {change:.2f}%\n\n"
+    f"#DeFiChain #DFI"
+)
 
 
 
