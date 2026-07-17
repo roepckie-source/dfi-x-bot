@@ -18,28 +18,6 @@ ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 # DFI Daten von CoinGecko holen
 def get_dfi_data():
 
-    # DeFiChain News laden
-def get_dfi_news():
-
-    try:
-        with open("dfi_news.json", "r", encoding="utf-8") as file:
-            news = json.load(file)
-
-        day = datetime.now().timetuple().tm_yday
-
-        index = (day - 1) % len(news)
-
-        return news[index]
-
-    except Exception as e:
-        print("News Fehler:")
-        print(e)
-
-        return {
-            "title": "Keine News verfügbar",
-            "text": "DeFiChain Daily Update",
-            "hashtags": "#DeFiChain"
-        }
     url = "https://api.coingecko.com/api/v3/coins/defichain"
 
     params = {
@@ -65,6 +43,30 @@ def get_dfi_news():
         "low": market["low_24h"]["usd"],
         "volume": market["total_volume"]["usd"]
     }
+
+
+# DeFiChain News laden
+def get_dfi_news():
+
+    try:
+        with open("dfi_news.json", "r", encoding="utf-8") as file:
+            news = json.load(file)
+
+        day = datetime.now().timetuple().tm_yday
+
+        index = (day - 1) % len(news)
+
+        return news[index]
+
+    except Exception as e:
+        print("News Fehler:")
+        print(e)
+
+        return {
+            "title": "Keine News verfügbar",
+            "text": "DeFiChain Daily Update",
+            "hashtags": "#DeFiChain"
+        }
 
 
 # Discord senden
