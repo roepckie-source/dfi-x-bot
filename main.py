@@ -194,6 +194,7 @@ ${dfi.get('volume', 0):,.0f}
 🔗 https://defichain.com
 """
 
+
     # X Nachricht
 
     x_message = (
@@ -203,9 +204,21 @@ ${dfi.get('volume', 0):,.0f}
         f"🇪🇺 €{dfi['eur']:.6f}\n\n"
         f"📊 24h: {emoji} {change:.2f}%\n\n"
         f"💵 DUSD:\n"
-        f"${dfi['dusd_usd']:.4f}\n"
-        f"📊 DUSD 24h: {dfi['dusd_change']:.2f}%\n\n"
+        f"${dfi['dusd_usd']:.4f}\n\n"
         f"#DeFiChain #DFI #DUSD"
     )
+
+
+
+    send_discord(discord_message)
+
+    send_x(x_message)
+
+
+
+except Exception as e:
+
+    print("Fehler:")
+    print
 
 
