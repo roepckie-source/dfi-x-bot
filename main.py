@@ -5,220 +5,577 @@ import json
 from datetime import datetime
 
 
-# Discord
+# ==============================
+# ENVIRONMENT
+# ==============================
+
 DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
-# X
 API_KEY = os.environ["API_KEY"]
 API_SECRET = os.environ["API_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
 
-# DFI + DUSD Daten von CoinGecko holen
+
+# ==============================
+# ZAHLEN FORMATIEREN
+# ==============================
+
+def format_number(value):
+
+    try:
+        return f"{float(value):,.3f}"
+
+    except:
+        return "N/A"
+
+
+
+# ==============================
+# DFI MARKTDATEN
+# ==============================
+
 def get_dfi_data():
 
-    url = "https://api.coingecko.com/api/v3/simple/price"
+    url = "https://api.coingecko.com/api/v3/coins/defichain"
+
 
     params = {
-        "ids": "defichain,decentralized-usd",
-        "vs_currencies": "usd,eur",
-        "include_24hr_change": "true"
+
+        "localization": "false",
+        "tickers": "false",
+        "market_data": "true",
+        "community_data": "false",
+        "developer_data": "false"
+
     }
 
-    response = requests.get(url, params=params)
+
+    response = requests.get(
+
+        url,
+        params=params,
+        timeout=20
+
+    )
+
+
     response.raise_for_status()
+
 
     data = response.json()
 
-    dfi = data["defichain"]
-    dusd = data["decentralized-usd"]
+    market = data["market_data"]
+
 
     return {
 
-        # DFI
-        "usd": dfi["usd"],
-        "eur": dfi["eur"],
-        "change": dfi["usd_24h_change"],
+        "usd":
+            market["current_price"]["usd"],
 
-        # DUSD
-        "dusd_usd": dusd["usd"],
-        "dusd_eur": dusd["eur"],
-        "dusd_change": dusd["usd_24h_change"]
+        "eur":
+            market["current_price"]["eur"],
+
+        "change":
+            market["price_change_percentage_24h"],
+
+        "high":
+            market["high_24h"]["usd"],
+
+        "low":
+            market["low_24h"]["usd"],
+
+        "volume":
+            market["total_volume"]["usd"]
+
     }
 
 
 
-# DeFiChain News laden
-def get_dfi_news():
+# ==============================
+# DUSD DATEN
+# ==============================
+
+def get_dusd_data():
+
+    url = "https://api.coingecko.com/api/v3/simple/price"
+
+
+    params = {
+
+        "ids":
+        "decentralized-usd",
+
+        "vs_currencies":
+        "usd,eur",
+
+        "include_24hr_change":
+        "true"
+
+    }
+
+
+    response = requests.get(
+
+        url,
+        params=params,
+        timeout=20
+
+    )
+
+
+    response.raise_for_status()
+
+
+    data = response.json()["decentralized-usd"]
+
+
+    return {
+
+        "usd":
+            data["usd"],
+
+        "eur":
+            data["eur"],
+
+        "change":
+            data["usd_24h_change"]
+
+    }
+
+# ==============================
+# DEFICHAIN NETWORK DATEN
+# ==============================
+
+def get_network_data():
+
+    result = {
+
+        "existing_dfi": "N/A",
+        "burned_dfi": "N/A",
+        "locked_dusd": "N/A",
+        "excess_dfi": "N/A",
+        "community_dfi": "N/A",
+        "community_dusd": "N/A"
+
+    }
+
 
     try:
 
-        with open("dfi_news.json", "r", encoding="utf-8") as file:
-            news = json.load(file)
+        url = (
+            "https://ocean.defichain.com/"
+            "v0/mainnet/stats"
+        )
 
-        day = datetime.now().timetuple().tm_yday
 
-        index = (day - 1) % len(news)
+        response = requests.get(
 
-        return news[index]
+            url,
+            timeout=20
+
+        )
+
+
+        response.raise_for_status()
+
+
+        data = response.json()
+
+
+        stats = data.get(
+            "data",
+            {}
+        )
+
+
+        if "circulatingSupply" in stats:
+
+            result["existing_dfi"] = format_number(
+                stats["circulatingSupply"]
+            )
+
+
+        if "burned" in stats:
+
+            result["burned_dfi"] = format_number(
+                stats["burned"]
+            )
+
+
+        if "dusdLocked" in stats:
+
+            result["locked_dusd"] = format_number(
+                stats["dusdLocked"]
+            )
+
+
+        if "excessDFI" in stats:
+
+            result["excess_dfi"] = format_number(
+                stats["excessDFI"]
+            )
+
+
+        return result
+
 
 
     except Exception as e:
 
-        print("News Fehler:")
-        print(e)
+        print(
+            "Network Daten Fehler:",
+            e
+        )
+
+        return result
+
+
+
+
+
+# ==============================
+# NEWS LADEN
+# ==============================
+
+def get_dfi_news():
+
+    try:
+
+        with open(
+            "dfi_news.json",
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            news = json.load(file)
+
+
+        day = datetime.now().timetuple().tm_yday
+
+
+        index = (
+            day - 1
+        ) % len(news)
+
+
+        return news[index]
+
+
+
+    except Exception as e:
+
+        print(
+            "News Fehler:",
+            e
+        )
+
 
         return {
-            "title": "Keine News verfügbar",
-            "text": "DeFiChain Daily Update",
-            "hashtags": "#DeFiChain"
+
+            "title":
+            "Keine News verfügbar",
+
+            "text":
+            "DeFiChain Daily Update",
+
+            "hashtags":
+            "#DeFiChain"
+
         }
 
 
 
-# Discord senden
+
+
+# ==============================
+# DISCORD SENDEN
+# ==============================
+
 def send_discord(message):
 
     try:
 
         response = requests.post(
+
             DISCORD_WEBHOOK,
-            json={"content": message}
+
+            json={
+                "content": message
+            },
+
+            timeout=20
+
         )
 
+
         if response.status_code == 204:
-            print("Discord Nachricht erfolgreich gesendet")
+
+            print(
+                "Discord Nachricht erfolgreich gesendet"
+            )
+
         else:
-            print(response.text)
+
+            print(
+                response.text
+            )
+
 
     except Exception as e:
-        print("Discord Fehler:", e)
+
+        print(
+            "Discord Fehler:",
+            e
+        )
 
 
 
-# X senden
+
+
+# ==============================
+# X SENDEN
+# ==============================
+
 def send_x(message):
 
     try:
 
         client = tweepy.Client(
+
             consumer_key=API_KEY,
+
             consumer_secret=API_SECRET,
+
             access_token=ACCESS_TOKEN,
+
             access_token_secret=ACCESS_TOKEN_SECRET
+
         )
 
-        response = client.create_tweet(text=message)
 
-        print("X Tweet erfolgreich gesendet")
+        response = client.create_tweet(
+
+            text=message
+
+        )
+
+
+        print(
+            "X Tweet erfolgreich gesendet"
+        )
+
+
         print(response)
+
 
 
     except Exception as e:
 
-        print("X Fehler:", e)
+        print(
+            "X Fehler:",
+            e
+        )
+# ==============================
+# HAUPTPROGRAMM
+# ==============================
 
-
-
-# Hauptprogramm
 try:
 
     dfi = get_dfi_data()
 
+    dusd = get_dusd_data()
+
+    network = get_network_data()
+
     news = get_dfi_news()
 
-    now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
     change = dfi["change"]
 
-    emoji = "🟢" if change >= 0 else "🔴"
+    emoji = (
+        "🟢"
+        if change >= 0
+        else
+        "🔴"
+    )
 
 
-    warning = ""
-
-    if abs(change) > 20:
-
-        warning = (
-            "\n⚠️ Extreme Bewegung erkannt!\n"
-            "Bitte Daten prüfen.\n"
-        )
-
-
-
-    # Discord Nachricht
-
-    discord_message = f"""
-🚀 **DeFiChain DFI Update**
-
-💰 **DFI Preis**
-
-🇺🇸 USD: ${dfi['usd']:.6f}
-🇪🇺 EUR: €{dfi['eur']:.6f}
-
-{emoji} **24h Änderung:** {change:.2f}%
-
-
-💵 **DUSD Preis**
-
-🇺🇸 USD: ${dfi['dusd_usd']:.4f}
-🇪🇺 EUR: €{dfi['dusd_eur']:.4f}
-
-📊 **DUSD 24h:** {dfi['dusd_change']:.2f}%
-
-
-📈 **24h Hoch**
-${dfi.get('high', 0):.6f}
-
-📉 **24h Tief**
-${dfi.get('low', 0):.6f}
-
-💧 **Volumen 24h**
-${dfi.get('volume', 0):,.0f}
-
-
-{warning}
-
-
-📚 **DeFiChain Daily News**
-
-📰 **{news['title']}**
-
-{news['text']}
-
-{news['hashtags']}
-
-
-🕒 {now}
-
-🔗 https://defichain.com
-"""
-
-
-    # X Nachricht
-
-    x_message = (
-        f"🚀 DeFiChain $DFI Daily Update\n\n"
-        f"💰 DFI Price:\n"
-        f"🇺🇸 ${dfi['usd']:.6f}\n"
-        f"🇪🇺 €{dfi['eur']:.6f}\n\n"
-        f"📊 24h: {emoji} {change:.2f}%\n\n"
-        f"💵 DUSD:\n"
-        f"${dfi['dusd_usd']:.4f}\n\n"
-        f"#DeFiChain #DFI #DUSD"
+    now = datetime.now().strftime(
+        "%d.%m.%Y %H:%M"
     )
 
 
 
-    send_discord(discord_message)
+    # ==============================
+    # DISCORD REPORT
+    # ==============================
 
-    send_x(x_message)
+    discord_message = f"""
+
+🚀 **DeFiChain Daily Report**
+
+
+💰 **DFI Preis**
+
+🇺🇸 USD:
+${dfi['usd']:.8f}
+
+🇪🇺 EUR:
+€{dfi['eur']:.8f}
+
+
+{emoji} **24h Änderung**
+
+{change:.2f}%
+
+
+
+💵 **DUSD**
+
+🇺🇸 USD:
+${dusd['usd']:.6f}
+
+🇪🇺 EUR:
+€{dusd['eur']:.6f}
+
+📊 24h:
+{dusd['change']:.2f}%
+
+
+
+📈 **Market Daten**
+
+High:
+${dfi['high']:,.8f}
+
+Low:
+${dfi['low']:,.8f}
+
+Volumen:
+${dfi['volume']:,.0f}
+
+
+
+📊 **DeFiChain Netzwerk**
+
+🟢 Existing DFI:
+
+{network['existing_dfi']}
+
+
+🔥 Burned DFI:
+
+{network['burned_dfi']}
+
+
+🔒 Locked dUSD:
+
+{network['locked_dusd']}
+
+
+⚖️ Excess DFI:
+
+{network['excess_dfi']}
+
+
+
+🏦 **Community Fund**
+
+💰 DFI:
+
+{network['community_dfi']}
+
+
+💵 dUSD:
+
+{network['community_dusd']}
+
+
+
+📰 **Daily News**
+
+{news['title']}
+
+{news['text']}
+
+
+{news['hashtags']}
+
+
+
+🕒 {now}
+
+
+🔗 https://defichain.com
+
+"""
+
+
+    # ==============================
+    # X POST
+    # ==============================
+
+    x_message = f"""
+
+🚀 DeFiChain $DFI Daily Update
+
+
+💰 DFI
+
+🇺🇸 ${dfi['usd']:.8f}
+
+🇪🇺 €{dfi['eur']:.8f}
+
+
+📊 24h:
+
+{emoji} {change:.2f}%
+
+
+💵 DUSD
+
+${dusd['usd']:.6f}
+
+
+
+📊 Network
+
+🟢 Existing DFI:
+{network['existing_dfi']}
+
+🔥 Burned:
+{network['burned_dfi']}
+
+🔒 Locked dUSD:
+{network['locked_dusd']}
+
+
+
+📰 {news['title']}
+
+
+#DeFiChain #DFI #DUSD
+
+"""
+
+
+    send_discord(
+        discord_message
+    )
+
+
+    send_x(
+        x_message
+    )
 
 
 
 except Exception as e:
 
-    print("Fehler:")
-    print
+    print(
+        "Fehler im Bot:"
+    )
 
-
+    print(e)
