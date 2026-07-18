@@ -194,7 +194,6 @@ ${dfi.get('volume', 0):,.0f}
 🔗 https://defichain.com
 """
 
-
     # X Nachricht
 
     x_message = (
@@ -202,5 +201,11 @@ ${dfi.get('volume', 0):,.0f}
         f"💰 DFI Price:\n"
         f"🇺🇸 ${dfi['usd']:.6f}\n"
         f"🇪🇺 €{dfi['eur']:.6f}\n\n"
-        f"📊 24h: {emoji} {change:.
-  
+        f"📊 24h: {emoji} {change:.2f}%\n\n"
+        f"💵 DUSD:\n"
+        f"${dfi['dusd_usd']:.4f}\n"
+        f"📊 DUSD 24h: {dfi['dusd_change']:.2f}%\n\n"
+        f"#DeFiChain #DFI #DUSD"
+    )
+
+
