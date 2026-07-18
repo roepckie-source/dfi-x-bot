@@ -65,6 +65,8 @@ def get_dfi_data():
 
 
     data = response.json()
+print(data)
+
 
     market = data["market_data"]
 
