@@ -637,33 +637,38 @@ https://defichain.com
     # X POST
     # ==========================
 
-    x_message = f"""
+   x_message = f"""
 
 🚀 DeFiChain $DFI Daily Update
+
+🇬🇧 DeFiChain Daily Update
+🇨🇳 DeFiChain 每日更新
+🇮🇳 DeFiChain दैनिक अपडेट
+🇵🇭 DeFiChain Araw-araw na Update
+🇪🇸 Actualización diaria de DeFiChain
+🇫🇷 Mise à jour quotidienne de DeFiChain
+
 
 💰 Price:
 ${dfi['usd']:.8f}
 
 🇪🇺 €{dfi['eur']:.8f}
 
-{emoji} {change:.2f}%
+
+{emoji} 24h:
+{change:.2f}%
 
 
 📊 Market Cap:
 ${dfi['market_cap']:,.0f}
 
 
-💵 DUSD:
-${dusd['usd']:.6f}
-
-
 📰 {news['title']}
 
 
-#DeFiChain #DFI #DUSD
+#DeFiChain #DFI
 
 """
-
 
     send_discord(
         discord_message
