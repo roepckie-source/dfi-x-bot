@@ -22,10 +22,8 @@ ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 # ==============================
 
 def format_number(value):
-
     try:
         return f"{float(value):,.2f}"
-
     except:
         return "N/A"
 
@@ -50,37 +48,6 @@ def get_dfi_data():
         "ath_change": 0
     }
 
-    try:
-        ...
-
-result["market_cap"] = market.get(
-    "market_cap",
-    {}
-).get(
-    "usd",
-    0
-)
-
-result["circulating_supply"] = market.get(
-    "circulating_supply",
-    0
-)
-
-result["ath"] = market.get(
-    "ath",
-    {}
-).get(
-    "usd",
-    0
-)
-
-result["ath_change"] = market.get(
-    "ath_change_percentage",
-    {}
-).get(
-    "usd",
-    0
-)
 
     try:
 
@@ -100,6 +67,7 @@ result["ath_change"] = market.get(
             params=params,
             timeout=20
         )
+
 
         response.raise_for_status()
 
@@ -162,6 +130,39 @@ result["ath_change"] = market.get(
         )
 
 
+        result["market_cap"] = market.get(
+            "market_cap",
+            {}
+        ).get(
+            "usd",
+            0
+        )
+
+
+        result["circulating_supply"] = market.get(
+            "circulating_supply",
+            0
+        )
+
+
+        result["ath"] = market.get(
+            "ath",
+            {}
+        ).get(
+            "usd",
+            0
+        )
+
+
+        result["ath_change"] = market.get(
+            "ath_change_percentage",
+            {}
+        ).get(
+            "usd",
+            0
+        )
+
+
     except Exception as e:
 
         print(
@@ -171,8 +172,6 @@ result["ath_change"] = market.get(
 
 
     return result
-
-
 
 # ==============================
 # DUSD DATEN
@@ -193,16 +192,9 @@ def get_dusd_data():
 
 
         params = {
-
-            "ids":
-            "decentralized-usd",
-
-            "vs_currencies":
-            "usd,eur",
-
-            "include_24hr_change":
-            "true"
-
+            "ids": "decentralized-usd",
+            "vs_currencies": "usd,eur",
+            "include_24hr_change": "true"
         }
 
 
@@ -214,7 +206,6 @@ def get_dusd_data():
 
 
         response.raise_for_status()
-
 
         data = response.json().get(
             "decentralized-usd",
@@ -261,9 +252,7 @@ def get_network_data():
         "existing_dfi": "N/A",
         "burned_dfi": "N/A",
         "locked_dusd": "N/A",
-        "excess_dfi": "N/A",
-        "community_dfi": "N/A",
-        "community_dusd": "N/A"
+        "excess_dfi": "N/A"
 
     }
 
@@ -333,6 +322,8 @@ def get_network_data():
 
     return result
 
+
+
 # ==============================
 # NEWS LADEN
 # ==============================
@@ -351,21 +342,19 @@ def get_dfi_news():
 
 
         if not news:
+
             return {
                 "title": "DeFiChain Daily",
-                "text": "Keine News verfügbar",
+                "text": "Keine News",
                 "hashtags": "#DFI"
             }
 
 
         day = datetime.now().timetuple().tm_yday
 
-        index = (
-            day - 1
-        ) % len(news)
-
-
-        return news[index]
+        return news[
+            (day - 1) % len(news)
+        ]
 
 
     except Exception as e:
@@ -375,16 +364,12 @@ def get_dfi_news():
             e
         )
 
+
         return {
 
-            "title":
-            "DeFiChain Update",
-
-            "text":
-            "DeFiChain Daily Report",
-
-            "hashtags":
-            "#DeFiChain #DFI"
+            "title": "DeFiChain Update",
+            "text": "Daily Report",
+            "hashtags": "#DeFiChain #DFI"
 
         }
 
@@ -397,11 +382,6 @@ def get_dfi_news():
 def send_discord(message):
 
     if not DISCORD_WEBHOOK:
-
-        print(
-            "Kein Discord Webhook vorhanden"
-        )
-
         return
 
 
@@ -416,7 +396,6 @@ def send_discord(message):
             },
 
             timeout=20
-
         )
 
 
@@ -499,7 +478,6 @@ try:
     news = get_dfi_news()
 
 
-
     change = dfi["change"]
 
 
@@ -516,10 +494,6 @@ try:
     )
 
 
-
-    # ==========================
-    # DISCORD REPORT
-    # ==========================
 
     discord_message = f"""
 
@@ -539,15 +513,6 @@ try:
 
 
 
-💵 **DUSD**
-
-${dusd['usd']:.6f}
-
-24h:
-{dusd['change']:.2f}%
-
-
-
 📊 **Market**
 
 High:
@@ -559,39 +524,44 @@ ${dfi['low']:,.8f}
 Volume:
 ${dfi['volume']:,.0f}
 
-
 Market Cap:
 ${dfi['market_cap']:,.0f}
 
 Circulating Supply:
 {dfi['circulating_supply']:,.0f} DFI
 
-ATH:
+🏆 ATH:
 ${dfi['ath']:.4f}
 
-From ATH:
+📉 From ATH:
 {dfi['ath_change']:.2f}%
+
+
+
+💵 **DUSD**
+
+${dusd['usd']:.6f}
+
+24h:
+{dusd['change']:.2f}%
+
 
 
 🌐 **Network**
 
 Existing DFI:
-
 {network['existing_dfi']}
 
 
-🔥 Burned DFI:
-
+🔥 Burned:
 {network['burned_dfi']}
 
 
 🔒 Locked dUSD:
-
 {network['locked_dusd']}
 
 
 ⚖️ Excess DFI:
-
 {network['excess_dfi']}
 
 
@@ -615,44 +585,28 @@ https://defichain.com
 """
 
 
-    # ==========================
-    # X POST
-    # ==========================
-
-
     x_message = f"""
 
 🚀 DeFiChain $DFI Daily
 
 
-💰 DFI
+💰 ${dfi['usd']:.8f}
 
-${dfi['usd']:.8f}
-
-€{dfi['eur']:.8f}
+🇪🇺 €{dfi['eur']:.8f}
 
 
 {emoji} {change:.2f}%
 
 
-💵 DUSD
+📊 Market Cap:
+${dfi['market_cap']:,.0f}
 
+
+💵 DUSD:
 ${dusd['usd']:.6f}
 
 
-🌐 Existing DFI
-
-{network['existing_dfi']}
-
-
-🔥 Burned
-
-{network['burned_dfi']}
-
-
-📰
-
-{news['title']}
+📰 {news['title']}
 
 
 #DeFiChain #DFI #DUSD
@@ -670,9 +624,7 @@ ${dusd['usd']:.6f}
     )
 
 
-
 except Exception as e:
-
 
     print(
         "Bot Fehler:",
