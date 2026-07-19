@@ -637,7 +637,7 @@ https://defichain.com
     # X POST
     # ==========================
 
-   x_message = f"""
+    x_message = f"""
 
 🚀 DeFiChain $DFI Daily Update
 
