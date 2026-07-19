@@ -499,6 +499,12 @@ try:
 
 🚀 **DeFiChain Daily Update**
 
+🇬🇧 DeFiChain Daily Update
+🇨🇳 DeFiChain 每日更新
+🇮🇳 DeFiChain दैनिक अपडेट
+🇵🇭 DeFiChain Araw-araw na Update
+🇪🇸 Actualización diaria de DeFiChain
+🇫🇷 Mise à jour quotidienne de DeFiChain
 
 💰 **DFI**
 
