@@ -37,18 +37,21 @@ def format_number(value):
 
 def get_dfi_data():
 
-result = {
-    "usd": 0,
-    "eur": 0,
-    "change": 0,
-    "high": 0,
-    "low": 0,
-    "volume": 0,
-    "market_cap": 0,
-    "circulating_supply": 0,
-    "ath": 0,
-    "ath_change": 0
-}
+    result = {
+        "usd": 0,
+        "eur": 0,
+        "change": 0,
+        "high": 0,
+        "low": 0,
+        "volume": 0,
+        "market_cap": 0,
+        "circulating_supply": 0,
+        "ath": 0,
+        "ath_change": 0
+    }
+
+    try:
+        ...
 
 result["market_cap"] = market.get(
     "market_cap",
