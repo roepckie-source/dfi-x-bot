@@ -557,6 +557,18 @@ Volume:
 ${dfi['volume']:,.0f}
 
 
+Market Cap:
+${dfi['market_cap']:,.0f}
+
+Circulating Supply:
+{dfi['circulating_supply']:,.0f} DFI
+
+ATH:
+${dfi['ath']:.4f}
+
+From ATH:
+{dfi['ath_change']:.2f}%
+
 
 🌐 **Network**
 
