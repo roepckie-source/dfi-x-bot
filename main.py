@@ -17,13 +17,16 @@ ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 
 
+
 # ==============================
 # ZAHLEN FORMATIEREN
 # ==============================
 
 def format_number(value):
+
     try:
         return f"{float(value):,.2f}"
+
     except:
         return "N/A"
 
@@ -36,6 +39,7 @@ def format_number(value):
 def get_dfi_data():
 
     result = {
+
         "usd": 0,
         "eur": 0,
         "change": 0,
@@ -46,19 +50,26 @@ def get_dfi_data():
         "circulating_supply": 0,
         "ath": 0,
         "ath_change": 0
+
     }
 
 
     try:
 
-        url = "https://api.coingecko.com/api/v3/coins/defichain"
+        url = (
+            "https://api.coingecko.com/api/v3/"
+            "coins/defichain"
+        )
+
 
         params = {
+
             "localization": "false",
             "tickers": "false",
             "market_data": "true",
             "community_data": "false",
             "developer_data": "false"
+
         }
 
 
@@ -71,7 +82,9 @@ def get_dfi_data():
 
         response.raise_for_status()
 
+
         data = response.json()
+
 
         market = data.get(
             "market_data",
@@ -173,6 +186,8 @@ def get_dfi_data():
 
     return result
 
+
+
 # ==============================
 # DUSD DATEN
 # ==============================
@@ -180,21 +195,32 @@ def get_dfi_data():
 def get_dusd_data():
 
     result = {
+
         "usd": 0,
         "eur": 0,
         "change": 0
+
     }
 
 
     try:
 
-        url = "https://api.coingecko.com/api/v3/simple/price"
+        url = (
+            "https://api.coingecko.com/api/v3/"
+            "simple/price"
+        )
 
 
         params = {
+
             "ids": "decentralized-usd",
-            "vs_currencies": "usd,eur",
-            "include_24hr_change": "true"
+
+            "vs_currencies":
+            "usd,eur",
+
+            "include_24hr_change":
+            "true"
+
         }
 
 
@@ -207,6 +233,7 @@ def get_dusd_data():
 
         response.raise_for_status()
 
+
         data = response.json().get(
             "decentralized-usd",
             {}
@@ -218,10 +245,12 @@ def get_dusd_data():
             0
         )
 
+
         result["eur"] = data.get(
             "eur",
             0
         )
+
 
         result["change"] = data.get(
             "usd_24h_change",
@@ -238,9 +267,6 @@ def get_dusd_data():
 
 
     return result
-
-
-
 # ==============================
 # DEFICHAIN NETWORK
 # ==============================
@@ -344,13 +370,19 @@ def get_dfi_news():
         if not news:
 
             return {
+
                 "title": "DeFiChain Daily",
-                "text": "Keine News",
-                "hashtags": "#DFI"
+
+                "text": "No news available",
+
+                "hashtags":
+                "#DeFiChain #DFI"
+
             }
 
 
         day = datetime.now().timetuple().tm_yday
+
 
         return news[
             (day - 1) % len(news)
@@ -367,9 +399,14 @@ def get_dfi_news():
 
         return {
 
-            "title": "DeFiChain Update",
-            "text": "Daily Report",
-            "hashtags": "#DeFiChain #DFI"
+            "title":
+            "DeFiChain Update",
+
+            "text":
+            "Daily Report",
+
+            "hashtags":
+            "#DeFiChain #DFI"
 
         }
 
@@ -382,6 +419,11 @@ def get_dfi_news():
 def send_discord(message):
 
     if not DISCORD_WEBHOOK:
+
+        print(
+            "Kein Discord Webhook"
+        )
+
         return
 
 
@@ -396,6 +438,7 @@ def send_discord(message):
             },
 
             timeout=20
+
         )
 
 
@@ -459,15 +502,11 @@ def send_x(message):
             "X Fehler:",
             e
         )
-
-
-
 # ==============================
 # HAUPTPROGRAMM
 # ==============================
 
 try:
-
 
     dfi = get_dfi_data()
 
@@ -495,6 +534,10 @@ try:
 
 
 
+    # ==========================
+    # DISCORD REPORT
+    # ==========================
+
     discord_message = f"""
 
 🚀 **DeFiChain Daily Update**
@@ -505,6 +548,7 @@ try:
 🇵🇭 DeFiChain Araw-araw na Update
 🇪🇸 Actualización diaria de DeFiChain
 🇫🇷 Mise à jour quotidienne de DeFiChain
+
 
 💰 **DFI**
 
@@ -558,21 +602,18 @@ ${dusd['usd']:.6f}
 Existing DFI:
 {network['existing_dfi']}
 
-
 🔥 Burned:
 {network['burned_dfi']}
 
-
 🔒 Locked dUSD:
 {network['locked_dusd']}
-
 
 ⚖️ Excess DFI:
 {network['excess_dfi']}
 
 
 
-📰 **News**
+📰 **Insight**
 
 {news['title']}
 
@@ -591,19 +632,19 @@ https://defichain.com
 """
 
 
+
+    # ==========================
+    # X POST
+    # ==========================
+
     x_message = f"""
 
-🚀 DeFiChain $DFI Test
+🚀 DeFiChain $DFI Daily Update
 
-#DFI
-"""
-
-
-
-💰 ${dfi['usd']:.8f}
+💰 Price:
+${dfi['usd']:.8f}
 
 🇪🇺 €{dfi['eur']:.8f}
-
 
 {emoji} {change:.2f}%
 
