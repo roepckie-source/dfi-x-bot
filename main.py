@@ -50,6 +50,35 @@ result = {
     "ath_change": 0
 }
 
+result["market_cap"] = market.get(
+    "market_cap",
+    {}
+).get(
+    "usd",
+    0
+)
+
+result["circulating_supply"] = market.get(
+    "circulating_supply",
+    0
+)
+
+result["ath"] = market.get(
+    "ath",
+    {}
+).get(
+    "usd",
+    0
+)
+
+result["ath_change"] = market.get(
+    "ath_change_percentage",
+    {}
+).get(
+    "usd",
+    0
+)
+
     try:
 
         url = "https://api.coingecko.com/api/v3/coins/defichain"
