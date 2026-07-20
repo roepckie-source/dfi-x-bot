@@ -102,7 +102,6 @@ ${format_large_number(
 {comparison['vs_eth']}""",
 
 
-
             f"""🌐 DeFiChain Network
 
 
@@ -116,16 +115,8 @@ ${format_large_number(
 {network['locked_dusd']}
 
 
-📰 Daily Insight
-
-{news['title']}
-
-{news['text']}
-
-
-{news['hashtags']}
-
-#DeFiChain #DFI"""
+#DeFiChain #DFI"""            
+           
         ]
 
 
