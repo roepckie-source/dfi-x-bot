@@ -14,6 +14,29 @@ from utils import (
 
 
 # ==============================
+# X TEXT SICHERHEIT
+# ==============================
+
+
+def clean_x_text(text, max_length=180):
+
+    if not text:
+
+        return ""
+
+    text = str(text)
+
+    text = (
+        text
+        .replace("\n\n\n", "\n\n")
+        .strip()
+    )
+
+    return text[:max_length]
+
+
+
+# ==============================
 # X POSTS
 # ==============================
 
@@ -41,13 +64,18 @@ def send_x_thread(
 
 
         dfi = market["dfi"]
+
         btc = market["bitcoin"]
+
         eth = market["ethereum"]
+
 
 
         tweets = [
 
-            f"""🚀 DeFiChain $DFI Daily Update 🌍
+
+
+f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
 💰 Price
@@ -73,7 +101,8 @@ ${format_large_number(
 
 
 
-            f"""🌍 Crypto Market Comparison
+
+f"""🌍 Crypto Market Comparison
 
 
 ₿ Bitcoin
@@ -99,34 +128,40 @@ ${format_large_number(
 
 {comparison['vs_btc']}
 
-{comparison['vs_eth']}""",
+{comparison['vs_eth']}
 
 
-            f"""🌐 DeFiChain Network
+#Crypto""",
 
 
-🔥 Burned DFI:
-
-{network['burned_dfi']}
 
 
-🔒 Locked dUSD:
-
-{network['locked_dusd']}
+f"""📰 DeFiChain Daily Insight
 
 
-#DeFiChain #DFI"""            
-           
+{clean_x_text(
+    news.get('title','DeFiChain Update')
+)}
+
+
+{clean_x_text(
+    news.get('text','Daily DeFiChain Report')
+)}
+
+
+#DeFiChain #DFI"""
         ]
+
 
 
         # ==============================
         # POSTS SENDEN
         # ==============================
 
+
         for tweet in tweets:
 
-            # X Limit Sicherheit
+
             tweet = tweet[:280]
 
 
@@ -146,8 +181,11 @@ ${format_large_number(
             )
 
 
+
         print(
-            "X Thread erfolgreich gesendet"
+
+            "X Posts erfolgreich gesendet"
+
         )
 
 
@@ -157,7 +195,7 @@ ${format_large_number(
 
         print(
 
-            "X Thread Fehler:",
+            "X Fehler:",
 
             e
 
