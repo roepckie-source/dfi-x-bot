@@ -21,7 +21,6 @@ from utils import (
 def clean_x_text(text, max_length=180):
 
     if not text:
-
         return ""
 
     text = str(text)
@@ -78,7 +77,35 @@ def send_x_thread(
 f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
-💰 Price
+🇬🇧 English:
+DeFiChain Daily Update
+
+
+🇨🇳 中文:
+DeFiChain 每日更新
+
+
+🇮🇳 हिन्दी:
+DeFiChain दैनिक अपडेट
+
+
+🇸🇦 العربية:
+تحديث DeFiChain اليومي
+
+
+🇮🇩 Indonesia:
+Update Harian DeFiChain
+
+
+🇪🇸 Español:
+Actualización diaria de DeFiChain
+
+
+🇫🇷 Français:
+Mise à jour quotidienne DeFiChain
+
+
+💰 Price:
 
 ${dfi.get('usd',0):.8f}
 
@@ -90,7 +117,7 @@ ${dfi.get('usd',0):.8f}
 )}
 
 
-📊 Market Cap
+📊 Market Cap:
 
 ${format_large_number(
     dfi.get('usd_market_cap',0)
