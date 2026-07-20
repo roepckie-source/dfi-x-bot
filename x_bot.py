@@ -14,7 +14,7 @@ from utils import (
 
 
 # ==============================
-# X THREAD
+# X TEST POST
 # ==============================
 
 
@@ -42,19 +42,12 @@ def send_x_thread(
 
         dfi = market["dfi"]
 
-        btc = market["bitcoin"]
 
-        eth = market["ethereum"]
-
-
-
-        tweets = [
+        tweet = f"""
+🚀 DeFiChain $DFI Daily Update 🌍
 
 
-f"""🚀 DeFiChain $DFI Daily Update 🌍
-
-
-💰 Price
+💰 Price:
 
 ${dfi.get('usd',0):.8f}
 
@@ -66,102 +59,25 @@ ${dfi.get('usd',0):.8f}
 )}
 
 
-📊 Market Cap
+📊 Market Cap:
 
 ${format_large_number(
     dfi.get('usd_market_cap',0)
 )}
 
 
-#DeFiChain #DFI""",
+#DeFiChain #DFI
+"""
 
 
-
-f"""🌍 Crypto Market Comparison
-
-
-₿ Bitcoin
-
-{format_percent(
-    btc.get('usd_24h_change',0)
-)}
-
-
-Ξ Ethereum
-
-{format_percent(
-    eth.get('usd_24h_change',0)
-)}
-
-
-🚀 DFI
-
-{format_percent(
-    dfi.get('usd_24h_change',0)
-)}
-
-
-{comparison['vs_btc']}
-
-{comparison['vs_eth']}""",
-
-
-
-f"""🌐 DeFiChain Network
-
-
-🔥 Burned DFI:
-
-{network['burned_dfi']}
-
-
-🔒 Locked dUSD:
-
-{network['locked_dusd']}
-
-
-📰 Daily Insight
-
-{news['title']}
-
-{news['text']}
-
-
-#DeFiChain #DFI"""
-        ]
-
-
-        previous_id = None
-
-
-        for tweet in tweets:
-
-
-            if previous_id:
-
-                response = client.create_tweet(
-
-                    text=tweet,
-
-                    in_reply_to_tweet_id=previous_id
-
-                )
-
-            else:
-
-                response = client.create_tweet(
-
-                    text=tweet
-
-                )
-
-
-            previous_id = response.data["id"]
-
+        response = client.create_tweet(
+            text=tweet
+        )
 
 
         print(
-            "X Thread erfolgreich gesendet"
+            "X Tweet erfolgreich gesendet:",
+            response.data["id"]
         )
 
 
