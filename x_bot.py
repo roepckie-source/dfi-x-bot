@@ -128,8 +128,7 @@ f"""🌐 DeFiChain Network
 #DeFiChain #DFI"""
         ]
 
-
-             for tweet in tweets:
+    for tweet in tweets:
 
             # X Limit Sicherheit
             tweet = tweet[:280]
