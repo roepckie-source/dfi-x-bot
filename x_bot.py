@@ -18,8 +18,7 @@ from utils import (
 # X TEXT SICHERHEIT
 # ==============================
 
-
-def clean_x_text(text, max_length=180):
+def clean_x_text(text, max_length=160):
 
     if not text:
         return ""
@@ -39,7 +38,6 @@ def clean_x_text(text, max_length=180):
 # ==============================
 # X POSTS
 # ==============================
-
 
 def send_x_thread(
     market,
@@ -75,6 +73,7 @@ def send_x_thread(
         )
 
 
+
         tweets = [
 
 
@@ -84,32 +83,15 @@ f"""🚀 DeFiChain $DFI Daily Update 🌍
 📅 {today}
 
 
-🇬🇧 English:
-DeFiChain Daily Update
+🌐 Multilingual Crypto Update:
 
-
-🇨🇳 中文:
-DeFiChain 每日更新
-
-
-🇮🇳 हिन्दी:
-DeFiChain दैनिक अपडेट
-
-
-🇸🇦 العربية:
-تحديث DeFiChain اليومي
-
-
-🇮🇩 Indonesia:
-Update Harian DeFiChain
-
-
-🇪🇸 Español:
-Actualización diaria de DeFiChain
-
-
-🇫🇷 Français:
-Mise à jour quotidienne DeFiChain
+🇬🇧 English
+🇨🇳 中文
+🇮🇳 हिन्दी
+🇸🇦 العربية
+🇮🇩 Indonesia
+🇪🇸 Español
+🇫🇷 Français
 
 
 💰 Price:
@@ -132,7 +114,6 @@ ${format_large_number(
 
 
 #DeFiChain #DFI""",
-
 
 
 
@@ -172,7 +153,6 @@ f"""🌍 Crypto Market Comparison
 
 
 
-
 f"""📰 DeFiChain Daily Insight
 
 
@@ -198,9 +178,7 @@ f"""📰 DeFiChain Daily Insight
         # POSTS SENDEN
         # ==============================
 
-
         for tweet in tweets:
-
 
             tweet = tweet[:280]
 
@@ -221,7 +199,6 @@ f"""📰 DeFiChain Daily Insight
             )
 
 
-
         print(
 
             "X Posts erfolgreich gesendet"
@@ -231,7 +208,6 @@ f"""📰 DeFiChain Daily Insight
 
 
     except Exception as e:
-
 
         print(
 
