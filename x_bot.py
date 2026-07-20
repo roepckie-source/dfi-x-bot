@@ -216,4 +216,3 @@ f"""📰 DeFiChain Daily Insight
             e
 
         )
-
