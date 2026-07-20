@@ -167,6 +167,9 @@ f"""🌍 Crypto Market Comparison
 f"""📰 DeFiChain Daily Insight
 
 
+📅 {datetime.now().strftime('%d.%m.%Y')}
+
+
 {clean_x_text(
     news.get('title','DeFiChain Update')
 )}
