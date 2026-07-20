@@ -14,7 +14,7 @@ from utils import (
 
 
 # ==============================
-# X THREAD
+# X POSTS
 # ==============================
 
 
@@ -47,7 +47,7 @@ def send_x_thread(
 
         tweets = [
 
-f"""🚀 DeFiChain $DFI Daily Update 🌍
+            f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
 💰 Price
@@ -73,7 +73,7 @@ ${format_large_number(
 
 
 
-f"""🌍 Crypto Market Comparison
+            f"""🌍 Crypto Market Comparison
 
 
 ₿ Bitcoin
@@ -103,7 +103,7 @@ f"""🌍 Crypto Market Comparison
 
 
 
-f"""🌐 DeFiChain Network
+            f"""🌐 DeFiChain Network
 
 
 🔥 Burned DFI:
@@ -128,6 +128,11 @@ f"""🌐 DeFiChain Network
 #DeFiChain #DFI"""
         ]
 
+
+        # ==============================
+        # POSTS SENDEN
+        # ==============================
+
         for tweet in tweets:
 
             # X Limit Sicherheit
@@ -135,13 +140,18 @@ f"""🌐 DeFiChain Network
 
 
             response = client.create_tweet(
+
                 text=tweet
+
             )
 
 
             print(
+
                 "X Tweet gesendet:",
+
                 response.data["id"]
+
             )
 
 
@@ -150,10 +160,14 @@ f"""🌐 DeFiChain Network
         )
 
 
+
     except Exception as e:
 
+
         print(
+
             "X Thread Fehler:",
+
             e
-        )    
- 
+
+        )
