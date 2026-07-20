@@ -14,7 +14,7 @@ from utils import (
 
 
 # ==============================
-# X TEST POST
+# X THREAD
 # ==============================
 
 
@@ -41,13 +41,16 @@ def send_x_thread(
 
 
         dfi = market["dfi"]
+        btc = market["bitcoin"]
+        eth = market["ethereum"]
 
 
-        tweet = f"""
-🚀 DeFiChain $DFI Daily Update 🌍
+        tweets = [
+
+f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
-💰 Price:
+💰 Price
 
 ${dfi.get('usd',0):.8f}
 
@@ -59,31 +62,116 @@ ${dfi.get('usd',0):.8f}
 )}
 
 
-📊 Market Cap:
+📊 Market Cap
 
 ${format_large_number(
     dfi.get('usd_market_cap',0)
 )}
 
 
-#DeFiChain #DFI
-"""
+#DeFiChain #DFI""",
 
 
-        response = client.create_tweet(
-            text=tweet
-        )
+
+f"""🌍 Crypto Market Comparison
+
+
+₿ Bitcoin
+
+{format_percent(
+    btc.get('usd_24h_change',0)
+)}
+
+
+Ξ Ethereum
+
+{format_percent(
+    eth.get('usd_24h_change',0)
+)}
+
+
+🚀 DFI
+
+{format_percent(
+    dfi.get('usd_24h_change',0)
+)}
+
+
+{comparison['vs_btc']}
+
+{comparison['vs_eth']}""",
+
+
+
+f"""🌐 DeFiChain Network
+
+
+🔥 Burned DFI:
+
+{network['burned_dfi']}
+
+
+🔒 Locked dUSD:
+
+{network['locked_dusd']}
+
+
+📰 Daily Insight
+
+{news['title']}
+
+{news['text']}
+
+
+{news['hashtags']}
+
+#DeFiChain #DFI"""
+        ]
+
+
+        previous_id = None
+
+
+        for tweet in tweets:
+
+
+            # Sicherheitsprüfung
+            tweet = tweet[:280]
+
+
+            if previous_id:
+
+
+                response = client.create_tweet(
+
+                    text=tweet,
+
+                    in_reply_to_tweet_id=previous_id
+
+                )
+
+            else:
+
+
+                response = client.create_tweet(
+
+                    text=tweet
+
+                )
+
+
+            previous_id = response.data["id"]
+
 
 
         print(
-            "X Tweet erfolgreich gesendet:",
-            response.data["id"]
+            "X Thread erfolgreich gesendet"
         )
 
 
     except Exception as e:
 
         print(
-            "X Fehler:",
+            "X Thread Fehler:",
             e
         )
