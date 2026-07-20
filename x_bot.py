@@ -129,39 +129,21 @@ f"""🌐 DeFiChain Network
         ]
 
 
-        previous_id = None
+             for tweet in tweets:
 
-
-        for tweet in tweets:
-
-
-            # Sicherheitsprüfung
+            # X Limit Sicherheit
             tweet = tweet[:280]
 
 
-            if previous_id:
+            response = client.create_tweet(
+                text=tweet
+            )
 
 
-                response = client.create_tweet(
-
-                    text=tweet,
-
-                    in_reply_to_tweet_id=previous_id
-
-                )
-
-            else:
-
-
-                response = client.create_tweet(
-
-                    text=tweet
-
-                )
-
-
-            previous_id = response.data["id"]
-
+            print(
+                "X Tweet gesendet:",
+                response.data["id"]
+            )
 
 
         print(
