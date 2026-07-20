@@ -69,9 +69,13 @@ def send_x_thread(
 
 
         today = datetime.now().strftime(
-            "%d.%m.%Y"
+            "%d.%m.%Y %H:%M"
         )
 
+
+        report_id = datetime.now().strftime(
+            "%H%M"
+        )
 
 
         tweets = [
@@ -81,6 +85,9 @@ f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
 📅 {today}
+
+
+🤖 Automated Daily Report #{report_id}
 
 
 🌐 Multilingual Crypto Update:
@@ -114,6 +121,7 @@ ${format_large_number(
 
 
 #DeFiChain #DFI""",
+
 
 
 
@@ -153,10 +161,14 @@ f"""🌍 Crypto Market Comparison
 
 
 
+
 f"""📰 DeFiChain Daily Insight
 
 
 📅 {today}
+
+
+🤖 Report #{report_id}
 
 
 {clean_x_text(
@@ -165,7 +177,8 @@ f"""📰 DeFiChain Daily Insight
 
 
 {clean_x_text(
-    news.get('text','Daily DeFiChain Report')
+    news.get('text','Daily DeFiChain Report'),
+    100
 )}
 
 
@@ -179,6 +192,7 @@ f"""📰 DeFiChain Daily Insight
         # ==============================
 
         for tweet in tweets:
+
 
             tweet = tweet[:280]
 
@@ -208,6 +222,7 @@ f"""📰 DeFiChain Daily Insight
 
 
     except Exception as e:
+
 
         print(
 
