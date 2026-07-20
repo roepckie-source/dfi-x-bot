@@ -62,9 +62,7 @@ def send_x_thread(
 
 
         dfi = market["dfi"]
-
         btc = market["bitcoin"]
-
         eth = market["ethereum"]
 
 
@@ -188,13 +186,18 @@ f"""📰 DeFiChain Daily Insight
 
 
         # ==============================
-        # POSTS SENDEN
+        # POSTS SENDEN MIT DEBUG
         # ==============================
 
-        for tweet in tweets:
-
+        for i, tweet in enumerate(tweets, start=1):
 
             tweet = tweet[:280]
+
+
+            print("----------------")
+            print("Sende Tweet Nummer:", i)
+            print(tweet)
+            print("----------------")
 
 
             response = client.create_tweet(
@@ -211,6 +214,7 @@ f"""📰 DeFiChain Daily Insight
                 response.data["id"]
 
             )
+
 
 
         print(
