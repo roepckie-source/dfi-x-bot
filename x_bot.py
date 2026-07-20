@@ -70,12 +70,18 @@ def send_x_thread(
         eth = market["ethereum"]
 
 
+        today = datetime.now().strftime(
+            "%d.%m.%Y"
+        )
+
 
         tweets = [
 
 
-
 f"""🚀 DeFiChain $DFI Daily Update 🌍
+
+
+📅 {today}
 
 
 🇬🇧 English:
@@ -133,6 +139,9 @@ ${format_large_number(
 f"""🌍 Crypto Market Comparison
 
 
+📅 {today}
+
+
 ₿ Bitcoin
 
 {format_percent(
@@ -167,7 +176,7 @@ f"""🌍 Crypto Market Comparison
 f"""📰 DeFiChain Daily Insight
 
 
-📅 {datetime.now().strftime('%d.%m.%Y')}
+📅 {today}
 
 
 {clean_x_text(
