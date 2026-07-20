@@ -62,7 +62,9 @@ def send_x_thread(
 
 
         dfi = market["dfi"]
+
         btc = market["bitcoin"]
+
         eth = market["ethereum"]
 
 
@@ -76,7 +78,9 @@ def send_x_thread(
         )
 
 
+
         tweets = [
+
 
 
 f"""🚀 DeFiChain $DFI Daily Update 🌍
@@ -85,18 +89,12 @@ f"""🚀 DeFiChain $DFI Daily Update 🌍
 📅 {today}
 
 
-🤖 Automated Daily Report #{report_id}
+🤖 Daily Report #{report_id}
 
 
-🌐 Multilingual Crypto Update:
+🌐 Global Crypto Update:
 
-🇬🇧 English
-🇨🇳 中文
-🇮🇳 हिन्दी
-🇸🇦 العربية
-🇮🇩 Indonesia
-🇪🇸 Español
-🇫🇷 Français
+🇬🇧 🇨🇳 🇮🇳 🇸🇦 🇮🇩 🇪🇸 🇫🇷
 
 
 💰 Price:
@@ -186,10 +184,11 @@ f"""📰 DeFiChain Daily Insight
 
 
         # ==============================
-        # POSTS SENDEN MIT DEBUG
+        # POSTS SENDEN
         # ==============================
 
         for i, tweet in enumerate(tweets, start=1):
+
 
             tweet = tweet[:280]
 
