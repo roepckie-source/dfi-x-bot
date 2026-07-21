@@ -1,6 +1,6 @@
 # ==============================
 # DeFiChain Daily Intelligence v4
-# Blockchain Module
+# Blockchain Network Engine
 # ==============================
 
 import requests
@@ -9,40 +9,73 @@ import requests
 
 def get_blockchain_data():
 
+
     try:
 
 
-        # Vorbereitung:
-        # echte DeFiChain API-Anbindung
-        # kommt hier hinein
+        # =================================
+        # Vorbereitung echte API Anbindung
+        # =================================
+
+
+        block_height = None
+
+        last_block_time = None
+
+        masternodes = None
+
+
+
+        if block_height is None:
+
+
+            return {
+
+
+                "network_status":
+
+                    "🟢 Online",
+
+
+                "block_height":
+
+                    "N/A",
+
+
+                "last_block_time":
+
+                    "N/A",
+
+
+                "masternodes":
+
+                    "N/A"
+
+            }
+
 
 
         return {
 
 
+            "network_status":
+
+                "🟢 Online",
+
+
             "block_height":
 
-            "N/A",
-
+                block_height,
 
 
             "last_block_time":
 
-            "N/A",
-
+                last_block_time,
 
 
             "masternodes":
 
-            "N/A",
-
-
-
-            "network_status":
-
-            "🟢 Online"
-
-
+                masternodes
 
         }
 
@@ -52,35 +85,34 @@ def get_blockchain_data():
 
 
         print(
+
             "Blockchain Fehler:",
+
             e
+
         )
 
 
         return {
 
 
+            "network_status":
+
+                "🔴 Fehler",
+
+
             "block_height":
 
-            "N/A",
-
+                "N/A",
 
 
             "last_block_time":
 
-            "N/A",
-
+                "N/A",
 
 
             "masternodes":
 
-            "N/A",
-
-
-
-            "network_status":
-
-            "🔴 Fehler"
-
+                "N/A"
 
         }
