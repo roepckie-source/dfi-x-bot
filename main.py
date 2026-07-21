@@ -16,9 +16,8 @@ from x_bot import send_x_thread
 
 def main():
 
-    print(
-        "🚀 DeFiChain Bot startet..."
-    )
+    print("🚀 DeFiChain Bot startet...")
+
 
 
     # ==========================
@@ -78,7 +77,7 @@ def main():
 
 
     # ==========================
-    # Veränderung
+    # Veränderungen
     # ==========================
 
     dfi_change = dfi.get(
@@ -97,29 +96,16 @@ def main():
     )
 
 
+    dfi_signal = "🟢" if dfi_change >= 0 else "🔴"
 
-    dfi_signal = (
-        "🟢"
-        if dfi_change >= 0
-        else "🔴"
-    )
+    btc_signal = "🟢" if btc_change >= 0 else "🔴"
 
-    btc_signal = (
-        "🟢"
-        if btc_change >= 0
-        else "🔴"
-    )
-
-    eth_signal = (
-        "🟢"
-        if eth_change >= 0
-        else "🔴"
-    )
+    eth_signal = "🟢" if eth_change >= 0 else "🔴"
 
 
 
     # ==========================
-    # Burn / Emission Analyse
+    # Burn / Emission
     # ==========================
 
     burned = network.get(
@@ -161,14 +147,25 @@ def main():
 
 
     # ==========================
-    # Network Format
+    # DUSD Daten
+    # ==========================
+
+    dusd = network.get(
+        "dusd",
+        {}
+    )
+
+
+
+    # ==========================
+    # Network Bericht
     # ==========================
 
     network_message = f"""
 🌐 <b>Network & Tokenomics</b>
 
 
-🪙 <b>Existing DFI</b>
+🪙 Existing DFI
 
 {network.get('existing_dfi','N/A')}
 
@@ -200,7 +197,7 @@ def main():
 {burned.get('payback',0):,.2f} DFI
 
 
-🔥 <b>Total Burned</b>
+🔥 Total Burned
 
 {total_burned:,.2f} DFI
 
@@ -209,14 +206,13 @@ def main():
 ━━━━━━━━━━━━━━
 
 
-📈 <b>Emission</b>
-
+📈 Emission
 
 {emission:,.2f} DFI
 
 
 
-⚖️ <b>Burn vs Emission</b>
+⚖️ Burn vs Emission
 
 
 {token_status}
@@ -229,26 +225,32 @@ def main():
 🪙 <b>DUSD Status</b>
 
 
+💵 Price
+
+${dusd.get('price','N/A')}
+
+
+⚖️ Peg Difference
+
+{dusd.get('peg_difference','N/A')}
+
+
+📊 Status
+
+{dusd.get('status','N/A')}
+
+
+
 🔒 Locked DUSD
 
 {network.get('locked_dusd','N/A')}
-
-
-💵 Peg Status
-
-Coming soon...
-
-
-🔥 DUSD Burn
-
-Coming soon...
 
 
 
 ━━━━━━━━━━━━━━
 
 
-⚖️ <b>Excess DFI</b>
+⚖️ Excess DFI
 
 {network.get('excess_dfi','N/A')}
 """
@@ -256,7 +258,7 @@ Coming soon...
 
 
     # ==========================
-    # Telegram Report
+    # Telegram Nachricht
     # ==========================
 
     telegram_message = f"""
@@ -279,7 +281,6 @@ Coming soon...
 
 💎 Price
 
-
 🇺🇸 ${dfi.get('usd',0):.8f}
 
 🇪🇺 €{dfi.get('eur',0):.8f}
@@ -288,13 +289,11 @@ Coming soon...
 
 📊 24h Change
 
-
 {dfi_signal} {dfi_change:.2f}%
 
 
 
 🏦 Market Cap
-
 
 ${dfi.get('usd_market_cap',0):,.0f}
 
@@ -364,9 +363,7 @@ ${dfi.get('usd_market_cap',0):,.0f}
 
 
 
-    print(
-        "✅ Bot fertig"
-    )
+    print("✅ Bot fertig")
 
 
 
