@@ -275,6 +275,22 @@ Block:
 
     }
 
+    print("DEBUG NETWORK:")
+    print(network)
+
+
+    send_discord(
+
+    market,
+
+    network,
+
+    comparison,
+
+    news
+
+    )
+    
     send_discord(
 
         market,
