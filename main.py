@@ -63,7 +63,7 @@ def main():
 
 
     # ==========================
-    # Telegram komplett
+    # Telegram Premium Report
     # ==========================
 
 
@@ -83,6 +83,54 @@ def main():
     )
 
 
+    # DFI Signal
+
+    dfi_change = dfi.get(
+        "usd_24h_change",
+        0
+    )
+
+
+    dfi_signal = (
+        "🟢"
+        if dfi_change >= 0
+        else "🔴"
+    )
+
+
+
+    # BTC Signal
+
+    btc_change = btc.get(
+        "usd_24h_change",
+        0
+    )
+
+
+    btc_signal = (
+        "🟢"
+        if btc_change >= 0
+        else "🔴"
+    )
+
+
+
+    # ETH Signal
+
+    eth_change = eth.get(
+        "usd_24h_change",
+        0
+    )
+
+
+    eth_signal = (
+        "🟢"
+        if eth_change >= 0
+        else "🔴"
+    )
+
+
+
     telegram_message = f"""
 🚀 <b>DeFiChain Daily Update</b>
 
@@ -94,10 +142,14 @@ def main():
 📚 History #{news.get('id',0)}/100
 
 
+
 ━━━━━━━━━━━━━━
 
 
-💰 <b>DFI Price</b>
+💰 <b>DFI Market</b>
+
+
+💎 Price
 
 
 🇺🇸 ${dfi.get('usd',0):.8f}
@@ -106,13 +158,15 @@ def main():
 
 
 
-📊 <b>24h Change</b>
-
-{dfi.get('usd_24h_change',0):.2f}%
+📊 24h Change
 
 
+{dfi_signal} {dfi_change:.2f}%
 
-🏦 <b>Market Cap</b>
+
+
+🏦 Market Cap
+
 
 ${dfi.get('usd_market_cap',0):,.0f}
 
@@ -121,15 +175,21 @@ ${dfi.get('usd_market_cap',0):,.0f}
 ━━━━━━━━━━━━━━
 
 
-₿ <b>Bitcoin</b>
-
-{btc.get('usd_24h_change',0):.2f}%
+🌍 <b>Crypto Market</b>
 
 
 
-Ξ <b>Ethereum</b>
+₿ Bitcoin
 
-{eth.get('usd_24h_change',0):.2f}%
+
+{btc_signal} {btc_change:.2f}%
+
+
+
+Ξ Ethereum
+
+
+{eth_signal} {eth_change:.2f}%
 
 
 
@@ -137,6 +197,8 @@ ${dfi.get('usd_market_cap',0):,.0f}
 
 
 🌐 <b>Network</b>
+
+
 
 {network}
 
@@ -148,7 +210,9 @@ ${dfi.get('usd_market_cap',0):,.0f}
 📰 <b>Daily Insight</b>
 
 
+
 🎯 <b>{news.get('title','')}</b>
+
 
 
 {news.get('text','')}
@@ -158,8 +222,19 @@ ${dfi.get('usd_market_cap',0):,.0f}
 ━━━━━━━━━━━━━━
 
 
+🪙 <b>DUSD Status</b>
+
+
+Coming soon...
+
+
+
+━━━━━━━━━━━━━━
+
+
 #DeFiChain #DFI
 """
+
 
 
     send_telegram(
