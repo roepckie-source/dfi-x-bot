@@ -10,6 +10,8 @@ from modules.dusd import get_dusd_data
 from modules.community import get_community_data
 from modules.blockchain import get_blockchain_data
 
+from modules.report_formatter import create_report
+
 
 from language_manager import load_language
 
@@ -20,51 +22,6 @@ from outputs.x_bot import send_x_thread
 
 
 
-def build_report(
-        market,
-        tokenomics,
-        dusd,
-        community,
-        blockchain
-):
-
-
-    report = f"""
-🚀 DeFiChain Daily Intelligence v4
-
-
-💰 DFI Market
-
-{market}
-
-
-🔥 Tokenomics
-
-{tokenomics}
-
-
-🪙 DUSD Health
-
-{dusd}
-
-
-🏦 Community Fund
-
-{community}
-
-
-⛓ Blockchain
-
-{blockchain}
-
-"""
-
-
-    return report
-
-
-
-
 
 def main():
 
@@ -72,6 +29,7 @@ def main():
     print(
         "🚀 DeFiChain Intelligence v4 startet..."
     )
+
 
 
     # ==========================
@@ -114,7 +72,7 @@ def main():
 
 
     # ==========================
-    # Adapter für alte Bots
+    # Adapter alte Bots
     # ==========================
 
 
@@ -124,7 +82,6 @@ def main():
         "existing_dfi":
 
             "N/A",
-
 
 
         "burned_dfi":
@@ -158,6 +115,7 @@ def main():
 
 
 
+
     comparison = {
 
 
@@ -186,7 +144,7 @@ def main():
 
         "text":
 
-            "DeFiChain Daily Intelligence v4 Report",
+            "DeFiChain Daily Intelligence Report",
 
 
 
@@ -194,18 +152,17 @@ def main():
 
             "#DeFiChain #DFI"
 
-
-
     }
 
 
 
+
     # ==========================
-    # Report
+    # Schöner Report
     # ==========================
 
 
-    report = build_report(
+    report = create_report(
 
         market,
 
@@ -275,6 +232,7 @@ def main():
     print(
         "✅ v4 Report gesendet"
     )
+
 
 
 
