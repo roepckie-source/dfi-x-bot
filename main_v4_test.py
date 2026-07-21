@@ -230,23 +230,28 @@ Block:
     # Ausgaben
     # ==========================
 
-
     send_telegram(
         report
     )
 
 
     send_discord(
-        report
-    )
 
+        market,
+
+        blockchain,
+
+        {},
+
+        news
+
+    )
 
 
     send_x_thread(
         report
     )
-
-
+ 
 
     print(
         "✅ v4 Report gesendet"
