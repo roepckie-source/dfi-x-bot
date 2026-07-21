@@ -5,70 +5,139 @@
 import requests
 
 
+
+# ==============================
+# DUSD Daten
+# ==============================
+
 def get_dusd_data():
 
     try:
 
-        # DUSD Preis über CoinGecko
         url = "https://api.coingecko.com/api/v3/simple/price"
 
+
         params = {
+
             "ids": "defichain-usd",
+
             "vs_currencies": "usd"
+
         }
 
 
         response = requests.get(
+
             url,
+
             params=params,
+
             timeout=10
+
         )
 
 
         data = response.json()
 
 
-        dusd_price = data.get(
+        price = data.get(
+
             "defichain-usd",
+
             {}
+
         ).get(
-            "usd",
-            0
+
+            "usd"
+
         )
 
 
-        peg_difference = dusd_price - 1
+        # Keine Daten vorhanden
+
+        if price is None:
 
 
-        if dusd_price >= 0.99:
+            return {
 
-            peg_status = "🟢 Peg stabil"
+                "price": "N/A",
 
-        elif dusd_price >= 0.90:
+                "peg_difference": "N/A",
 
-            peg_status = "🟡 Unter Peg"
+                "status": "Keine Daten"
+
+            }
+
+
+
+        difference = price - 1
+
+
+
+        if price >= 0.99:
+
+
+            status = "🟢 Peg stabil"
+
+
+
+        elif price >= 0.90:
+
+
+            status = "🟡 Unter Peg"
+
+
 
         else:
 
-            peg_status = "🔴 Stark unter Peg"
+
+            status = "🔴 Stark unter Peg"
+
 
 
 
         return {
 
-            "price": dusd_price,
 
-            "peg_difference": peg_difference,
+            "price": round(
 
-            "status": peg_status
+                price,
+
+                6
+
+            ),
+
+
+            "peg_difference": round(
+
+                difference,
+
+                6
+
+            ),
+
+
+            "status": status
+
 
         }
+
 
 
     except Exception as e:
 
 
+        print(
+
+            "DUSD Fehler:",
+
+            e
+
+        )
+
+
         return {
+
 
             "price": "N/A",
 
@@ -81,47 +150,62 @@ def get_dusd_data():
 
 
 
+# ==============================
+# Network Daten
+# ==============================
 
 def get_network_data():
 
 
     # ==========================
-    # Hier bleiben deine bisherigen
-    # Burn Daten
+    # Burn / Emission Daten
     # ==========================
 
-
     network = {
+
 
         "existing_dfi": "N/A",
 
 
+
         "burned_dfi": {
+
 
             "address": 158909764.56224337,
 
+
             "fee": 993026.96,
+
 
             "auction": 3538007.7617579,
 
+
             "payback": 61705058.1749106,
 
+
             "emission": 98815760.9869514,
+
 
             "total": 321435128.08025473
 
         },
 
 
+
         "locked_dusd": "N/A",
 
+
+
         "excess_dfi": "N/A"
+
 
     }
 
 
 
+    # ==========================
     # DUSD hinzufügen
+    # ==========================
 
     network["dusd"] = get_dusd_data()
 
