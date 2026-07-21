@@ -234,6 +234,14 @@ Block:
         report
     )
 
+    comparison = {
+
+    "vs_btc": "N/A",
+
+    "vs_eth": "N/A"
+
+    }
+
 
     send_discord(
 
@@ -241,12 +249,12 @@ Block:
 
         blockchain,
 
-        {},
+        comparison,
 
         news
 
     )
-
+   
 
     send_x_thread(
         report
