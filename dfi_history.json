@@ -1,1 +1,52 @@
-
+[
+  {
+    "id": 1,
+    "title": "The Beginning of DeFiChain",
+    "text": "DeFiChain was created with the vision to bring decentralized financial services to the Bitcoin ecosystem. The goal was to combine Bitcoin security with powerful DeFi applications."
+  },
+  {
+    "id": 2,
+    "title": "Why Bitcoin?",
+    "text": "DeFiChain was designed with a strong connection to Bitcoin. The idea was to use Bitcoin as a foundation while enabling decentralized finance features."
+  },
+  {
+    "id": 3,
+    "title": "What is DFI?",
+    "text": "DFI is the native token of DeFiChain. It powers governance, staking, rewards and many functions inside the ecosystem."
+  },
+  {
+    "id": 4,
+    "title": "The DeFiChain DEX",
+    "text": "The decentralized exchange allows users to trade digital assets without traditional intermediaries while staying within the DeFiChain ecosystem."
+  },
+  {
+    "id": 5,
+    "title": "Community Governance",
+    "text": "DeFiChain uses community voting to decide important changes. DFIPs allow the community to propose and vote on improvements."
+  },
+  {
+    "id": 6,
+    "title": "The Community Fund",
+    "text": "The Community Fund supports projects, development and initiatives that help grow the DeFiChain ecosystem."
+  },
+  {
+    "id": 7,
+    "title": "dTokens",
+    "text": "DeFiChain introduced dTokens as blockchain-based assets designed to represent different markets and financial instruments."
+  },
+  {
+    "id": 8,
+    "title": "Staking on DeFiChain",
+    "text": "Users can participate in network security and receive rewards through staking mechanisms."
+  },
+  {
+    "id": 9,
+    "title": "DeFiChain and Decentralization",
+    "text": "Decentralization is a core principle of DeFiChain, giving the community an important role in the future development."
+  },
+  {
+    "id": 10,
+    "title": "The Vision of DeFiChain",
+    "text": "The long-term vision is an open financial ecosystem where users can access decentralized services globally."
+  }
+]
