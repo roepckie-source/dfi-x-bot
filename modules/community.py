@@ -1,42 +1,110 @@
 # ==============================
 # DeFiChain Daily Intelligence v4
-# Community Fund Module
+# Community Fund Engine
 # ==============================
 
 
 def get_community_data():
 
 
-    # Platzhalter:
-    # wird später durch echte
-    # DeFiChain On-Chain Daten ersetzt
+    try:
 
 
-    community = {
+        # =================================
+        # Vorbereitung für echte API Daten
+        # =================================
 
 
-        "dfi":
+        community_dfi = None
 
-        "N/A",
-
-
-        "dusd":
-
-        "N/A",
-
-
-        "daily_inflow":
-
-        "N/A",
-
-
-        "usd_value":
-
-        "N/A"
-
-
-    }
+        community_dusd = None
 
 
 
-    return community
+        if community_dfi is None:
+
+
+            return {
+
+
+                "dfi":
+
+                    "N/A",
+
+
+                "dusd":
+
+                    "N/A",
+
+
+                "daily_inflow":
+
+                    "N/A",
+
+
+                "usd_value":
+
+                    "N/A"
+
+            }
+
+
+
+        return {
+
+
+            "dfi":
+
+                community_dfi,
+
+
+            "dusd":
+
+                community_dusd,
+
+
+            "daily_inflow":
+
+                "N/A",
+
+
+            "usd_value":
+
+                "N/A"
+
+        }
+
+
+
+    except Exception as e:
+
+
+        print(
+            "Community Fund Fehler:",
+            e
+        )
+
+
+        return {
+
+
+            "dfi":
+
+                "N/A",
+
+
+            "dusd":
+
+                "N/A",
+
+
+            "daily_inflow":
+
+                "N/A",
+
+
+            "usd_value":
+
+                "N/A"
+
+        }
