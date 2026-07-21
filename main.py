@@ -57,7 +57,7 @@ def main():
 
 
     # ==========================
-    # Telegram Daten vorbereiten
+    # Markt Daten
     # ==========================
 
     dfi = market.get(
@@ -76,15 +76,9 @@ def main():
     )
 
 
-    burned = network.get(
-        "burned_dfi",
-        {}
-    )
-
-
 
     # ==========================
-    # Signale
+    # Veränderung
     # ==========================
 
     dfi_change = dfi.get(
@@ -101,6 +95,7 @@ def main():
         "usd_24h_change",
         0
     )
+
 
 
     dfi_signal = (
@@ -124,6 +119,48 @@ def main():
 
 
     # ==========================
+    # Burn / Emission Analyse
+    # ==========================
+
+    burned = network.get(
+        "burned_dfi",
+        {}
+    )
+
+
+    total_burned = burned.get(
+        "total",
+        0
+    )
+
+
+    emission = burned.get(
+        "emission",
+        0
+    )
+
+
+    net_change = emission - total_burned
+
+
+
+    if net_change > 0:
+
+        token_status = (
+            "🔴 Inflationär\n"
+            f"+{net_change:,.2f} DFI"
+        )
+
+    else:
+
+        token_status = (
+            "🟢 Deflationär\n"
+            f"{net_change:,.2f} DFI"
+        )
+
+
+
+    # ==========================
     # Network Format
     # ==========================
 
@@ -140,7 +177,7 @@ def main():
 ━━━━━━━━━━━━━━
 
 
-🔥 <b>Burned DFI</b>
+🔥 <b>DFI Burn</b>
 
 
 🏠 Address Burn
@@ -163,24 +200,52 @@ def main():
 {burned.get('payback',0):,.2f} DFI
 
 
-📈 Emission
-
-{burned.get('emission',0):,.2f} DFI
-
-
 🔥 <b>Total Burned</b>
 
-{burned.get('total',0):,.2f} DFI
+{total_burned:,.2f} DFI
 
 
 
 ━━━━━━━━━━━━━━
 
 
-🔒 <b>Locked DUSD</b>
+📈 <b>Emission</b>
+
+
+{emission:,.2f} DFI
+
+
+
+⚖️ <b>Burn vs Emission</b>
+
+
+{token_status}
+
+
+
+━━━━━━━━━━━━━━
+
+
+🪙 <b>DUSD Status</b>
+
+
+🔒 Locked DUSD
 
 {network.get('locked_dusd','N/A')}
 
+
+💵 Peg Status
+
+Coming soon...
+
+
+🔥 DUSD Burn
+
+Coming soon...
+
+
+
+━━━━━━━━━━━━━━
 
 
 ⚖️ <b>Excess DFI</b>
@@ -191,7 +256,7 @@ def main():
 
 
     # ==========================
-    # Telegram Nachricht
+    # Telegram Report
     # ==========================
 
     telegram_message = f"""
@@ -214,17 +279,22 @@ def main():
 
 💎 Price
 
+
 🇺🇸 ${dfi.get('usd',0):.8f}
 
 🇪🇺 €{dfi.get('eur',0):.8f}
 
 
+
 📊 24h Change
+
 
 {dfi_signal} {dfi_change:.2f}%
 
 
+
 🏦 Market Cap
+
 
 ${dfi.get('usd_market_cap',0):,.0f}
 
@@ -243,7 +313,7 @@ ${dfi.get('usd_market_cap',0):,.0f}
 
 Ξ Ethereum
 
-{eth_signal} {eth_change:.2f}
+{eth_signal} {eth_change:.2f}%
 
 
 
@@ -264,15 +334,6 @@ ${dfi.get('usd_market_cap',0):,.0f}
 
 
 {news.get('text','')}
-
-
-
-━━━━━━━━━━━━━━
-
-
-🪙 <b>DUSD Status</b>
-
-Coming soon...
 
 
 
