@@ -291,19 +291,6 @@ Block:
 
     )
     
-    send_discord(
-
-        market,
-
-        blockchain,
-
-        comparison,
-
-        news
-
-    )
-   
-
     send_x_thread(
         report
     )
