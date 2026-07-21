@@ -1,7 +1,7 @@
-# ==============================
-# DeFiChain Daily Intelligence v4
-# Main Controller
-# ==============================
+# ======================================
+# DeFiChain Intelligence v4
+# Main Test Runner
+# ======================================
 
 
 from modules.market import get_market_data
@@ -10,16 +10,61 @@ from modules.dusd import get_dusd_data
 from modules.community import get_community_data
 from modules.blockchain import get_blockchain_data
 
-from language_manager import (
-    get_daily_language,
-    load_language
-)
 
-from news import get_dfi_news
+from language_manager import load_language
+
 
 from outputs.telegram_bot import send_telegram
 from outputs.discord_bot import send_discord
 from outputs.x_bot import send_x_thread
+
+
+
+def build_report(
+        market,
+        tokenomics,
+        dusd,
+        community,
+        blockchain
+):
+
+
+    report = f"""
+🚀 DeFiChain Daily Intelligence v4
+
+
+💰 DFI Market
+
+Price:
+{market}
+
+
+🔥 Tokenomics
+
+Burn:
+{tokenomics}
+
+
+🪙 DUSD Health
+
+{dusd}
+
+
+🏦 Community Fund
+
+{community}
+
+
+⛓ Blockchain
+
+{blockchain}
+
+"""
+
+
+    return report
+
+
 
 
 
@@ -31,21 +76,18 @@ def main():
     )
 
 
-
     # ==========================
-    # Sprache bestimmen
+    # Sprache
     # ==========================
 
-    language = get_daily_language()
+    language = "de"
 
-    text = load_language(
-        language
+    print(
+        f"🌍 Sprache: {language}"
     )
 
 
-
-    print(
-        "🌍 Sprache:",
+    load_language(
         language
     )
 
@@ -54,6 +96,7 @@ def main():
     # ==========================
     # Daten laden
     # ==========================
+
 
     market = get_market_data()
 
@@ -70,235 +113,151 @@ def main():
     blockchain = get_blockchain_data()
 
 
-    news = get_dfi_news()
+
+    # ==========================
+    # Adapter für alte Bots
+    # ==========================
+
+
+    network = {
+
+
+        "existing_dfi":
+
+            "N/A",
+
+
+        "burned_dfi":
+
+            tokenomics
+            .get(
+                "burn",
+                {}
+            )
+            .get(
+                "total",
+                "N/A"
+            ),
+
+
+        "locked_dusd":
+
+            dusd.get(
+                "locked_dusd",
+                "N/A"
+            ),
+
+
+        "excess_dfi":
+
+            "N/A"
+
+    }
+
+
+
+    comparison = {
+
+
+        "vs_btc":
+
+            "N/A",
+
+
+        "vs_eth":
+
+            "N/A"
+
+    }
+
+
+
+    news = {
+
+
+        "title":
+
+            "DeFiChain Intelligence v4"
+
+
+    }
 
 
 
     # ==========================
-    # Report erstellen
+    # Report
     # ==========================
 
-    dfi = market.get(
-        "dfi",
-        {}
+
+    report = build_report(
+
+        market,
+
+        tokenomics,
+
+        dusd,
+
+        community,
+
+        blockchain
+
     )
 
 
-    report = f"""
-
-🚀 {text.get('title')}
-
-
-🌐 Language
-
-{language.upper()}
-
-
-━━━━━━━━━━━━━━
-
-
-💰 {text.get('market')}
-
-
-
-💎 {text.get('price')}
-
-
-🇺🇸 ${dfi.get('usd','N/A')}
-
-
-🇪🇺 €{dfi.get('eur','N/A')}
-
-
-
-📊 {text.get('change')}
-
-
-{dfi.get('change','N/A')} %
-
-
-
-🏦 {text.get('market_cap')}
-
-
-${dfi.get('market_cap','N/A')}
-
-
-
-━━━━━━━━━━━━━━
-
-
-🔥 {text.get('tokenomics')}
-
-
-
-🔥 {text.get('burn')}
-
-
-{tokenomics.get('burn',{}).get('total')} DFI
-
-
-
-📈 {text.get('emission')}
-
-
-{tokenomics.get('emission')} DFI
-
-
-
-⚖️ {text.get('net_burn')}
-
-
-{tokenomics.get('net_change')}
-
-
-
-{tokenomics.get('status')}
-
-
-
-━━━━━━━━━━━━━━
-
-
-🪙 {text.get('dusd')}
-
-
-
-💵 Price
-
-
-{dusd.get('price')}
-
-
-
-❤️ Health
-
-
-{dusd.get('health_score')}/100
-
-
-
-━━━━━━━━━━━━━━
-
-
-🏦 {text.get('community')}
-
-
-
-DFI
-
-{community.get('dfi')}
-
-
-
-━━━━━━━━━━━━━━
-
-
-⛓ {text.get('network')}
-
-
-
-{blockchain.get('network_status')}
-
-
-Block:
-
-{blockchain.get('block_height')}
-
-
-
-━━━━━━━━━━━━━━
-
-
-📰 {text.get('insight')}
-
-
-{news.get('title','')}
-
-
-{news.get('text','')}
-
-
-
-#DeFiChain #DFI
-
-"""
-
-
 
     # ==========================
-    # Ausgaben
+    # Telegram
     # ==========================
+
 
     send_telegram(
         report
     )
 
-    comparison = {
-
-    "vs_btc": "N/A",
-
-    "vs_eth": "N/A"
-
-    }
-
-    network = {
 
 
-    "existing_dfi":
-
-        "N/A",
-
-
-
-    "burned_dfi":
-
-        tokenomics.get("burn", {}).get(
-            "total",
-            "N/A"
-        ),
-
-
-
-    "locked_dusd":
-
-        dusd.get(
-            "locked_dusd",
-            "N/A"
-        ),
-
-
-
-    "excess_dfi":
-
-        "N/A"
-
-    }
-
-    print("DEBUG NETWORK:")
-    print(network)
+    # ==========================
+    # Discord
+    # ==========================
 
 
     send_discord(
 
-    market,
+        market,
 
-    network,
+        network,
 
-    comparison,
+        comparison,
 
-    news
+        news
 
     )
-    
+
+
+
+    # ==========================
+    # X
+    # ==========================
+
+
     send_x_thread(
-        report
+
+        market,
+
+        network,
+
+        comparison,
+
+        news
+
     )
- 
+
+
 
     print(
         "✅ v4 Report gesendet"
     )
+
 
 
 
