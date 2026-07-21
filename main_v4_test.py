@@ -242,6 +242,25 @@ Block:
 
     }
 
+    network = {
+
+    "existing_dfi": 
+        tokenomics.get("existing_dfi", "N/A"),
+
+
+    "burned_dfi": 
+        tokenomics.get("burn", {}),
+
+
+    "locked_dusd":
+        dusd.get("locked_dusd", "N/A"),
+
+
+    "excess_dfi":
+        "N/A"
+
+    }
+
 
     send_discord(
 
