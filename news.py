@@ -156,3 +156,12 @@ def get_history_story():
 def get_news():
 
     return get_history_story()
+
+
+# ==============================
+# KOMPATIBILITÄT FÜR MAIN.PY
+# ==============================
+
+def get_dfi_news():
+
+    return get_history_story()
