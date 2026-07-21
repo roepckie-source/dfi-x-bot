@@ -1,134 +1,106 @@
 # ==============================
 # DeFiChain Daily Intelligence v4
-# Tokenomics Module
+# Tokenomics Engine
 # ==============================
+
+import requests
 
 
 def get_tokenomics_data():
 
+    try:
 
-    # Aktuelle Werte
-    # später ersetzen wir diese
-    # durch echte On-Chain Daten
+        # Vorbereitung für DeFiChain API
+        # echte Endpunkte werden jetzt eingebunden
 
 
-    burned = {
+        burn_data = {
 
-        "address": 158909764.56,
+            "address": 0,
 
-        "fee": 993026.96,
+            "fee": 0,
 
-        "auction": 3538007.76,
+            "auction": 0,
 
-        "payback": 61705058.17
+            "payback": 0,
 
-    }
+            "total": 0
 
+        }
 
 
-    total_burn = (
+        emission = 0
 
-        burned["address"]
 
-        + burned["fee"]
 
-        + burned["auction"]
+        net_change = (
+            emission
+            -
+            burn_data["total"]
+        )
 
-        + burned["payback"]
 
-    )
 
+        if net_change < 0:
 
+            status = "🟢 Deflationär"
 
-    emission = 98815760.99
 
+        else:
 
+            status = "🔴 Inflationär"
 
-    net_change = emission - total_burn
 
 
+        return {
 
-    if net_change < 0:
+            "burn":
 
+            burn_data,
 
-        status = "🟢 Deflationär"
 
+            "emission":
 
+            emission,
 
-    else:
 
+            "net_change":
 
-        status = "🔴 Inflationär"
+            net_change,
 
 
+            "status":
 
+            status,
 
-    # einfacher Score
-    # später erweitern
 
+            "score":
 
-    if net_change < 0:
+            0
 
+        }
 
-        score = 80
 
 
-    else:
+    except Exception as e:
 
 
-        score = 40
+        print(
+            "Tokenomics Fehler:",
+            e
+        )
 
 
+        return {
 
+            "burn": {},
 
-    return {
+            "emission": 0,
 
+            "net_change": 0,
 
-        "burn": {
+            "status": "Fehler",
 
+            "score": 0
 
-            "address":
-            burned["address"],
-
-
-            "fee":
-            burned["fee"],
-
-
-            "auction":
-            burned["auction"],
-
-
-            "payback":
-            burned["payback"],
-
-
-            "total":
-            total_burn
-
-        },
-
-
-        "emission":
-
-        emission,
-
-
-
-        "net_change":
-
-        net_change,
-
-
-
-        "status":
-
-        status,
-
-
-
-        "score":
-
-        score
-
-    }
+        }
