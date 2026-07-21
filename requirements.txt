@@ -1,4 +1,4 @@
 python-dotenv
 requests
 schedule
-tweepy
+tweepy>=4.14.0
