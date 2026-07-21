@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 
 HISTORY_FILE = "dfi_history.json"
@@ -95,9 +96,21 @@ def get_history_story():
 
         return {
 
+            "id": 0,
+
             "title": "DeFiChain Update",
 
-            "text": "No history available."
+            "text": "No history available.",
+
+            "hashtags": "#DeFiChain #DFI",
+
+            "date": datetime.now().strftime(
+                "%d.%m.%Y %H:%M"
+            ),
+
+            "report": datetime.now().strftime(
+                "%H%M"
+            )
 
         }
 
@@ -137,21 +150,26 @@ def get_history_story():
 
 
 
- return {
+    return {
 
-    "id": next_story["id"],
+        "id": next_story["id"],
 
-    "title": next_story["title"],
+        "title": next_story["title"],
 
-    "text": next_story["text"],
+        "text": next_story["text"],
 
-    "hashtags": "#DeFiChain #DFI",
+        "hashtags": "#DeFiChain #DFI",
 
-    "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "date": datetime.now().strftime(
+            "%d.%m.%Y %H:%M"
+        ),
 
-    "report": datetime.now().strftime("%H%M")
+        "report": datetime.now().strftime(
+            "%H%M"
+        )
 
-}
+    }
+
 
 
 # ==============================
@@ -161,6 +179,7 @@ def get_history_story():
 def get_news():
 
     return get_history_story()
+
 
 
 # ==============================
