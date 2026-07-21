@@ -14,7 +14,7 @@ from utils import (
 
 
 # ==============================
-# X POSTS
+# X THREAD POSTS
 # ==============================
 
 
@@ -45,8 +45,13 @@ def send_x_thread(
         eth = market["ethereum"]
 
 
-        tweets = [
+        hashtags = news.get(
+            "hashtags",
+            "#DeFiChain #DFI"
+        )
 
+
+        tweets = [
 
 f"""🚀 DeFiChain $DFI Daily Update 🌍
 
@@ -112,9 +117,9 @@ f"""🌍 Crypto Market Comparison
 )}
 
 
-{comparison['vs_btc']}
+{comparison.get('vs_btc','')}
 
-{comparison['vs_eth']}
+{comparison.get('vs_eth','')}
 
 
 #Crypto""",
@@ -139,12 +144,18 @@ f"""📰 DeFiChain Daily Insight
 {news.get('text','')}
 
 
-{news.get('hashtags','#DeFiChain #DFI')}"""
+{hashtags}"""
 
         ]
 
 
-        for index, tweet in enumerate(tweets, start=1):
+        previous_tweet_id = None
+
+
+        for index, tweet in enumerate(
+            tweets,
+            start=1
+        ):
 
             print("----------------")
             print(
@@ -152,18 +163,38 @@ f"""📰 DeFiChain Daily Insight
             )
 
 
-            # X Limit Sicherheit
+            # X Zeichenlimit
             tweet = tweet[:280]
 
 
-            response = client.create_tweet(
-                text=tweet
-            )
+            if previous_tweet_id:
+
+
+                response = client.create_tweet(
+
+                    text=tweet,
+
+                    in_reply_to_tweet_id=previous_tweet_id
+
+                )
+
+
+            else:
+
+
+                response = client.create_tweet(
+
+                    text=tweet
+
+                )
+
+
+            previous_tweet_id = response.data["id"]
 
 
             print(
                 "X Tweet gesendet:",
-                response.data["id"]
+                previous_tweet_id
             )
 
 
