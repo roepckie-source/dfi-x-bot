@@ -114,7 +114,7 @@ def main():
 
 
     # ==========================
-    # Adapter alte Bots
+    # Adapter für alte Bots
     # ==========================
 
 
@@ -186,7 +186,13 @@ def main():
 
         "text":
 
-            "DeFiChain Daily Intelligence v4 Report"
+            "DeFiChain Daily Intelligence v4 Report",
+
+
+
+        "hashtags":
+
+            "#DeFiChain #DFI"
 
 
 
@@ -195,7 +201,7 @@ def main():
 
 
     # ==========================
-    # Report erstellen
+    # Report
     # ==========================
 
 
