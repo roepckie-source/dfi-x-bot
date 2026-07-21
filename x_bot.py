@@ -45,34 +45,16 @@ def send_x_thread(
         eth = market["ethereum"]
 
 
-        # Datum und Report
-        date = news.get(
-            "date",
-            ""
-        )
-
-        report = news.get(
-            "report",
-            ""
-        )
-
-
-        history_id = news.get(
-            "id",
-            0
-        )
-
-
         tweets = [
 
 
 f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
-📅 {date}
+📅 {news.get('date','')}
 
 
-🤖 Daily Report #{report}
+🤖 Daily Report #{news.get('report','')}
 
 
 🌐 Global Crypto Update:
@@ -82,29 +64,20 @@ f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 💰 Price:
 
-
 ${dfi.get('usd',0):.8f}
-
 
 🇪🇺 €{dfi.get('eur',0):.8f}
 
 
 {format_percent(
-    dfi.get(
-        'usd_24h_change',
-        0
-    )
+    dfi.get('usd_24h_change',0)
 )}
 
 
 📊 Market Cap:
 
-
 ${format_large_number(
-    dfi.get(
-        'usd_market_cap',
-        0
-    )
+    dfi.get('usd_market_cap',0)
 )}
 
 
@@ -115,44 +88,31 @@ ${format_large_number(
 f"""🌍 Crypto Market Comparison
 
 
-📅 {date}
+📅 {news.get('date','')}
 
 
 ₿ Bitcoin
 
-
 {format_percent(
-    btc.get(
-        'usd_24h_change',
-        0
-    )
+    btc.get('usd_24h_change',0)
 )}
 
 
 Ξ Ethereum
 
-
 {format_percent(
-    eth.get(
-        'usd_24h_change',
-        0
-    )
+    eth.get('usd_24h_change',0)
 )}
 
 
 🚀 DFI
 
-
 {format_percent(
-    dfi.get(
-        'usd_24h_change',
-        0
-    )
+    dfi.get('usd_24h_change',0)
 )}
 
 
 {comparison['vs_btc']}
-
 
 {comparison['vs_eth']}
 
@@ -164,74 +124,47 @@ f"""🌍 Crypto Market Comparison
 f"""📰 DeFiChain Daily Insight
 
 
-📅 {date}
+📅 {news.get('date','')}
 
 
-🤖 Report #{report}
+🤖 Report #{news.get('report','')}
 
 
-📚 History #{history_id}/100
+📚 History #{news.get('id',0)}/100
 
 
-{news.get(
-    'title',
-    'DeFiChain History'
-)}
+🎯 {news.get('title','')}
 
 
-{news.get(
-    'text',
-    ''
-)}
+{news.get('text','')}
 
 
-{news.get(
-    'hashtags',
-    '#DeFiChain #DFI'
-)}
+{news.get('hashtags','#DeFiChain #DFI')}"""
 
-
-#DeFiChain #DFI"""
         ]
 
 
+        for index, tweet in enumerate(tweets, start=1):
 
-        print("----------------")
-
-
-        for index, tweet in enumerate(
-            tweets,
-            start=1
-        ):
-
-
+            print("----------------")
             print(
                 f"Sende Tweet Nummer: {index}"
             )
 
 
-            # X Limit
+            # X Limit Sicherheit
             tweet = tweet[:280]
 
 
-            print("----------------")
-
-
             response = client.create_tweet(
-
                 text=tweet
-
             )
 
 
             print(
-
                 "X Tweet gesendet:",
-
                 response.data["id"]
-
             )
-
 
 
         print(
@@ -239,14 +172,9 @@ f"""📰 DeFiChain Daily Insight
         )
 
 
-
     except Exception as e:
 
-
         print(
-
             "X Fehler:",
-
             e
-
         )
