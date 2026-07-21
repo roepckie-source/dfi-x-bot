@@ -14,7 +14,7 @@ from utils import (
 
 
 # ==============================
-# X THREAD POSTS
+# X POSTS
 # ==============================
 
 
@@ -30,11 +30,8 @@ def send_x_thread(
         client = tweepy.Client(
 
             consumer_key=API_KEY,
-
             consumer_secret=API_SECRET,
-
             access_token=ACCESS_TOKEN,
-
             access_token_secret=ACCESS_TOKEN_SECRET
 
         )
@@ -149,9 +146,6 @@ f"""📰 DeFiChain Daily Insight
         ]
 
 
-        previous_tweet_id = None
-
-
         for index, tweet in enumerate(
             tweets,
             start=1
@@ -163,38 +157,18 @@ f"""📰 DeFiChain Daily Insight
             )
 
 
-            # X Zeichenlimit
+            # X Maximum 280 Zeichen
             tweet = tweet[:280]
 
 
-            if previous_tweet_id:
-
-
-                response = client.create_tweet(
-
-                    text=tweet,
-
-                    in_reply_to_tweet_id=previous_tweet_id
-
-                )
-
-
-            else:
-
-
-                response = client.create_tweet(
-
-                    text=tweet
-
-                )
-
-
-            previous_tweet_id = response.data["id"]
+            response = client.create_tweet(
+                text=tweet
+            )
 
 
             print(
                 "X Tweet gesendet:",
-                previous_tweet_id
+                response.data["id"]
             )
 
 
