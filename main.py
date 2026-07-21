@@ -9,6 +9,7 @@ from comparison import get_comparison
 from news import get_dfi_news
 
 from discord_bot import send_discord
+from telegram_bot import send_telegram
 from x_bot import send_x_thread
 
 
