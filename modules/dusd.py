@@ -1,21 +1,70 @@
 # ==============================
 # DeFiChain Daily Intelligence v4
-# DUSD Health Module
+# DUSD Health Engine
 # ==============================
 
 import requests
 
 
+def calculate_health(price):
+
+    """
+    DUSD Peg Bewertung
+    """
+
+
+    deviation = price - 1
+
+
+
+    if price >= 0.995:
+
+        status = "🟢 Peg stabil"
+        score = 95
+
+
+    elif price >= 0.97:
+
+        status = "🟡 leichte Abweichung"
+        score = 75
+
+
+    elif price >= 0.90:
+
+        status = "🟠 unter Peg"
+        score = 50
+
+
+    else:
+
+        status = "🔴 stark unter Peg"
+        score = 25
+
+
+
+    return {
+
+        "peg_difference":
+            round(deviation, 6),
+
+        "status":
+            status,
+
+        "health_score":
+            score
+    }
+
+
 
 def get_dusd_data():
+
 
     try:
 
 
-        # Vorbereitung:
-        # Hier kommt später die echte
-        # DeFiChain Ocean API Verbindung rein
-
+        # =================================
+        # Platzhalter für echte API
+        # =================================
 
         dusd_price = None
 
@@ -27,68 +76,36 @@ def get_dusd_data():
             return {
 
 
-                "price": "N/A",
+                "price":
+                    "N/A",
 
 
-                "peg_difference": "N/A",
+                "peg_difference":
+                    "N/A",
 
 
-                "status": "Keine Daten",
+                "status":
+                    "Keine Daten",
 
 
-                "health_score": 0,
+                "health_score":
+                    0,
 
 
-                "locked_dusd": "N/A",
+                "locked_dusd":
+                    "N/A",
 
 
-                "burned_dusd": "N/A"
+                "burned_dusd":
+                    "N/A"
 
             }
 
 
 
-        deviation = dusd_price - 1
-
-
-
-        # Bewertung
-
-
-        if dusd_price >= 0.99:
-
-
-            status = "🟢 Peg stabil"
-
-            score = 90
-
-
-
-        elif dusd_price >= 0.95:
-
-
-            status = "🟡 leichte Abweichung"
-
-            score = 70
-
-
-
-        elif dusd_price >= 0.90:
-
-
-            status = "🟠 Unter Peg"
-
-            score = 50
-
-
-
-        else:
-
-
-            status = "🔴 Stark unter Peg"
-
-            score = 25
-
+        health = calculate_health(
+            dusd_price
+        )
 
 
 
@@ -96,44 +113,21 @@ def get_dusd_data():
 
 
             "price":
-
-            round(
-                dusd_price,
-                6
-            ),
-
+                round(
+                    dusd_price,
+                    6
+                ),
 
 
-            "peg_difference":
-
-            round(
-                deviation,
-                6
-            ),
-
-
-
-            "status":
-
-            status,
-
-
-
-            "health_score":
-
-            score,
-
+            **health,
 
 
             "locked_dusd":
-
-            "N/A",
-
+                "N/A",
 
 
             "burned_dusd":
-
-            "N/A"
+                "N/A"
 
         }
 
@@ -151,21 +145,27 @@ def get_dusd_data():
         return {
 
 
-            "price": "N/A",
+            "price":
+                "N/A",
 
 
-            "peg_difference": "N/A",
+            "peg_difference":
+                "N/A",
 
 
-            "status": "Fehler",
+            "status":
+                "Fehler",
 
 
-            "health_score": 0,
+            "health_score":
+                0,
 
 
-            "locked_dusd": "N/A",
+            "locked_dusd":
+                "N/A",
 
 
-            "burned_dusd": "N/A"
+            "burned_dusd":
+                "N/A"
 
         }
