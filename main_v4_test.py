@@ -35,13 +35,11 @@ def build_report(
 
 💰 DFI Market
 
-Price:
 {market}
 
 
 🔥 Tokenomics
 
-Burn:
 {tokenomics}
 
 
@@ -82,6 +80,7 @@ def main():
 
     language = "de"
 
+
     print(
         f"🌍 Sprache: {language}"
     )
@@ -115,7 +114,7 @@ def main():
 
 
     # ==========================
-    # Adapter für alte Bots
+    # Adapter alte Bots
     # ==========================
 
 
@@ -125,6 +124,7 @@ def main():
         "existing_dfi":
 
             "N/A",
+
 
 
         "burned_dfi":
@@ -140,12 +140,14 @@ def main():
             ),
 
 
+
         "locked_dusd":
 
             dusd.get(
                 "locked_dusd",
                 "N/A"
             ),
+
 
 
         "excess_dfi":
@@ -172,12 +174,20 @@ def main():
 
 
 
+
     news = {
 
 
         "title":
 
-            "DeFiChain Intelligence v4"
+            "DeFiChain Intelligence v4",
+
+
+
+        "text":
+
+            "DeFiChain Daily Intelligence v4 Report"
+
 
 
     }
@@ -185,7 +195,7 @@ def main():
 
 
     # ==========================
-    # Report
+    # Report erstellen
     # ==========================
 
 
@@ -211,7 +221,9 @@ def main():
 
 
     send_telegram(
+
         report
+
     )
 
 
