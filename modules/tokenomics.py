@@ -1,106 +1,111 @@
-# ==============================
-# DeFiChain Daily Intelligence v4
+# ======================================
+# DeFiChain Intelligence v4
 # Tokenomics Engine
-# ==============================
-
-import requests
+# ======================================
 
 
 def get_tokenomics_data():
 
-    try:
 
-        # Vorbereitung für DeFiChain API
-        # echte Endpunkte werden jetzt eingebunden
+    # ==================================
+    # DFI Burn Daten
+    # ==================================
 
-
-        burn_data = {
-
-            "address": 0,
-
-            "fee": 0,
-
-            "auction": 0,
-
-            "payback": 0,
-
-            "total": 0
-
-        }
+    burned = {
 
 
-        emission = 0
+        "address":
+
+            158909764.56,
 
 
+        "fee":
 
-        net_change = (
-            emission
-            -
-            burn_data["total"]
-        )
+            993026.96,
 
 
+        "auction":
 
-        if net_change < 0:
-
-            status = "🟢 Deflationär"
+            3538007.76,
 
 
-        else:
+        "payback":
 
-            status = "🔴 Inflationär"
+            61705058.17,
+
+
+    }
 
 
 
-        return {
+    # ==================================
+    # Gesamter Burn
+    # ==================================
 
-            "burn":
+    burned["total"] = sum(
 
-            burn_data,
+        burned.values()
+
+    )
 
 
-            "emission":
+
+    # ==================================
+    # Emission
+    # ==================================
+
+    emission = 98815760.99
+
+
+
+    # ==================================
+    # Burn vs Emission
+    # ==================================
+
+    balance = (
+
+        burned["total"]
+
+        -
+
+        emission
+
+    )
+
+
+
+    if balance > 0:
+
+        status = "🟢 Inflation reduziert / deflationär"
+
+    else:
+
+        status = "🔴 Inflationär"
+
+
+
+    return {
+
+
+        "burn":
+
+            burned,
+
+
+        "emission":
 
             emission,
 
 
-            "net_change":
+        "burn_vs_emission":
 
-            net_change,
-
-
-            "status":
-
-            status,
+            balance,
 
 
-            "score":
+        "status":
 
-            0
-
-        }
+            status
 
 
 
-    except Exception as e:
-
-
-        print(
-            "Tokenomics Fehler:",
-            e
-        )
-
-
-        return {
-
-            "burn": {},
-
-            "emission": 0,
-
-            "net_change": 0,
-
-            "status": "Fehler",
-
-            "score": 0
-
-        }
+    }
