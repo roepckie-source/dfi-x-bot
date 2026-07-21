@@ -1,5 +1,4 @@
 import tweepy
-from datetime import datetime
 
 from config import (
     API_KEY,
@@ -15,29 +14,9 @@ from utils import (
 
 
 # ==============================
-# X TEXT SICHERHEIT
-# ==============================
-
-def clean_x_text(text, max_length=160):
-
-    if not text:
-        return ""
-
-    text = str(text)
-
-    text = (
-        text
-        .replace("\n\n\n", "\n\n")
-        .strip()
-    )
-
-    return text[:max_length]
-
-
-
-# ==============================
 # X POSTS
 # ==============================
+
 
 def send_x_thread(
     market,
@@ -62,34 +41,38 @@ def send_x_thread(
 
 
         dfi = market["dfi"]
-
         btc = market["bitcoin"]
-
         eth = market["ethereum"]
 
 
-        today = datetime.now().strftime(
-            "%d.%m.%Y %H:%M"
+        # Datum und Report
+        date = news.get(
+            "date",
+            ""
+        )
+
+        report = news.get(
+            "report",
+            ""
         )
 
 
-        report_id = datetime.now().strftime(
-            "%H%M"
+        history_id = news.get(
+            "id",
+            0
         )
-
 
 
         tweets = [
 
 
-
 f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
-📅 {today}
+📅 {date}
 
 
-🤖 Daily Report #{report_id}
+🤖 Daily Report #{report}
 
 
 🌐 Global Crypto Update:
@@ -99,20 +82,29 @@ f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 💰 Price:
 
+
 ${dfi.get('usd',0):.8f}
+
 
 🇪🇺 €{dfi.get('eur',0):.8f}
 
 
 {format_percent(
-    dfi.get('usd_24h_change',0)
+    dfi.get(
+        'usd_24h_change',
+        0
+    )
 )}
 
 
 📊 Market Cap:
 
+
 ${format_large_number(
-    dfi.get('usd_market_cap',0)
+    dfi.get(
+        'usd_market_cap',
+        0
+    )
 )}
 
 
@@ -120,35 +112,47 @@ ${format_large_number(
 
 
 
-
 f"""🌍 Crypto Market Comparison
 
 
-📅 {today}
+📅 {date}
 
 
 ₿ Bitcoin
 
+
 {format_percent(
-    btc.get('usd_24h_change',0)
+    btc.get(
+        'usd_24h_change',
+        0
+    )
 )}
 
 
 Ξ Ethereum
 
+
 {format_percent(
-    eth.get('usd_24h_change',0)
+    eth.get(
+        'usd_24h_change',
+        0
+    )
 )}
 
 
 🚀 DFI
 
+
 {format_percent(
-    dfi.get('usd_24h_change',0)
+    dfi.get(
+        'usd_24h_change',
+        0
+    )
 )}
 
 
 {comparison['vs_btc']}
+
 
 {comparison['vs_eth']}
 
@@ -157,24 +161,33 @@ f"""🌍 Crypto Market Comparison
 
 
 
-
 f"""📰 DeFiChain Daily Insight
 
 
-📅 {today}
+📅 {date}
 
 
-🤖 Report #{report_id}
+🤖 Report #{report}
 
 
-{clean_x_text(
-    news.get('title','DeFiChain Update')
+📚 History #{history_id}/100
+
+
+{news.get(
+    'title',
+    'DeFiChain History'
 )}
 
 
-{clean_x_text(
-    news.get('text','Daily DeFiChain Report'),
-    100
+{news.get(
+    'text',
+    ''
+)}
+
+
+{news.get(
+    'hashtags',
+    '#DeFiChain #DFI'
 )}
 
 
@@ -183,19 +196,24 @@ f"""📰 DeFiChain Daily Insight
 
 
 
-        # ==============================
-        # POSTS SENDEN
-        # ==============================
-
-        for i, tweet in enumerate(tweets, start=1):
+        print("----------------")
 
 
+        for index, tweet in enumerate(
+            tweets,
+            start=1
+        ):
+
+
+            print(
+                f"Sende Tweet Nummer: {index}"
+            )
+
+
+            # X Limit
             tweet = tweet[:280]
 
 
-            print("----------------")
-            print("Sende Tweet Nummer:", i)
-            print(tweet)
             print("----------------")
 
 
@@ -217,9 +235,7 @@ f"""📰 DeFiChain Daily Insight
 
 
         print(
-
             "X Posts erfolgreich gesendet"
-
         )
 
 
