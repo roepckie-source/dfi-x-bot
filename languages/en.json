@@ -1,1 +1,16 @@
-
+{
+  "title": "DeFiChain Daily Intelligence",
+  "market": "Market",
+  "price": "Price",
+  "change": "Change",
+  "market_cap": "Market Cap",
+  "tokenomics": "Tokenomics",
+  "burn": "Burn",
+  "emission": "Emission",
+  "net_burn": "Net Burn",
+  "dusd_health": "DUSD Health",
+  "community": "Community Fund",
+  "network": "Network",
+  "block": "Block Height",
+  "insight": "Daily Insight"
+}
