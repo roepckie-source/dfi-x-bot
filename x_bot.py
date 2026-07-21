@@ -14,7 +14,7 @@ from utils import (
 
 
 # ==============================
-# X POSTS
+# X EINZELPOST
 # ==============================
 
 def send_x_thread(
@@ -37,31 +37,16 @@ def send_x_thread(
 
 
         dfi = market["dfi"]
-        btc = market["bitcoin"]
-        eth = market["ethereum"]
 
 
-        hashtags = news.get(
-            "hashtags",
-            "#DeFiChain #DFI"
-        )
-
-
-        tweets = [
-
-
-f"""🚀 DeFiChain $DFI Daily Update 🌍
+        tweet = f"""🚀 DeFiChain $DFI Daily Update 🌍
 
 
 📅 {news.get('date','')}
 
+🤖 Report #{news.get('report','')}
 
-🤖 Daily Report #{news.get('report','')}
-
-
-🌐 Global Crypto Update:
-
-🇬🇧 🇨🇳 🇮🇳 🇸🇦 🇮🇩 🇪🇸 🇫🇷
+📚 History #{news.get('id',0)}/100
 
 
 💰 Price:
@@ -83,118 +68,51 @@ ${format_large_number(
 )}
 
 
-#DeFiChain #DFI""",
-
-
-
-f"""🌍 Crypto Market Comparison
-
-
-📅 {news.get('date','')}
-
-
-₿ Bitcoin
-
-{format_percent(
-    btc.get('usd_24h_change',0)
-)}
-
-
-Ξ Ethereum
-
-{format_percent(
-    eth.get('usd_24h_change',0)
-)}
-
-
-🚀 DFI
-
-{format_percent(
-    dfi.get('usd_24h_change',0)
-)}
-
-
-{comparison.get('vs_btc','')}
-
-{comparison.get('vs_eth','')}
-
-
-#Crypto""",
-
-
-
-f"""📰 DeFiChain Daily Insight
-
-
-📅 {news.get('date','')}
-
-
-🤖 Report #{news.get('report','')}
-
-
-📚 History #{news.get('id',0)}/100
-
-
 🎯 {news.get('title','')}
 
 
 {news.get('text','')}
 
 
-{hashtags}"""
-
-        ]
-
-
-        for index, tweet in enumerate(
-            tweets,
-            start=1
-        ):
-
-            print("----------------")
-
-            print(
-                f"Sende Tweet Nummer: {index}"
-            )
+#DeFiChain #DFI
+"""
 
 
-            # X Maximum 280 Zeichen
+        # X Limit Sicherheit
 
-            tweet = tweet[:280]
-
-
-            response = client.create_tweet(
-                text=tweet
-            )
+        tweet = tweet[:280]
 
 
-            print(
-                "X Tweet gesendet:",
-                response.data["id"]
-            )
+        print("----------------")
+        print("Sende X Daily Update")
+
+
+        response = client.create_tweet(
+            text=tweet
+        )
 
 
         print(
-            "X Posts erfolgreich gesendet"
+            "X Tweet gesendet:",
+            response.data["id"]
+        )
+
+
+        print(
+            "X Post erfolgreich"
         )
 
 
     except Exception as e:
 
+
         error_message = str(e)
 
 
-        if "daily post limit" in error_message.lower():
+        if "403" in error_message:
 
             print(
-                "⚠️ X Tageslimit erreicht - Discord läuft weiter"
-            )
-
-
-        elif "403" in error_message:
-
-            print(
-                "⚠️ X 403 Fehler - Details:"
+                "⚠️ X Posting aktuell nicht möglich"
             )
 
             print(
