@@ -137,16 +137,21 @@ def get_history_story():
 
 
 
-    return {
+ return {
 
-        "title": next_story["title"],
+    "id": next_story["id"],
 
-        "text": next_story["text"],
+    "title": next_story["title"],
 
-        "hashtags": "#DeFiChain #DFI"
+    "text": next_story["text"],
 
-    }
+    "hashtags": "#DeFiChain #DFI",
 
+    "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
+
+    "report": datetime.now().strftime("%H%M")
+
+}
 
 
 # ==============================
