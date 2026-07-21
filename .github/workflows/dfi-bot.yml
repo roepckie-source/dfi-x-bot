@@ -1,33 +1,93 @@
-name: DFI Discord + X Bot
+name: DeFiChain Bot
+
 
 on:
-  schedule:
-    - cron: "0 21 * * *"   # 23:00 Uhr deutsche Zeit im Sommer (UTC+2)
+
   workflow_dispatch:
 
+  schedule:
+
+    # täglich 23:00 Uhr deutscher Zeit (UTC+2 Sommerzeit)
+    - cron: "0 21 * * *"
+
+
+
+# Erlaubt dem Bot, news_state.json zurückzuschreiben
+permissions:
+
+  contents: write
+
+
+
 jobs:
+
   run-bot:
+
     runs-on: ubuntu-latest
 
+
     steps:
-      - name: Repository laden
+
+
+      # Repository laden
+      - name: Checkout repository
+
         uses: actions/checkout@v4
 
-      - name: Python einrichten
+
+
+      # Python installieren
+      - name: Setup Python
+
         uses: actions/setup-python@v5
+
         with:
+
           python-version: "3.12"
 
-      - name: Abhängigkeiten installieren
+
+
+      # Abhängigkeiten installieren
+      - name: Install dependencies
+
         run: |
+
           pip install -r requirements.txt
 
-      - name: Bot starten
+
+
+      # Bot starten
+      - name: Run DeFiChain Bot
+
         env:
+
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
           API_KEY: ${{ secrets.API_KEY }}
+
           API_SECRET: ${{ secrets.API_SECRET }}
+
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+
         run: |
+
           python main.py
+
+
+
+      # History-Zähler speichern
+      - name: Save news state
+
+        run: |
+
+          git config --global user.name "DeFiChain Bot"
+
+          git config --global user.email "dfi-bot@github.com"
+
+          git add news_state.json
+
+          git commit -m "Update DFI history state" || echo "No changes"
+
+          git push
