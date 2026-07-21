@@ -158,7 +158,7 @@ f"""📰 DeFiChain Daily Insight
             )
 
 
-            # X Limit 280 Zeichen
+            # X Maximum 280 Zeichen
 
             tweet = tweet[:280]
 
@@ -196,7 +196,15 @@ f"""📰 DeFiChain Daily Insight
 
 
             print(
-                "⚠️ X Posting nicht möglich - Discord läuft weiter"
+                "⚠️ X 403 Fehler - Details:"
+            )
+
+            print(
+                error_message
+            )
+
+            print(
+                "Discord läuft weiter"
             )
 
 
