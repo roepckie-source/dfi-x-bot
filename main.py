@@ -16,7 +16,6 @@ from x_bot import send_x_thread
 
 def main():
 
-
     print(
         "🚀 DeFiChain Bot startet..."
     )
@@ -49,23 +48,17 @@ def main():
     # ==========================
 
     send_discord(
-
         market,
-
         network,
-
         comparison,
-
         news
-
     )
 
 
 
     # ==========================
-    # Telegram Premium Report
+    # Telegram Daten vorbereiten
     # ==========================
-
 
     dfi = market.get(
         "dfi",
@@ -83,9 +76,28 @@ def main():
     )
 
 
-    # DFI Signal
+    burned = network.get(
+        "burned_dfi",
+        {}
+    )
+
+
+
+    # ==========================
+    # Signale
+    # ==========================
 
     dfi_change = dfi.get(
+        "usd_24h_change",
+        0
+    )
+
+    btc_change = btc.get(
+        "usd_24h_change",
+        0
+    )
+
+    eth_change = eth.get(
         "usd_24h_change",
         0
     )
@@ -97,31 +109,11 @@ def main():
         else "🔴"
     )
 
-
-
-    # BTC Signal
-
-    btc_change = btc.get(
-        "usd_24h_change",
-        0
-    )
-
-
     btc_signal = (
         "🟢"
         if btc_change >= 0
         else "🔴"
     )
-
-
-
-    # ETH Signal
-
-    eth_change = eth.get(
-        "usd_24h_change",
-        0
-    )
-
 
     eth_signal = (
         "🟢"
@@ -130,6 +122,77 @@ def main():
     )
 
 
+
+    # ==========================
+    # Network Format
+    # ==========================
+
+    network_message = f"""
+🌐 <b>Network & Tokenomics</b>
+
+
+🪙 <b>Existing DFI</b>
+
+{network.get('existing_dfi','N/A')}
+
+
+
+━━━━━━━━━━━━━━
+
+
+🔥 <b>Burned DFI</b>
+
+
+🏠 Address Burn
+
+{burned.get('address',0):,.2f} DFI
+
+
+💸 Fee Burn
+
+{burned.get('fee',0):,.2f} DFI
+
+
+🔨 Auction Burn
+
+{burned.get('auction',0):,.2f} DFI
+
+
+↩️ Payback
+
+{burned.get('payback',0):,.2f} DFI
+
+
+📈 Emission
+
+{burned.get('emission',0):,.2f} DFI
+
+
+🔥 <b>Total Burned</b>
+
+{burned.get('total',0):,.2f} DFI
+
+
+
+━━━━━━━━━━━━━━
+
+
+🔒 <b>Locked DUSD</b>
+
+{network.get('locked_dusd','N/A')}
+
+
+
+⚖️ <b>Excess DFI</b>
+
+{network.get('excess_dfi','N/A')}
+"""
+
+
+
+    # ==========================
+    # Telegram Nachricht
+    # ==========================
 
     telegram_message = f"""
 🚀 <b>DeFiChain Daily Update</b>
@@ -151,22 +214,17 @@ def main():
 
 💎 Price
 
-
 🇺🇸 ${dfi.get('usd',0):.8f}
 
 🇪🇺 €{dfi.get('eur',0):.8f}
 
 
-
 📊 24h Change
-
 
 {dfi_signal} {dfi_change:.2f}%
 
 
-
 🏦 Market Cap
-
 
 ${dfi.get('usd_market_cap',0):,.0f}
 
@@ -178,29 +236,21 @@ ${dfi.get('usd_market_cap',0):,.0f}
 🌍 <b>Crypto Market</b>
 
 
-
 ₿ Bitcoin
-
 
 {btc_signal} {btc_change:.2f}%
 
 
-
 Ξ Ethereum
 
-
-{eth_signal} {eth_change:.2f}%
+{eth_signal} {eth_change:.2f}
 
 
 
 ━━━━━━━━━━━━━━
 
 
-🌐 <b>Network</b>
-
-
-
-{network}
+{network_message}
 
 
 
@@ -210,9 +260,7 @@ ${dfi.get('usd_market_cap',0):,.0f}
 📰 <b>Daily Insight</b>
 
 
-
 🎯 <b>{news.get('title','')}</b>
-
 
 
 {news.get('text','')}
@@ -223,7 +271,6 @@ ${dfi.get('usd_market_cap',0):,.0f}
 
 
 🪙 <b>DUSD Status</b>
-
 
 Coming soon...
 
@@ -238,27 +285,20 @@ Coming soon...
 
 
     send_telegram(
-
         telegram_message
-
     )
 
 
 
     # ==========================
-    # X Thread
+    # X
     # ==========================
 
     send_x_thread(
-
         market,
-
         network,
-
         comparison,
-
         news
-
     )
 
 
