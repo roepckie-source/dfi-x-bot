@@ -152,12 +152,14 @@ f"""📰 DeFiChain Daily Insight
         ):
 
             print("----------------")
+
             print(
                 f"Sende Tweet Nummer: {index}"
             )
 
 
-            # X Maximum 280 Zeichen
+            # X Limit 280 Zeichen
+
             tweet = tweet[:280]
 
 
@@ -177,28 +179,31 @@ f"""📰 DeFiChain Daily Insight
         )
 
 
- except Exception as e:
-
-    error_message = str(e)
+    except Exception as e:
 
 
-    if "daily post limit" in error_message.lower():
-
-        print(
-            "⚠️ X Tageslimit erreicht - Discord läuft weiter"
-        )
+        error_message = str(e)
 
 
-    elif "403" in error_message:
+        if "daily post limit" in error_message.lower():
 
-        print(
-            "⚠️ X Posting nicht möglich - Discord läuft weiter"
-        )
+            print(
+                "⚠️ X Tageslimit erreicht - Discord läuft weiter"
+            )
 
 
-    else:
+        elif "403" in error_message:
 
-        print(
-            "⚠️ X Fehler:",
-            error_message
-        ) 
+
+            print(
+                "⚠️ X Posting nicht möglich - Discord läuft weiter"
+            )
+
+
+        else:
+
+
+            print(
+                "⚠️ X Fehler:",
+                error_message
+            )
