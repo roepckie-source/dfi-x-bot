@@ -7,46 +7,96 @@
   {
     "id": 2,
     "title": "Why Bitcoin?",
-    "text": "DeFiChain was designed with a strong connection to Bitcoin. The idea was to use Bitcoin as a foundation while enabling decentralized finance features."
+    "text": "DeFiChain was designed with a strong connection to Bitcoin. The idea was to build decentralized finance while using Bitcoin as a foundation for security and trust."
   },
   {
     "id": 3,
     "title": "What is DFI?",
-    "text": "DFI is the native token of DeFiChain. It powers governance, staking, rewards and many functions inside the ecosystem."
+    "text": "DFI is the native token of DeFiChain. It is used for governance, staking, rewards and many important functions inside the ecosystem."
   },
   {
     "id": 4,
     "title": "The DeFiChain DEX",
-    "text": "The decentralized exchange allows users to trade digital assets without traditional intermediaries while staying within the DeFiChain ecosystem."
+    "text": "The decentralized exchange allows users to trade assets without traditional intermediaries. It became one of the central components of the DeFiChain ecosystem."
   },
   {
     "id": 5,
     "title": "Community Governance",
-    "text": "DeFiChain uses community voting to decide important changes. DFIPs allow the community to propose and vote on improvements."
+    "text": "DeFiChain gives the community an active role. Through proposals and voting, users can participate in decisions about the future development of the blockchain."
   },
   {
     "id": 6,
     "title": "The Community Fund",
-    "text": "The Community Fund supports projects, development and initiatives that help grow the DeFiChain ecosystem."
+    "text": "The Community Fund was created to support development, projects and initiatives that strengthen the DeFiChain ecosystem."
   },
   {
     "id": 7,
-    "title": "dTokens",
-    "text": "DeFiChain introduced dTokens as blockchain-based assets designed to represent different markets and financial instruments."
+    "title": "The Idea Behind dTokens",
+    "text": "DeFiChain introduced dTokens with the vision of creating blockchain-based representations of different assets and markets."
   },
   {
     "id": 8,
     "title": "Staking on DeFiChain",
-    "text": "Users can participate in network security and receive rewards through staking mechanisms."
+    "text": "Staking helps secure the network while allowing participants to earn rewards. It is an important part of the DeFiChain ecosystem."
   },
   {
     "id": 9,
-    "title": "DeFiChain and Decentralization",
-    "text": "Decentralization is a core principle of DeFiChain, giving the community an important role in the future development."
+    "title": "Decentralization First",
+    "text": "A core idea of DeFiChain is decentralization. The community and network participants play an important role in the evolution of the project."
   },
   {
     "id": 10,
     "title": "The Vision of DeFiChain",
-    "text": "The long-term vision is an open financial ecosystem where users can access decentralized services globally."
+    "text": "The long-term vision is an open financial ecosystem where people worldwide can access decentralized financial services."
+  },
+  {
+    "id": 11,
+    "title": "A Blockchain Built for DeFi",
+    "text": "Unlike general-purpose blockchains, DeFiChain was created specifically for decentralized finance applications and financial services."
+  },
+  {
+    "id": 12,
+    "title": "Masternodes and Network Security",
+    "text": "Masternodes play an important role in maintaining the DeFiChain network and supporting decentralization."
+  },
+  {
+    "id": 13,
+    "title": "Atomic Swaps",
+    "text": "Atomic swaps allow decentralized exchanges between different blockchain assets without relying on centralized platforms."
+  },
+  {
+    "id": 14,
+    "title": "The Importance of Community",
+    "text": "The DeFiChain community has always been one of its strongest foundations, contributing ideas, proposals and development."
+  },
+  {
+    "id": 15,
+    "title": "DeFiChain and Financial Freedom",
+    "text": "The project follows the idea that decentralized technology can create more open and accessible financial opportunities."
+  },
+  {
+    "id": 16,
+    "title": "Learning From Challenges",
+    "text": "Every blockchain project faces challenges. DeFiChain continues to evolve through community feedback and improvements."
+  },
+  {
+    "id": 17,
+    "title": "The Role of DFIPs",
+    "text": "DFIPs allow the community to propose improvements and changes, creating a decentralized decision-making process."
+  },
+  {
+    "id": 18,
+    "title": "Building an Ecosystem",
+    "text": "A successful blockchain needs developers, users and community members. DeFiChain focuses on growing a complete ecosystem."
+  },
+  {
+    "id": 19,
+    "title": "DeFiChain Around the World",
+    "text": "The DeFiChain community includes members from many countries who share ideas and contribute to the ecosystem."
+  },
+  {
+    "id": 20,
+    "title": "The Future of DeFiChain",
+    "text": "The future depends on innovation, community participation and continued development of decentralized finance solutions."
   }
 ]
