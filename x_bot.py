@@ -177,9 +177,28 @@ f"""📰 DeFiChain Daily Insight
         )
 
 
-    except Exception as e:
+ except Exception as e:
+
+    error_message = str(e)
+
+
+    if "daily post limit" in error_message.lower():
 
         print(
-            "X Fehler:",
-            e
+            "⚠️ X Tageslimit erreicht - Discord läuft weiter"
         )
+
+
+    elif "403" in error_message:
+
+        print(
+            "⚠️ X Posting nicht möglich - Discord läuft weiter"
+        )
+
+
+    else:
+
+        print(
+            "⚠️ X Fehler:",
+            error_message
+        ) 
