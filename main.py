@@ -63,8 +63,25 @@ def main():
 
 
     # ==========================
-    # Telegram
+    # Telegram komplett
     # ==========================
+
+
+    dfi = market.get(
+        "dfi",
+        {}
+    )
+
+    btc = market.get(
+        "bitcoin",
+        {}
+    )
+
+    eth = market.get(
+        "ethereum",
+        {}
+    )
+
 
     telegram_message = f"""
 🚀 <b>DeFiChain Daily Update</b>
@@ -72,17 +89,73 @@ def main():
 
 📅 {news.get('date','')}
 
-
 🤖 Report #{news.get('report','')}
 
-
 📚 History #{news.get('id',0)}/100
+
+
+━━━━━━━━━━━━━━
+
+
+💰 <b>DFI Price</b>
+
+
+🇺🇸 ${dfi.get('usd',0):.8f}
+
+🇪🇺 €{dfi.get('eur',0):.8f}
+
+
+
+📊 <b>24h Change</b>
+
+{dfi.get('usd_24h_change',0):.2f}%
+
+
+
+🏦 <b>Market Cap</b>
+
+${dfi.get('usd_market_cap',0):,.0f}
+
+
+
+━━━━━━━━━━━━━━
+
+
+₿ <b>Bitcoin</b>
+
+{btc.get('usd_24h_change',0):.2f}%
+
+
+
+Ξ <b>Ethereum</b>
+
+{eth.get('usd_24h_change',0):.2f}%
+
+
+
+━━━━━━━━━━━━━━
+
+
+🌐 <b>Network</b>
+
+{network}
+
+
+
+━━━━━━━━━━━━━━
+
+
+📰 <b>Daily Insight</b>
 
 
 🎯 <b>{news.get('title','')}</b>
 
 
 {news.get('text','')}
+
+
+
+━━━━━━━━━━━━━━
 
 
 #DeFiChain #DFI
