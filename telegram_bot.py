@@ -10,13 +10,6 @@ TELEGRAM_TOKEN = os.environ.get(
     "TELEGRAM_TOKEN"
 )
 
-print(
-    "Telegram Token vorhanden:",
-    bool(TELEGRAM_TOKEN),
-    "Länge:",
-    len(TELEGRAM_TOKEN) if TELEGRAM_TOKEN else 0
-)
-
 TELEGRAM_CHAT_ID = os.environ.get(
     "TELEGRAM_CHAT_ID"
 )
