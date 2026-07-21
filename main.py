@@ -1,5 +1,5 @@
 # ==============================
-# DeFiChain Daily Bot v2
+# DeFiChain Daily Bot v3
 # ==============================
 
 
@@ -16,7 +16,9 @@ from x_bot import send_x_thread
 
 def main():
 
-    print("🚀 DeFiChain Bot startet...")
+    print(
+        "🚀 DeFiChain Bot startet..."
+    )
 
 
 
@@ -56,7 +58,7 @@ def main():
 
 
     # ==========================
-    # Markt Daten
+    # Market Daten
     # ==========================
 
     dfi = market.get(
@@ -64,10 +66,12 @@ def main():
         {}
     )
 
+
     btc = market.get(
         "bitcoin",
         {}
     )
+
 
     eth = market.get(
         "ethereum",
@@ -85,10 +89,12 @@ def main():
         0
     )
 
+
     btc_change = btc.get(
         "usd_24h_change",
         0
     )
+
 
     eth_change = eth.get(
         "usd_24h_change",
@@ -96,16 +102,31 @@ def main():
     )
 
 
-    dfi_signal = "🟢" if dfi_change >= 0 else "🔴"
 
-    btc_signal = "🟢" if btc_change >= 0 else "🔴"
+    dfi_signal = (
+        "🟢"
+        if dfi_change >= 0
+        else "🔴"
+    )
 
-    eth_signal = "🟢" if eth_change >= 0 else "🔴"
+
+    btc_signal = (
+        "🟢"
+        if btc_change >= 0
+        else "🔴"
+    )
+
+
+    eth_signal = (
+        "🟢"
+        if eth_change >= 0
+        else "🔴"
+    )
 
 
 
     # ==========================
-    # Burn / Emission
+    # Burn Analyse
     # ==========================
 
     burned = network.get(
@@ -147,7 +168,7 @@ def main():
 
 
     # ==========================
-    # DUSD Daten
+    # DUSD Health
     # ==========================
 
     dusd = network.get(
@@ -158,7 +179,7 @@ def main():
 
 
     # ==========================
-    # Network Bericht
+    # Network Report
     # ==========================
 
     network_message = f"""
@@ -212,7 +233,7 @@ def main():
 
 
 
-⚖️ Burn vs Emission
+⚖️ <b>Burn vs Emission</b>
 
 
 {token_status}
@@ -222,7 +243,7 @@ def main():
 ━━━━━━━━━━━━━━
 
 
-🪙 <b>DUSD Status</b>
+🪙 <b>DUSD Health Report</b>
 
 
 💵 Price
@@ -230,9 +251,11 @@ def main():
 ${dusd.get('price','N/A')}
 
 
-⚖️ Peg Difference
+
+📉 Peg Deviation
 
 {dusd.get('peg_difference','N/A')}
+
 
 
 📊 Status
@@ -241,9 +264,21 @@ ${dusd.get('price','N/A')}
 
 
 
+❤️ Health Score
+
+{dusd.get('health_score',0)}/100
+
+
+
 🔒 Locked DUSD
 
-{network.get('locked_dusd','N/A')}
+{dusd.get('locked','N/A')}
+
+
+
+🔥 DUSD Burn
+
+{dusd.get('burned','N/A')}
 
 
 
@@ -258,7 +293,7 @@ ${dusd.get('price','N/A')}
 
 
     # ==========================
-    # Telegram Nachricht
+    # Telegram Report
     # ==========================
 
     telegram_message = f"""
@@ -267,7 +302,9 @@ ${dusd.get('price','N/A')}
 
 📅 {news.get('date','')}
 
+
 🤖 Report #{news.get('report','')}
+
 
 📚 History #{news.get('id',0)}/100
 
@@ -279,9 +316,12 @@ ${dusd.get('price','N/A')}
 💰 <b>DFI Market</b>
 
 
+
 💎 Price
 
+
 🇺🇸 ${dfi.get('usd',0):.8f}
+
 
 🇪🇺 €{dfi.get('eur',0):.8f}
 
@@ -289,11 +329,13 @@ ${dusd.get('price','N/A')}
 
 📊 24h Change
 
+
 {dfi_signal} {dfi_change:.2f}%
 
 
 
 🏦 Market Cap
+
 
 ${dfi.get('usd_market_cap',0):,.0f}
 
@@ -305,9 +347,11 @@ ${dfi.get('usd_market_cap',0):,.0f}
 🌍 <b>Crypto Market</b>
 
 
+
 ₿ Bitcoin
 
 {btc_signal} {btc_change:.2f}%
+
 
 
 Ξ Ethereum
@@ -329,7 +373,9 @@ ${dfi.get('usd_market_cap',0):,.0f}
 📰 <b>Daily Insight</b>
 
 
+
 🎯 <b>{news.get('title','')}</b>
+
 
 
 {news.get('text','')}
@@ -363,7 +409,9 @@ ${dfi.get('usd_market_cap',0):,.0f}
 
 
 
-    print("✅ Bot fertig")
+    print(
+        "✅ Bot fertig"
+    )
 
 
 
