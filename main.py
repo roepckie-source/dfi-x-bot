@@ -28,9 +28,7 @@ def main():
 
     market = get_market_data()
 
-
     network = get_network_data()
-
 
     news = get_dfi_news()
 
@@ -65,6 +63,41 @@ def main():
 
 
     # ==========================
+    # Telegram
+    # ==========================
+
+    telegram_message = f"""
+🚀 <b>DeFiChain Daily Update</b>
+
+
+📅 {news.get('date','')}
+
+
+🤖 Report #{news.get('report','')}
+
+
+📚 History #{news.get('id',0)}/100
+
+
+🎯 <b>{news.get('title','')}</b>
+
+
+{news.get('text','')}
+
+
+#DeFiChain #DFI
+"""
+
+
+    send_telegram(
+
+        telegram_message
+
+    )
+
+
+
+    # ==========================
     # X Thread
     # ==========================
 
@@ -79,6 +112,7 @@ def main():
         news
 
     )
+
 
 
     print(
