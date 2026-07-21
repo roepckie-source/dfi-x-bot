@@ -1,5 +1,5 @@
 # ==============================
-# DeFiChain Network Data v2
+# DeFiChain Network Data v3
 # ==============================
 
 import requests
@@ -7,55 +7,57 @@ import requests
 
 
 # ==============================
-# DUSD Daten
+# DUSD Health Report
 # ==============================
 
 def get_dusd_data():
 
     try:
 
-        url = "https://api.coingecko.com/api/v3/simple/price"
-
-
-        params = {
-
-            "ids": "defichain-usd",
-
-            "vs_currencies": "usd"
-
-        }
+        # DUSD Daten über Ocean API
+        url = (
+            "https://ocean.defichain.com/v0/mainnet/poolpairs"
+        )
 
 
         response = requests.get(
-
             url,
-
-            params=params,
-
             timeout=10
-
         )
 
 
         data = response.json()
 
 
-        price = data.get(
-
-            "defichain-usd",
-
-            {}
-
-        ).get(
-
-            "usd"
-
-        )
+        dusd_price = None
 
 
-        # Keine Daten vorhanden
+        # Suche DUSD Pool
 
-        if price is None:
+        if "poolPairs" in data:
+
+            for pool in data["poolPairs"]:
+
+                symbol = pool.get(
+                    "symbol",
+                    ""
+                )
+
+
+                if "DUSD" in symbol:
+
+                    dusd_price = pool.get(
+                        "priceRatio",
+                        {}
+                    ).get(
+                        "ab"
+                    )
+
+                    break
+
+
+
+        if dusd_price is None:
 
 
             return {
@@ -64,27 +66,53 @@ def get_dusd_data():
 
                 "peg_difference": "N/A",
 
-                "status": "Keine Daten"
+                "status": "Keine Daten",
+
+                "health_score": 0,
+
+                "locked": "N/A",
+
+                "burned": "N/A"
 
             }
 
 
 
-        difference = price - 1
+        dusd_price = float(
+            dusd_price
+        )
+
+
+        deviation = dusd_price - 1
 
 
 
-        if price >= 0.99:
+        # Peg Bewertung
+
+        if dusd_price >= 0.99:
 
 
             status = "🟢 Peg stabil"
 
+            score = 90
 
 
-        elif price >= 0.90:
+
+        elif dusd_price >= 0.95:
 
 
-            status = "🟡 Unter Peg"
+            status = "🟡 leichte Abweichung"
+
+            score = 70
+
+
+
+        elif dusd_price >= 0.90:
+
+
+            status = "🟠 Unter Peg"
+
+            score = 50
 
 
 
@@ -93,6 +121,8 @@ def get_dusd_data():
 
             status = "🔴 Stark unter Peg"
 
+            score = 25
+
 
 
 
@@ -100,25 +130,27 @@ def get_dusd_data():
 
 
             "price": round(
-
-                price,
-
+                dusd_price,
                 6
-
             ),
 
 
             "peg_difference": round(
-
-                difference,
-
+                deviation,
                 6
-
             ),
 
 
-            "status": status
+            "status": status,
 
+
+            "health_score": score,
+
+
+            "locked": "N/A",
+
+
+            "burned": "N/A"
 
         }
 
@@ -128,24 +160,27 @@ def get_dusd_data():
 
 
         print(
-
             "DUSD Fehler:",
-
             e
-
         )
 
 
         return {
 
-
             "price": "N/A",
 
             "peg_difference": "N/A",
 
-            "status": "Fehler"
+            "status": "Fehler",
+
+            "health_score": 0,
+
+            "locked": "N/A",
+
+            "burned": "N/A"
 
         }
+
 
 
 
@@ -156,10 +191,6 @@ def get_dusd_data():
 
 def get_network_data():
 
-
-    # ==========================
-    # Burn / Emission Daten
-    # ==========================
 
     network = {
 
@@ -173,18 +204,13 @@ def get_network_data():
 
             "address": 158909764.56224337,
 
-
             "fee": 993026.96,
-
 
             "auction": 3538007.7617579,
 
-
             "payback": 61705058.1749106,
 
-
             "emission": 98815760.9869514,
-
 
             "total": 321435128.08025473
 
@@ -195,17 +221,13 @@ def get_network_data():
         "locked_dusd": "N/A",
 
 
-
         "excess_dfi": "N/A"
-
 
     }
 
 
 
-    # ==========================
-    # DUSD hinzufügen
-    # ==========================
+    # DUSD Health anhängen
 
     network["dusd"] = get_dusd_data()
 
