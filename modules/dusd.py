@@ -7,7 +7,6 @@
 import requests
 
 
-
 COINGECKO_URL = (
     "https://api.coingecko.com/api/v3/simple/price"
 )
@@ -20,11 +19,9 @@ def get_dusd_price():
 
         params = {
 
-            "ids":
-            "defichain-dusd",
+            "ids": "defichain-dusd",
 
-            "vs_currencies":
-            "usd"
+            "vs_currencies": "usd"
 
         }
 
@@ -70,11 +67,7 @@ def get_dusd_price():
 
 
 
-def calculate_health_score(
-
-        price
-
-):
+def calculate_health_score(price):
 
 
     if not price:
@@ -88,11 +81,9 @@ def calculate_health_score(
     )
 
 
-
     score = 100 - (
         deviation * 100
     )
-
 
 
     if score < 0:
@@ -100,10 +91,7 @@ def calculate_health_score(
         score = 0
 
 
-
-    return round(
-        score
-    )
+    return round(score)
 
 
 
@@ -127,26 +115,17 @@ def get_dusd_health():
 
 
 
-        if abs(
-            peg_difference
-        ) < 0.01:
-
+        if abs(peg_difference) < 0.01:
 
             status = "🟢 Stable"
 
 
-
-        elif abs(
-            peg_difference
-        ) < 0.05:
-
+        elif abs(peg_difference) < 0.05:
 
             status = "🟡 Beobachten"
 
 
-
         else:
-
 
             status = "🔴 Stark unter Peg"
 
@@ -158,6 +137,7 @@ def get_dusd_health():
         peg_difference = "N/A"
 
         status = "Keine Daten"
+
 
 
 
@@ -218,3 +198,17 @@ def get_dusd_health():
 
 
     }
+
+
+
+
+
+# ======================================
+# Compatibility Wrapper
+# für main_v4_test.py
+# ======================================
+
+
+def get_dusd_data():
+
+    return get_dusd_health()
