@@ -34,6 +34,10 @@ def get_tokenomics_data():
             61705058.17,
 
 
+        "fees": 
+        
+            993026.96,
+        
     }
 
 
