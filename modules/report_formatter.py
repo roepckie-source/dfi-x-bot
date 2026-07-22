@@ -8,212 +8,130 @@ from datetime import datetime
 
 
 
+
+# ======================================
+# Zahlen Formatierung
+# ======================================
+
+
 def format_number(value):
 
-    try:
-        value = float(value)
 
-    except:
+    if value in [
+
+        None,
+
+        "None",
+
+        "N/A",
+
+        ""
+
+    ]:
+
         return "N/A"
 
 
-    if abs(value) >= 1_000_000_000:
-        return f"{value/1_000_000_000:.2f} B"
+
+    try:
 
 
-    if abs(value) >= 1_000_000:
-        return f"{value/1_000_000:.2f} M"
-
-
-    if abs(value) >= 1_000:
-        return f"{value/1_000:.2f} K"
-
-
-    return f"{value:.2f}"
+        value = float(value)
 
 
 
+        if value >= 1_000_000:
+
+
+            return (
+
+                f"{value / 1_000_000:.2f} M"
+
+            )
+
+
+
+        elif value >= 1_000:
+
+
+            return (
+
+                f"{value / 1_000:.2f} K"
+
+            )
+
+
+
+        else:
+
+
+            return f"{value:.2f}"
+
+
+
+    except:
+
+
+        return str(value)
+
+
+
+
+
+# ======================================
+# Prozent Formatierung
+# ======================================
 
 
 def format_percent(value):
 
-    try:
-        value = float(value)
 
-    except:
+    if value in [
+
+        None,
+
+        "None",
+
+        "N/A"
+
+    ]:
+
         return "N/A"
 
 
-    if value >= 0:
-        return f"🟢 +{value:.2f} %"
 
-    else:
-        return f"🔴 {value:.2f} %"
+    try:
 
 
+        value = float(value)
 
 
 
-# ======================================
-# TOKENOMICS
-# ======================================
+        if value >= 0:
 
 
-def format_tokenomics(tokenomics):
+            return f"🟢 +{value:.2f} %"
 
 
-    burn = tokenomics.get(
-        "burn",
-        {}
-    )
+
+        else:
 
 
-    total_burn = burn.get(
-        "total",
-        0
-    )
+            return f"🔴 {value:.2f} %"
 
 
-    emission = tokenomics.get(
-        "emission",
-        0
-    )
+
+    except:
 
 
-    balance = total_burn - emission
-
-
-    if balance >= 0:
-
-        status = (
-            f"🟢 +{format_number(balance)} DFI"
-        )
-
-    else:
-
-        status = (
-            f"🔴 {format_number(balance)} DFI"
-        )
-
-
-    return f"""
-🔥 TOKENOMICS
-
-🔥 Total Burn
-{format_number(total_burn)} DFI
-
-📈 Emission
-{format_number(emission)} DFI
-
-⚖️ Net Change
-{status}
-
-
-Details
-
-🏠 Address  {format_number(burn.get('address',0))} DFI
-↩️ Payback  {format_number(burn.get('payback',0))} DFI
-🔨 Auction  {format_number(burn.get('auction',0))} DFI
-💸 Fees     {format_number(burn.get('fee',0))} DFI
-
-"""
+        return "N/A"
 
 
 
 
 
 # ======================================
-# DUSD HEALTH
-# ======================================
-
-
-def format_dusd(dusd):
-
-
-    return f"""
-🪙 DUSD HEALTH
-
-💵 Price
-{dusd.get('price','N/A')}
-
-📉 Peg
-{dusd.get('peg_difference','N/A')}
-
-❤️ Health Score
-{dusd.get('health_score',0)}/100
-
-🔒 Locked
-{dusd.get('locked_dusd','N/A')}
-
-🔥 Burned
-{dusd.get('burned_dusd','N/A')}
-
-"""
-
-
-
-
-
-# ======================================
-# COMMUNITY FUND
-# ======================================
-
-
-def format_community(community):
-
-
-    return f"""
-🏦 COMMUNITY FUND
-
-🪙 DFI
-{community.get('dfi','N/A')}
-
-💵 dUSD
-{community.get('dusd','N/A')}
-
-📈 Daily Inflow
-{community.get('daily_inflow','N/A')}
-
-💰 Value
-{community.get('usd_value','N/A')}
-
-"""
-
-
-
-
-
-# ======================================
-# NETWORK
-# ======================================
-
-
-def format_network(blockchain):
-
-
-    return f"""
-⛓ NETWORK
-
-🌐 Status
-{blockchain.get('network_status','N/A')}
-
-🧱 Block Height
-{blockchain.get('block_height','N/A')}
-
-⏱ Last Block
-{blockchain.get('last_block_time','N/A')}
-
-🖥 Masternodes
-{blockchain.get('masternodes','N/A')}
-
-"""
-
-
-
-
-
-# ======================================
-# MAIN REPORT
+# Haupt Report
 # ======================================
 
 
@@ -227,7 +145,7 @@ def create_report(
 
         community,
 
-        blockchain
+        network
 
 ):
 
@@ -237,10 +155,17 @@ def create_report(
     )
 
 
+
+    # ==============================
+    # Market
+    # ==============================
+
+
     dfi = market.get(
         "dfi",
         {}
     )
+
 
 
     report = f"""
@@ -250,44 +175,287 @@ def create_report(
 
 ━━━━━━━━━━━━━━━━━━
 
+
 💰 MARKET
 
+
 💎 DFI Price
-🇺🇸 ${dfi.get('usd','N/A')}
-🇪🇺 €{dfi.get('eur','N/A')}
+
+🇺🇸 ${dfi.get("usd","N/A")}
+
+🇪🇺 €{dfi.get("eur","N/A")}
+
+
 
 📊 24h Change
-{format_percent(dfi.get('change','N/A'))}
+
+{format_percent(
+    dfi.get("change")
+)}
+
+
 
 🏦 Market Cap
-${format_number(dfi.get('market_cap',0))}
+
+${format_number(
+    dfi.get("market_cap")
+)}
+
+
 
 📊 Volume 24h
-${format_number(dfi.get('volume',0))}
 
+${format_number(
+    dfi.get("volume")
+)}
 
-━━━━━━━━━━━━━━━━━━
-
-
-{format_tokenomics(tokenomics)}
 
 
 ━━━━━━━━━━━━━━━━━━
 
 
-{format_dusd(dusd)}
+🔥 TOKENOMICS
+
+
+🔥 Total Burn
+
+{format_number(
+    tokenomics.get(
+        "burn",
+        {}
+    ).get(
+        "total"
+    )
+)} DFI
+
+
+
+📈 Emission
+
+{format_number(
+    tokenomics.get(
+        "emission"
+    )
+)} DFI
+
+
+
+⚖️ Net Change
+
+🟢 +{format_number(
+    tokenomics.get(
+        "net_change"
+    )
+)} DFI
+
+
+
+Details
+
+
+🏠 Address
+
+{format_number(
+    tokenomics.get(
+        "burn",
+        {}
+    ).get(
+        "address"
+    )
+)} DFI
+
+
+
+↩️ Payback
+
+{format_number(
+    tokenomics.get(
+        "burn",
+        {}
+    ).get(
+        "payback"
+    )
+)} DFI
+
+
+
+🔨 Auction
+
+{format_number(
+    tokenomics.get(
+        "burn",
+        {}
+    ).get(
+        "auction"
+    )
+)} DFI
+
+
+
+💸 Fees
+
+{format_number(
+    tokenomics.get(
+        "burn",
+        {}
+    ).get(
+        "fees"
+    )
+)} DFI
+
+
 
 
 ━━━━━━━━━━━━━━━━━━
 
 
-{format_community(community)}
+
+🪙 DUSD HEALTH
+
+
+💵 Price
+
+{dusd.get(
+    "price",
+    "N/A"
+)}
+
+
+
+📉 Peg
+
+{dusd.get(
+    "peg_difference",
+    "N/A"
+)}
+
+
+
+❤️ Health Score
+
+{dusd.get(
+    "health_score",
+    0
+)}/100
+
+
+
+🔒 Locked
+
+{format_number(
+    dusd.get(
+        "locked_dusd"
+    )
+)} DUSD
+
+
+
+🔥 Burned
+
+{format_number(
+    dusd.get(
+        "burned_dusd"
+    )
+)} DUSD
+
+
+
 
 
 ━━━━━━━━━━━━━━━━━━
 
 
-{format_network(blockchain)}
+
+🏦 COMMUNITY FUND
+
+
+🪙 DFI
+
+{format_number(
+    community.get(
+        "dfi"
+    )
+)} DFI
+
+
+
+💵 dUSD
+
+{format_number(
+    community.get(
+        "dusd"
+    )
+)} dUSD
+
+
+
+📈 Daily Inflow
+
+{format_number(
+    community.get(
+        "daily_inflow"
+    )
+)} DFI
+
+
+
+💰 Value
+
+{format_number(
+    community.get(
+        "usd_value"
+    )
+)}
+
+
+
+
+
+
+━━━━━━━━━━━━━━━━━━
+
+
+
+⛓ NETWORK
+
+
+🌐 Status
+
+{network.get(
+    "network_status",
+    "N/A"
+)}
+
+
+
+🧱 Block Height
+
+{format_number(
+    network.get(
+        "block_height"
+    )
+)}
+
+
+
+⏱ Last Block
+
+{network.get(
+    "last_block_time",
+    "N/A"
+)}
+
+
+
+🖥 Masternodes
+
+{format_number(
+    network.get(
+        "masternodes"
+    )
+)}
+
+
 
 
 ━━━━━━━━━━━━━━━━━━
