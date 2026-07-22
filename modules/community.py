@@ -1,110 +1,62 @@
-# ==============================
-# DeFiChain Daily Intelligence v4
-# Community Fund Engine
-# ==============================
+# ======================================
+# DeFiChain Intelligence v4
+# Community Fund Module
+# ======================================
+
+
+from modules.stats import get_stats
+
+
 
 
 def get_community_data():
 
 
-    try:
+    stats = get_stats()
 
 
-        # =================================
-        # Vorbereitung für echte API Daten
-        # =================================
-
-
-        community_dfi = None
-
-        community_dusd = None
+    community = stats.get(
+        "community",
+        {}
+    )
 
 
 
-        if community_dfi is None:
+    return {
 
 
-            return {
+        "dfi":
 
-
-                "dfi":
-
-                    "N/A",
-
-
-                "dusd":
-
-                    "N/A",
-
-
-                "daily_inflow":
-
-                    "N/A",
-
-
-                "usd_value":
-
-                    "N/A"
-
-            }
+        community.get(
+            "dfi",
+            "N/A"
+        ),
 
 
 
-        return {
+        "dusd":
 
-
-            "dfi":
-
-                community_dfi,
-
-
-            "dusd":
-
-                community_dusd,
-
-
-            "daily_inflow":
-
-                "N/A",
-
-
-            "usd_value":
-
-                "N/A"
-
-        }
+        community.get(
+            "dusd",
+            "N/A"
+        ),
 
 
 
-    except Exception as e:
+        "daily_inflow":
+
+        community.get(
+            "daily_inflow",
+            "N/A"
+        ),
 
 
-        print(
-            "Community Fund Fehler:",
-            e
+
+        "usd_value":
+
+        community.get(
+            "usd_value",
+            "N/A"
         )
 
-
-        return {
-
-
-            "dfi":
-
-                "N/A",
-
-
-            "dusd":
-
-                "N/A",
-
-
-            "daily_inflow":
-
-                "N/A",
-
-
-            "usd_value":
-
-                "N/A"
-
-        }
+    }
