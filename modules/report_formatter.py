@@ -1,11 +1,16 @@
 # ======================================
 # DeFiChain Intelligence v4
-# Compact Report Formatter
+# Compact Telegram Report Formatter
 # ======================================
 
 
 from datetime import datetime
 
+
+
+# ======================================
+# Format Helfer
+# ======================================
 
 
 def format_number(value):
@@ -38,9 +43,11 @@ def format_block(value):
         return "N/A"
 
     try:
+
         return f"{int(value):,}".replace(",", ".")
 
     except:
+
         return value
 
 
@@ -58,8 +65,7 @@ def format_percent(value):
         if value >= 0:
             return f"🟢 +{value:.2f} %"
 
-        else:
-            return f"🔴 {value:.2f} %"
+        return f"🔴 {value:.2f} %"
 
     except:
 
@@ -68,12 +74,20 @@ def format_percent(value):
 
 
 
+
+# ======================================
+# Report
+# ======================================
+
+
 def create_report(
+
         market,
         tokenomics,
         dusd,
         community,
         network
+
 ):
 
 
@@ -82,10 +96,60 @@ def create_report(
     )
 
 
+
     dfi = market.get(
         "dfi",
         {}
     )
+
+
+
+    # Net Change berechnen
+
+    net_change = tokenomics.get(
+        "net_change"
+    )
+
+
+    if net_change in [
+        None,
+        "N/A"
+    ]:
+
+        try:
+
+            net_change = (
+
+                float(
+                    tokenomics
+                    .get(
+                        "burn",
+                        {}
+                    )
+                    .get(
+                        "total",
+                        0
+                    )
+                )
+
+                -
+
+                float(
+                    tokenomics
+                    .get(
+                        "emission",
+                        0
+                    )
+                )
+
+            )
+
+
+        except:
+
+            net_change = "N/A"
+
+
 
 
     report = f"""🚀 DeFiChain Intelligence
@@ -97,10 +161,9 @@ def create_report(
 💰 MARKET
 
 💎 DFI Price
-🇺🇸 ${dfi.get("usd","N/A")}
-🇪🇺 €{dfi.get("eur","N/A")}
+🇺🇸 ${dfi.get("usd","N/A")} | 🇪🇺 €{dfi.get("eur","N/A")}
 
-📊 24h Change
+📊 24h
 {format_percent(dfi.get("change"))}
 
 🏦 Market Cap
@@ -121,20 +184,13 @@ ${format_number(dfi.get("volume"))}
 {format_number(tokenomics.get("emission"))} DFI
 
 ⚖️ Net
-🟢 +{format_number(tokenomics.get("net_change"))} DFI
+🟢 +{format_number(net_change)} DFI
 
 
-🏠 Address
-{format_number(tokenomics.get("burn",{}).get("address"))}
-
-↩️ Payback
-{format_number(tokenomics.get("burn",{}).get("payback"))}
-
-🔨 Auction
-{format_number(tokenomics.get("burn",{}).get("auction"))}
-
-💸 Fees
-{format_number(tokenomics.get("burn",{}).get("fees"))}
+🏠 Address {format_number(tokenomics.get("burn",{}).get("address"))}
+↩️ Payback {format_number(tokenomics.get("burn",{}).get("payback"))}
+🔨 Auction {format_number(tokenomics.get("burn",{}).get("auction"))}
+💸 Fees {format_number(tokenomics.get("burn",{}).get("fees"))}
 
 
 ━━━━━━━━━━━━━━━━━━
@@ -147,7 +203,7 @@ ${dusd.get("price","N/A")}
 📉 Peg
 {dusd.get("peg_difference","N/A")} %
 
-❤️ Health Score
+❤️ Health
 {dusd.get("health_score",0)}/100
 
 🔒 Locked
@@ -181,7 +237,7 @@ ${dusd.get("price","N/A")}
 🌐 Status
 {network.get("network_status","N/A")}
 
-🧱 Block
+🧱 Block Height
 {format_block(network.get("block_height"))}
 
 ⏱ Last Block
