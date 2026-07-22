@@ -1,135 +1,57 @@
-# ==============================
-# DeFiChain Daily Intelligence v4
-# DUSD Health Engine
-# ==============================
+# ======================================
+# DeFiChain Intelligence v4
+# DUSD Health Module
+# ======================================
+
 
 import requests
 
 
-def calculate_health(price):
 
-    """
-    DUSD Peg Bewertung
-    """
-
-
-    deviation = price - 1
+COINGECKO_URL = (
+    "https://api.coingecko.com/api/v3/simple/price"
+)
 
 
 
-    if price >= 0.995:
-
-        status = "🟢 Peg stabil"
-        score = 95
-
-
-    elif price >= 0.97:
-
-        status = "🟡 leichte Abweichung"
-        score = 75
-
-
-    elif price >= 0.90:
-
-        status = "🟠 unter Peg"
-        score = 50
-
-
-    else:
-
-        status = "🔴 stark unter Peg"
-        score = 25
-
-
-
-    return {
-
-        "peg_difference":
-            round(deviation, 6),
-
-        "status":
-            status,
-
-        "health_score":
-            score
-    }
-
-
-
-def get_dusd_data():
-
+def get_dusd_price():
 
     try:
 
+        params = {
 
-        # =================================
-        # Platzhalter für echte API
-        # =================================
+            "ids":
+            "defichain-dusd",
 
-        dusd_price = None
+            "vs_currencies":
+            "usd"
 
-
-
-        if dusd_price is None:
-
-
-            return {
+        }
 
 
-                "price":
-                    "N/A",
+        response = requests.get(
 
+            COINGECKO_URL,
 
-                "peg_difference":
-                    "N/A",
+            params=params,
 
+            timeout=10
 
-                "status":
-                    "Keine Daten",
-
-
-                "health_score":
-                    0,
-
-
-                "locked_dusd":
-                    "N/A",
-
-
-                "burned_dusd":
-                    "N/A"
-
-            }
-
-
-
-        health = calculate_health(
-            dusd_price
         )
 
 
-
-        return {
-
-
-            "price":
-                round(
-                    dusd_price,
-                    6
-                ),
+        data = response.json()
 
 
-            **health,
+        price = data.get(
+            "defichain-dusd",
+            {}
+        ).get(
+            "usd"
+        )
 
 
-            "locked_dusd":
-                "N/A",
-
-
-            "burned_dusd":
-                "N/A"
-
-        }
+        return price
 
 
 
@@ -137,35 +59,162 @@ def get_dusd_data():
 
 
         print(
-            "DUSD Fehler:",
+            "DUSD Price Fehler:",
             e
         )
 
 
-        return {
+        return None
 
 
-            "price":
-                "N/A",
 
 
-            "peg_difference":
-                "N/A",
+
+def calculate_health_score(
+
+        price
+
+):
 
 
-            "status":
-                "Fehler",
+    if not price:
+
+        return 0
 
 
-            "health_score":
-                0,
+
+    deviation = abs(
+        1 - price
+    )
 
 
-            "locked_dusd":
-                "N/A",
+
+    score = 100 - (
+        deviation * 100
+    )
 
 
-            "burned_dusd":
-                "N/A"
 
-        }
+    if score < 0:
+
+        score = 0
+
+
+
+    return round(
+        score
+    )
+
+
+
+
+
+def get_dusd_health():
+
+
+    price = get_dusd_price()
+
+
+
+    if price:
+
+
+        peg_difference = (
+
+            price - 1
+
+        )
+
+
+
+        if abs(
+            peg_difference
+        ) < 0.01:
+
+
+            status = "🟢 Stable"
+
+
+
+        elif abs(
+            peg_difference
+        ) < 0.05:
+
+
+            status = "🟡 Beobachten"
+
+
+
+        else:
+
+
+            status = "🔴 Stark unter Peg"
+
+
+
+    else:
+
+
+        peg_difference = "N/A"
+
+        status = "Keine Daten"
+
+
+
+
+    return {
+
+
+        "price":
+
+        f"${price:.4f}"
+
+        if price
+
+        else
+
+        "N/A",
+
+
+
+        "peg_difference":
+
+        f"{peg_difference:.2%}"
+
+        if isinstance(
+            peg_difference,
+            float
+        )
+
+        else
+
+        "N/A",
+
+
+
+        "status":
+
+        status,
+
+
+
+        "health_score":
+
+        calculate_health_score(
+            price
+        ),
+
+
+
+        "locked_dusd":
+
+        "N/A",
+
+
+
+        "burned_dusd":
+
+        "N/A"
+
+
+    }
