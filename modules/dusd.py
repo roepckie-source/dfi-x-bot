@@ -1,7 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v4
 # DUSD Health Engine
-# Variante B
 # ======================================
 
 
@@ -22,13 +21,20 @@ COINGECKO_URL = (
 
 def get_dusd_price():
 
+
     try:
+
+
+        # DUSD CoinGecko ID
+        # falls vorhanden
 
         params = {
 
-            "ids": "defichain",
+            "ids":
+            "defichain-dusd",
 
-            "vs_currencies": "usd"
+            "vs_currencies":
+            "usd"
 
         }
 
@@ -47,12 +53,9 @@ def get_dusd_price():
         data = response.json()
 
 
-        # Fallback:
-        # DeFiChain DUSD wird später
-        # durch echte Chain-Daten ersetzt
 
         price = data.get(
-            "defichain",
+            "defichain-dusd",
             {}
         ).get(
             "usd"
@@ -79,7 +82,7 @@ def get_dusd_price():
 
 
 # ======================================
-# Peg Bewertung
+# Peg Score
 # ======================================
 
 
@@ -103,7 +106,6 @@ def calculate_peg_score(price):
     )
 
 
-
     if score < 0:
 
         score = 0
@@ -116,7 +118,7 @@ def calculate_peg_score(price):
 
 
 # ======================================
-# Locked DUSD Bewertung
+# Locked DUSD Score
 # später echte Daten
 # ======================================
 
@@ -124,19 +126,14 @@ def calculate_peg_score(price):
 def calculate_locked_score():
 
 
-    # Platzhalter
-
-    # wird später aus Chain/API geholt
-
-
-    return 0
+    return 50
 
 
 
 
 
 # ======================================
-# Burn Bewertung
+# Burn Score
 # später echte Daten
 # ======================================
 
@@ -144,16 +141,14 @@ def calculate_locked_score():
 def calculate_burn_score():
 
 
-    # Platzhalter
-
-    return 0
+    return 50
 
 
 
 
 
 # ======================================
-# Gesamt Health Score
+# Gesamt Score
 # ======================================
 
 
@@ -227,7 +222,6 @@ def get_status(score):
 def get_dusd_health():
 
 
-
     price = get_dusd_price()
 
 
@@ -235,17 +229,11 @@ def get_dusd_health():
     if price:
 
 
-        peg_difference = (
-
-            price - 1
-
-        )
-
+        peg_difference = price - 1
 
         peg_score = calculate_peg_score(
             price
         )
-
 
 
     else:
@@ -260,7 +248,6 @@ def get_dusd_health():
 
 
     locked_score = calculate_locked_score()
-
 
 
     burn_score = calculate_burn_score()
@@ -348,7 +335,6 @@ def get_dusd_health():
 
         "N/A"
 
-
     }
 
 
@@ -356,7 +342,7 @@ def get_dusd_health():
 
 
 # ======================================
-# Kompatibilität für main_v4_test.py
+# Kompatibilität
 # ======================================
 
 
