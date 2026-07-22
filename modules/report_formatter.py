@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v4
-# Report Formatter
+# Compact Report Formatter
 # ======================================
 
 
@@ -8,145 +8,72 @@ from datetime import datetime
 
 
 
-
-# ======================================
-# Zahlen Formatierung
-# ======================================
-
-
 def format_number(value):
 
-
-    if value in [
-
-        None,
-
-        "None",
-
-        "N/A",
-
-        ""
-
-    ]:
-
+    if value in [None, "None", "N/A", ""]:
         return "N/A"
-
-
 
     try:
 
-
         value = float(value)
 
-
-
         if value >= 1_000_000:
+            return f"{value/1_000_000:.2f} M"
 
+        if value >= 1_000:
+            return f"{value/1_000:.2f} K"
 
-            return (
-
-                f"{value / 1_000_000:.2f} M"
-
-            )
-
-
-
-        elif value >= 1_000:
-
-
-            return (
-
-                f"{value / 1_000:.2f} K"
-
-            )
-
-
-
-        else:
-
-
-            return f"{value:.2f}"
-
-
+        return f"{value:.2f}"
 
     except:
-
 
         return str(value)
 
 
 
 
+def format_block(value):
 
-# ======================================
-# Prozent Formatierung
-# ======================================
+    if value in [None, "None", "N/A", ""]:
+        return "N/A"
+
+    try:
+        return f"{int(value):,}".replace(",", ".")
+
+    except:
+        return value
+
+
 
 
 def format_percent(value):
 
-
-    if value in [
-
-        None,
-
-        "None",
-
-        "N/A"
-
-    ]:
-
+    if value in [None, "None", "N/A"]:
         return "N/A"
-
-
 
     try:
 
-
         value = float(value)
 
-
-
         if value >= 0:
-
-
             return f"🟢 +{value:.2f} %"
 
-
-
         else:
-
-
             return f"🔴 {value:.2f} %"
 
-
-
     except:
-
 
         return "N/A"
 
 
 
 
-
-# ======================================
-# Haupt Report
-# ======================================
-
-
 def create_report(
-
         market,
-
         tokenomics,
-
         dusd,
-
         community,
-
         network
-
 ):
 
 
@@ -155,311 +82,116 @@ def create_report(
     )
 
 
-
-    # ==============================
-    # Market
-    # ==============================
-
-
     dfi = market.get(
         "dfi",
         {}
     )
 
 
-
-    report = f"""
-🚀 DeFiChain Intelligence
+    report = f"""🚀 DeFiChain Intelligence
 
 📅 {now}
 
 ━━━━━━━━━━━━━━━━━━
 
-
 💰 MARKET
 
-
 💎 DFI Price
-
 🇺🇸 ${dfi.get("usd","N/A")}
-
 🇪🇺 €{dfi.get("eur","N/A")}
 
-
-
 📊 24h Change
-
-{format_percent(
-    dfi.get("change")
-)}
-
-
+{format_percent(dfi.get("change"))}
 
 🏦 Market Cap
+${format_number(dfi.get("market_cap"))}
 
-${format_number(
-    dfi.get("market_cap")
-)}
-
-
-
-📊 Volume 24h
-
-${format_number(
-    dfi.get("volume")
-)}
-
+📊 Volume
+${format_number(dfi.get("volume"))}
 
 
 ━━━━━━━━━━━━━━━━━━
-
 
 🔥 TOKENOMICS
 
-
-🔥 Total Burn
-
-{format_number(
-    tokenomics.get(
-        "burn",
-        {}
-    ).get(
-        "total"
-    )
-)} DFI
-
-
+🔥 Burn
+{format_number(tokenomics.get("burn",{}).get("total"))} DFI
 
 📈 Emission
+{format_number(tokenomics.get("emission"))} DFI
 
-{format_number(
-    tokenomics.get(
-        "emission"
-    )
-)} DFI
-
-
-
-⚖️ Net Change
-
-🟢 +{format_number(
-    tokenomics.get(
-        "net_change"
-    )
-)} DFI
-
-
-
-Details
+⚖️ Net
+🟢 +{format_number(tokenomics.get("net_change"))} DFI
 
 
 🏠 Address
-
-{format_number(
-    tokenomics.get(
-        "burn",
-        {}
-    ).get(
-        "address"
-    )
-)} DFI
-
-
+{format_number(tokenomics.get("burn",{}).get("address"))}
 
 ↩️ Payback
-
-{format_number(
-    tokenomics.get(
-        "burn",
-        {}
-    ).get(
-        "payback"
-    )
-)} DFI
-
-
+{format_number(tokenomics.get("burn",{}).get("payback"))}
 
 🔨 Auction
-
-{format_number(
-    tokenomics.get(
-        "burn",
-        {}
-    ).get(
-        "auction"
-    )
-)} DFI
-
-
+{format_number(tokenomics.get("burn",{}).get("auction"))}
 
 💸 Fees
-
-{format_number(
-    tokenomics.get(
-        "burn",
-        {}
-    ).get(
-        "fees"
-    )
-)} DFI
-
-
+{format_number(tokenomics.get("burn",{}).get("fees"))}
 
 
 ━━━━━━━━━━━━━━━━━━
-
-
 
 🪙 DUSD HEALTH
 
-
 💵 Price
-
-{dusd.get(
-    "price",
-    "N/A"
-)}
-
-
+${dusd.get("price","N/A")}
 
 📉 Peg
-
-{dusd.get(
-    "peg_difference",
-    "N/A"
-)}
-
-
+{dusd.get("peg_difference","N/A")} %
 
 ❤️ Health Score
-
-{dusd.get(
-    "health_score",
-    0
-)}/100
-
-
+{dusd.get("health_score",0)}/100
 
 🔒 Locked
-
-{format_number(
-    dusd.get(
-        "locked_dusd"
-    )
-)} DUSD
-
-
+{format_number(dusd.get("locked_dusd"))} DUSD
 
 🔥 Burned
-
-{format_number(
-    dusd.get(
-        "burned_dusd"
-    )
-)} DUSD
-
-
-
+{format_number(dusd.get("burned_dusd"))} DUSD
 
 
 ━━━━━━━━━━━━━━━━━━
-
-
 
 🏦 COMMUNITY FUND
 
-
 🪙 DFI
-
-{format_number(
-    community.get(
-        "dfi"
-    )
-)} DFI
-
-
+{format_number(community.get("dfi"))} DFI
 
 💵 dUSD
+{format_number(community.get("dusd"))} dUSD
 
-{format_number(
-    community.get(
-        "dusd"
-    )
-)} dUSD
-
-
-
-📈 Daily Inflow
-
-{format_number(
-    community.get(
-        "daily_inflow"
-    )
-)} DFI
-
-
+📈 Inflow
+{format_number(community.get("daily_inflow"))} DFI
 
 💰 Value
-
-{format_number(
-    community.get(
-        "usd_value"
-    )
-)}
-
-
-
-
+{format_number(community.get("usd_value"))}
 
 
 ━━━━━━━━━━━━━━━━━━
-
-
 
 ⛓ NETWORK
 
-
 🌐 Status
+{network.get("network_status","N/A")}
 
-{network.get(
-    "network_status",
-    "N/A"
-)}
-
-
-
-🧱 Block Height
-
-{format_number(
-    network.get(
-        "block_height"
-    )
-)}
-
-
+🧱 Block
+{format_block(network.get("block_height"))}
 
 ⏱ Last Block
-
-{network.get(
-    "last_block_time",
-    "N/A"
-)}
-
-
+{network.get("last_block_time","N/A")}
 
 🖥 Masternodes
-
-{format_number(
-    network.get(
-        "masternodes"
-    )
-)}
-
-
+{format_block(network.get("masternodes"))}
 
 
 ━━━━━━━━━━━━━━━━━━
-
 
 #DeFiChain #DFI
 """
