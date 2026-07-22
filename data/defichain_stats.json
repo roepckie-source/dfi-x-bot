@@ -5,13 +5,15 @@
     "daily_inflow": 52646,
     "usd_value": null
   },
+
   "dusd": {
-  "price": 0.0007,
-  "peg_difference": -99.93,
-  "health_score": 10,
-  "locked": 2450000,
-  "burned": 18300000
-},
+    "price": 0.0007,
+    "peg_difference": -99.93,
+    "health_score": 10,
+    "locked": 2450000,
+    "burned": 18300000
+  },
+
   "network": {
     "status": "🟢 Online",
     "block_height": 5821450,
