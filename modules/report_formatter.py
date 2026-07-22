@@ -8,15 +8,19 @@ from datetime import datetime
 
 
 
+
 def format_number(value):
 
     try:
-
         value = float(value)
 
     except:
-
         return "N/A"
+
+
+    if abs(value) >= 1_000_000_000:
+
+        return f"{value/1_000_000_000:.2f} B"
 
 
     if abs(value) >= 1_000_000:
@@ -98,22 +102,51 @@ def format_tokenomics(tokenomics):
 {format_number(balance)} DFI
 
 
+
 Details:
 
+
 🏠 Address Burn
-{format_number(burn.get('address',0))} DFI
+
+{format_number(
+    burn.get(
+        'address',
+        0
+    )
+)} DFI
+
 
 
 💸 Fee Burn
-{format_number(burn.get('fee',0))} DFI
+
+{format_number(
+    burn.get(
+        'fee',
+        0
+    )
+)} DFI
+
 
 
 🔨 Auction Burn
-{format_number(burn.get('auction',0))} DFI
+
+{format_number(
+    burn.get(
+        'auction',
+        0
+    )
+)} DFI
+
 
 
 ↩️ Payback
-{format_number(burn.get('payback',0))} DFI
+
+{format_number(
+    burn.get(
+        'payback',
+        0
+    )
+)} DFI
 
 """
 
@@ -130,27 +163,140 @@ def format_dusd(dusd):
 
 💵 Price
 
-{dusd.get('price','N/A')}
+{dusd.get(
+    'price',
+    'N/A'
+)}
+
 
 
 📉 Peg Difference
 
-{dusd.get('peg_difference','N/A')}
+{dusd.get(
+    'peg_difference',
+    'N/A'
+)}
+
 
 
 ❤️ Health Score
 
-{dusd.get('health_score',0)}/100
+{dusd.get(
+    'health_score',
+    0
+)}/100
+
 
 
 🔒 Locked DUSD
 
-{dusd.get('locked_dusd','N/A')}
+{dusd.get(
+    'locked_dusd',
+    'N/A'
+)}
+
 
 
 🔥 Burned DUSD
 
-{dusd.get('burned_dusd','N/A')}
+{dusd.get(
+    'burned_dusd',
+    'N/A'
+)}
+
+"""
+
+
+
+
+
+def format_community(community):
+
+
+    return f"""
+🏦 COMMUNITY FUND
+
+
+🪙 DFI
+
+{community.get(
+    'dfi',
+    'N/A'
+)}
+
+
+
+💵 dUSD
+
+{community.get(
+    'dusd',
+    'N/A'
+)}
+
+
+
+📈 Daily Inflow
+
+{community.get(
+    'daily_inflow',
+    'N/A'
+)}
+
+
+
+💰 USD Value
+
+{community.get(
+    'usd_value',
+    'N/A'
+)}
+
+"""
+
+
+
+
+
+def format_network(blockchain):
+
+
+    return f"""
+⛓ NETWORK
+
+
+🌐 Status
+
+{blockchain.get(
+    'network_status',
+    'N/A'
+)}
+
+
+
+🧱 Block Height
+
+{blockchain.get(
+    'block_height',
+    'N/A'
+)}
+
+
+
+⏱ Last Block
+
+{blockchain.get(
+    'last_block_time',
+    'N/A'
+)}
+
+
+
+🖥 Masternodes
+
+{blockchain.get(
+    'masternodes',
+    'N/A'
+)}
 
 """
 
@@ -178,6 +324,15 @@ def create_report(
     )
 
 
+    # echte Market Struktur
+
+    dfi = market.get(
+        "dfi",
+        {}
+    )
+
+
+
     report = f"""
 🚀 DeFiChain Intelligence
 
@@ -193,44 +348,87 @@ def create_report(
 
 💎 DFI Price
 
-🇺🇸 {market.get('usd','N/A')}
 
-🇪🇺 {market.get('eur','N/A')}
+🇺🇸 ${dfi.get(
+    'usd',
+    'N/A'
+)}
+
+
+🇪🇺 €{dfi.get(
+    'eur',
+    'N/A'
+)}
+
 
 
 📊 24h Change
 
-{market.get('change','N/A')}
+
+{dfi.get(
+    'change',
+    'N/A'
+)} %
+
+
+
+🏦 Market Cap
+
+
+${format_number(
+    dfi.get(
+        'usd_market_cap',
+        dfi.get(
+            'market_cap',
+            0
+        )
+    )
+)}
+
+
+
+📊 Volume 24h
+
+
+${format_number(
+    dfi.get(
+        'volume',
+        0
+    )
+)}
+
 
 
 ━━━━━━━━━━━━━━━━━━
+
 
 
 {format_tokenomics(tokenomics)}
 
 
+
 ━━━━━━━━━━━━━━━━━━
+
 
 
 {format_dusd(dusd)}
 
 
-━━━━━━━━━━━━━━━━━━
-
-
-🏦 COMMUNITY FUND
-
-
-{community}
-
 
 ━━━━━━━━━━━━━━━━━━
 
 
-⛓ NETWORK
+
+{format_community(community)}
 
 
-{blockchain}
+
+━━━━━━━━━━━━━━━━━━
+
+
+
+{format_network(blockchain)}
+
 
 
 ━━━━━━━━━━━━━━━━━━
