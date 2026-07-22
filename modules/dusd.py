@@ -1,10 +1,12 @@
 # ======================================
 # DeFiChain Intelligence v4
-# DUSD Health Module
+# DUSD Health Engine
+# Variante B
 # ======================================
 
 
 import requests
+
 
 
 COINGECKO_URL = (
@@ -13,13 +15,18 @@ COINGECKO_URL = (
 
 
 
+# ======================================
+# DUSD Preis
+# ======================================
+
+
 def get_dusd_price():
 
     try:
 
         params = {
 
-            "ids": "defichain-dusd",
+            "ids": "defichain",
 
             "vs_currencies": "usd"
 
@@ -40,8 +47,12 @@ def get_dusd_price():
         data = response.json()
 
 
+        # Fallback:
+        # DeFiChain DUSD wird später
+        # durch echte Chain-Daten ersetzt
+
         price = data.get(
-            "defichain-dusd",
+            "defichain",
             {}
         ).get(
             "usd"
@@ -56,7 +67,7 @@ def get_dusd_price():
 
 
         print(
-            "DUSD Price Fehler:",
+            "DUSD Preis Fehler:",
             e
         )
 
@@ -67,7 +78,12 @@ def get_dusd_price():
 
 
 
-def calculate_health_score(price):
+# ======================================
+# Peg Bewertung
+# ======================================
+
+
+def calculate_peg_score(price):
 
 
     if not price:
@@ -81,9 +97,11 @@ def calculate_health_score(price):
     )
 
 
+
     score = 100 - (
         deviation * 100
     )
+
 
 
     if score < 0:
@@ -97,7 +115,117 @@ def calculate_health_score(price):
 
 
 
+# ======================================
+# Locked DUSD Bewertung
+# später echte Daten
+# ======================================
+
+
+def calculate_locked_score():
+
+
+    # Platzhalter
+
+    # wird später aus Chain/API geholt
+
+
+    return 0
+
+
+
+
+
+# ======================================
+# Burn Bewertung
+# später echte Daten
+# ======================================
+
+
+def calculate_burn_score():
+
+
+    # Platzhalter
+
+    return 0
+
+
+
+
+
+# ======================================
+# Gesamt Health Score
+# ======================================
+
+
+def calculate_health_score(
+
+        peg_score,
+
+        locked_score,
+
+        burn_score
+
+):
+
+
+    score = (
+
+        peg_score * 0.50
+
+        +
+
+        locked_score * 0.25
+
+        +
+
+        burn_score * 0.15
+
+        +
+
+        100 * 0.10
+
+    )
+
+
+    return round(score)
+
+
+
+
+
+# ======================================
+# Status
+# ======================================
+
+
+def get_status(score):
+
+
+    if score >= 80:
+
+        return "🟢 Gesund"
+
+
+    elif score >= 50:
+
+        return "🟡 Beobachten"
+
+
+    else:
+
+        return "🔴 Kritisch"
+
+
+
+
+
+# ======================================
+# Hauptfunktion
+# ======================================
+
+
 def get_dusd_health():
+
 
 
     price = get_dusd_price()
@@ -114,31 +242,40 @@ def get_dusd_health():
         )
 
 
-
-        if abs(peg_difference) < 0.01:
-
-            status = "🟢 Stable"
-
-
-        elif abs(peg_difference) < 0.05:
-
-            status = "🟡 Beobachten"
-
-
-        else:
-
-            status = "🔴 Stark unter Peg"
+        peg_score = calculate_peg_score(
+            price
+        )
 
 
 
     else:
 
 
-        peg_difference = "N/A"
+        peg_difference = None
 
-        status = "Keine Daten"
+        peg_score = 0
 
 
+
+
+
+    locked_score = calculate_locked_score()
+
+
+
+    burn_score = calculate_burn_score()
+
+
+
+    health_score = calculate_health_score(
+
+        peg_score,
+
+        locked_score,
+
+        burn_score
+
+    )
 
 
 
@@ -161,10 +298,7 @@ def get_dusd_health():
 
         f"{peg_difference:.2%}"
 
-        if isinstance(
-            peg_difference,
-            float
-        )
+        if peg_difference is not None
 
         else
 
@@ -172,16 +306,34 @@ def get_dusd_health():
 
 
 
-        "status":
+        "peg_score":
 
-        status,
+        peg_score,
+
+
+
+        "locked_score":
+
+        locked_score,
+
+
+
+        "burn_score":
+
+        burn_score,
 
 
 
         "health_score":
 
-        calculate_health_score(
-            price
+        health_score,
+
+
+
+        "status":
+
+        get_status(
+            health_score
         ),
 
 
@@ -204,8 +356,7 @@ def get_dusd_health():
 
 
 # ======================================
-# Compatibility Wrapper
-# für main_v4_test.py
+# Kompatibilität für main_v4_test.py
 # ======================================
 
 
