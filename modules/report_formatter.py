@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v4
-# Telegram Report Formatter
+# Report Formatter
 # ======================================
 
 
@@ -8,23 +8,45 @@ from datetime import datetime
 
 
 
-def create_report(
-        market,
-        tokenomics,
-        dusd,
-        community,
-        blockchain
-):
+def format_number(value):
+
+    try:
+
+        value = float(value)
+
+    except:
+
+        return "N/A"
 
 
-    now = datetime.now().strftime(
-        "%d.%m.%Y %H:%M"
-    )
+    if abs(value) >= 1_000_000:
+
+        return f"{value/1_000_000:.2f} M"
+
+
+    if abs(value) >= 1_000:
+
+        return f"{value/1_000:.2f} K"
+
+
+    return f"{value:.2f}"
+
+
+
+
+
+def format_tokenomics(tokenomics):
 
 
     burn = tokenomics.get(
         "burn",
         {}
+    )
+
+
+    total_burn = burn.get(
+        "total",
+        0
     )
 
 
@@ -34,41 +56,146 @@ def create_report(
     )
 
 
-    balance = tokenomics.get(
-        "burn_vs_emission",
-        0
+    balance = (
+
+        total_burn
+
+        -
+
+        emission
+
     )
 
 
-    if balance > 0:
+    if balance >= 0:
 
-        burn_status = "🟢 Deflationär"
+        status = "🟢 Deflationär"
 
     else:
 
-        burn_status = "🔴 Inflationär"
+        status = "🔴 Inflationär"
 
+
+
+    return f"""
+🔥 TOKENOMICS
+
+
+🔥 Total Burn
+
+{format_number(total_burn)} DFI
+
+
+📈 Emission
+
+{format_number(emission)} DFI
+
+
+⚖️ Burn vs Emission
+
+{status}
+
+{format_number(balance)} DFI
+
+
+Details:
+
+🏠 Address Burn
+{format_number(burn.get('address',0))} DFI
+
+
+💸 Fee Burn
+{format_number(burn.get('fee',0))} DFI
+
+
+🔨 Auction Burn
+{format_number(burn.get('auction',0))} DFI
+
+
+↩️ Payback
+{format_number(burn.get('payback',0))} DFI
+
+"""
+
+
+
+
+
+def format_dusd(dusd):
+
+
+    return f"""
+🪙 DUSD HEALTH
+
+
+💵 Price
+
+{dusd.get('price','N/A')}
+
+
+📉 Peg Difference
+
+{dusd.get('peg_difference','N/A')}
+
+
+❤️ Health Score
+
+{dusd.get('health_score',0)}/100
+
+
+🔒 Locked DUSD
+
+{dusd.get('locked_dusd','N/A')}
+
+
+🔥 Burned DUSD
+
+{dusd.get('burned_dusd','N/A')}
+
+"""
+
+
+
+
+
+def create_report(
+
+        market,
+
+        tokenomics,
+
+        dusd,
+
+        community,
+
+        blockchain
+
+):
+
+
+    now = datetime.now().strftime(
+        "%d.%m.%Y %H:%M"
+    )
 
 
     report = f"""
-
-🚀 DeFiChain Daily Intelligence
+🚀 DeFiChain Intelligence
 
 
 📅 {now}
 
 
-━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 
 
-💰 DFI MARKET
+💰 MARKET
 
 
-💎 Price
+💎 DFI Price
 
-🇺🇸 ${market.get('usd','N/A')}
+🇺🇸 {market.get('usd','N/A')}
 
-🇪🇺 €{market.get('eur','N/A')}
+🇪🇺 {market.get('eur','N/A')}
 
 
 📊 24h Change
@@ -76,58 +203,19 @@ def create_report(
 {market.get('change','N/A')}
 
 
-━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 
 
-🔥 TOKENOMICS
+{format_tokenomics(tokenomics)}
 
 
-🏠 Address Burn
-
-{burn.get('address','N/A')} DFI
+━━━━━━━━━━━━━━━━━━
 
 
-💸 Fee Burn
-
-{burn.get('fee','N/A')} DFI
+{format_dusd(dusd)}
 
 
-🔨 Auction Burn
-
-{burn.get('auction','N/A')} DFI
-
-
-↩️ Payback
-
-{burn.get('payback','N/A')} DFI
-
-
-🔥 Total Burn
-
-{burn.get('total','N/A')} DFI
-
-
-
-📈 Emission
-
-{emission} DFI
-
-
-⚖️ Burn vs Emission
-
-{burn_status}
-
-
-━━━━━━━━━━━━━━
-
-
-🪙 DUSD HEALTH
-
-
-{dusd}
-
-
-━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 
 
 🏦 COMMUNITY FUND
@@ -136,7 +224,7 @@ def create_report(
 {community}
 
 
-━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 
 
 ⛓ NETWORK
@@ -145,7 +233,7 @@ def create_report(
 {blockchain}
 
 
-━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 
 
 #DeFiChain #DFI
