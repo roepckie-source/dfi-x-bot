@@ -4,109 +4,15 @@
 # ======================================
 
 
-import requests
-
-
-COINGECKO_URL = (
-    "https://api.coingecko.com/api/v3/simple/price"
-)
-
-
-
-# ======================================
-# DUSD Preis
-# ======================================
-
-
-def get_dusd_price():
-
-    try:
-
-        possible_ids = [
-
-            "defichain-dusd",
-            "dusd"
-
-        ]
-
-
-        for coin_id in possible_ids:
-
-
-            params = {
-
-                "ids": coin_id,
-
-                "vs_currencies": "usd"
-
-            }
-
-
-            response = requests.get(
-
-                COINGECKO_URL,
-
-                params=params,
-
-                timeout=10
-
-            )
-
-
-            data = response.json()
-
-
-            price = data.get(
-                coin_id,
-                {}
-            ).get(
-                "usd"
-            )
-
-
-            if price:
-
-
-                # Schutz:
-                # DUSD sollte nahe 1 USD liegen
-
-                if 0.50 <= price <= 1.50:
-
-
-                    return price
-
-
-                else:
-
-
-                    print(
-                        "Unplausibler DUSD Preis:",
-                        price
-                    )
-
-
-
-        return None
-
-
-
-    except Exception as e:
-
-
-        print(
-            "DUSD Preis Fehler:",
-            e
-        )
-
-
-        return None
+from modules.dusd_data import get_dusd_data
 
 
 
 
 
 # ======================================
-# Peg Score
+# Peg Bewertung
+# Gewicht 40 %
 # ======================================
 
 
@@ -118,9 +24,11 @@ def calculate_peg_score(price):
         return 0
 
 
+
     deviation = abs(
-        1 - price
+        1 - float(price)
     )
+
 
 
     score = 100 - (
@@ -138,20 +46,9 @@ def calculate_peg_score(price):
 
 
 # ======================================
-# Locked DUSD
+# Locked DUSD Bewertung
+# Gewicht 25 %
 # ======================================
-
-
-def get_locked_dusd():
-
-
-    # später:
-    # echte DeFiChain Datenquelle
-
-    return None
-
-
-
 
 
 def calculate_locked_score(value):
@@ -162,6 +59,9 @@ def calculate_locked_score(value):
         return 50
 
 
+
+    # wird später kalibriert
+
     return 50
 
 
@@ -169,20 +69,9 @@ def calculate_locked_score(value):
 
 
 # ======================================
-# Burn
+# Burn Bewertung
+# Gewicht 15 %
 # ======================================
-
-
-def get_dusd_burn():
-
-
-    # später:
-    # echte Burn Daten
-
-    return None
-
-
-
 
 
 def calculate_burn_score(value):
@@ -193,6 +82,7 @@ def calculate_burn_score(value):
         return 50
 
 
+
     return 50
 
 
@@ -200,7 +90,8 @@ def calculate_burn_score(value):
 
 
 # ======================================
-# Stabilität
+# Stability Fund / Community
+# Gewicht 10 %
 # ======================================
 
 
@@ -215,6 +106,7 @@ def calculate_stability_score():
 
 # ======================================
 # Trend
+# Gewicht 10 %
 # ======================================
 
 
@@ -228,7 +120,7 @@ def calculate_trend_score():
 
 
 # ======================================
-# Health Score
+# Gesamt Health Score
 # ======================================
 
 
@@ -289,9 +181,11 @@ def get_status(score):
         return "🟢 Gesund"
 
 
+
     elif score >= 50:
 
         return "🟡 Beobachten"
+
 
 
     else:
@@ -310,7 +204,25 @@ def get_status(score):
 def get_dusd_health():
 
 
-    price = get_dusd_price()
+    data = get_dusd_data()
+
+
+
+    price = data.get(
+        "price"
+    )
+
+
+    locked = data.get(
+        "locked_dusd"
+    )
+
+
+    burned = data.get(
+        "burned_dusd"
+    )
+
+
 
 
 
@@ -319,7 +231,7 @@ def get_dusd_health():
 
         peg_difference = (
 
-            price - 1
+            float(price) - 1
 
         )
 
@@ -339,16 +251,10 @@ def get_dusd_health():
 
 
 
-    locked = get_locked_dusd()
-
-
-    burned = get_dusd_burn()
-
-
-
     locked_score = calculate_locked_score(
         locked
     )
+
 
 
     burn_score = calculate_burn_score(
@@ -356,10 +262,14 @@ def get_dusd_health():
     )
 
 
+
     stability_score = calculate_stability_score()
 
 
+
     trend_score = calculate_trend_score()
+
+
 
 
 
@@ -379,12 +289,15 @@ def get_dusd_health():
 
 
 
+
+
     return {
+
 
 
         "price":
 
-        f"${price:.4f}"
+        f"${float(price):.4f}"
 
         if price
 
@@ -479,10 +392,10 @@ def get_dusd_health():
 
 
 # ======================================
-# Kompatibilität
+# Kompatibilität für main_v4_test.py
 # ======================================
 
 
-def get_dusd_data():
+def get_dusd_data_old():
 
     return get_dusd_health()
