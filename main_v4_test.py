@@ -10,6 +10,7 @@ from modules.dusd import get_dusd_data
 from modules.community import get_community_data
 from modules.network import get_network_data
 
+
 from modules.report_formatter import create_report
 
 
@@ -19,6 +20,7 @@ from language_manager import load_language
 from outputs.telegram_bot import send_telegram
 from outputs.discord_bot import send_discord
 from outputs.x_bot import send_x_thread
+
 
 
 
@@ -71,8 +73,11 @@ def main():
 
 
 
+
+
     # ==========================
-    # Adapter alte Bots
+    # Adapter für alte Outputs
+    # Discord / X
     # ==========================
 
 
@@ -82,6 +87,7 @@ def main():
         "existing_dfi":
 
             "N/A",
+
 
 
         "burned_dfi":
@@ -116,6 +122,7 @@ def main():
 
 
 
+
     comparison = {
 
 
@@ -124,11 +131,13 @@ def main():
             "N/A",
 
 
+
         "vs_eth":
 
             "N/A"
 
     }
+
 
 
 
@@ -157,8 +166,9 @@ def main():
 
 
 
+
     # ==========================
-    # Schöner Report
+    # Report erstellen
     # ==========================
 
 
@@ -172,9 +182,11 @@ def main():
 
         community,
 
-        blockchain
+        network_data
 
     )
+
+
 
 
 
@@ -188,6 +200,8 @@ def main():
         report
 
     )
+
+
 
 
 
@@ -210,6 +224,8 @@ def main():
 
 
 
+
+
     # ==========================
     # X
     # ==========================
@@ -229,8 +245,12 @@ def main():
 
 
 
+
+
     print(
+
         "✅ v4 Report gesendet"
+
     )
 
 
@@ -238,5 +258,6 @@ def main():
 
 
 if __name__ == "__main__":
+
 
     main()
