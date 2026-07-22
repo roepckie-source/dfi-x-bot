@@ -7,7 +7,6 @@
 import requests
 
 
-# DeFiChain Ocean API Basis
 OCEAN_API = (
     "https://ocean.defichain.com/v0"
 )
@@ -15,7 +14,7 @@ OCEAN_API = (
 
 
 # ======================================
-# DUSD Marktpreis
+# DUSD Preis
 # ======================================
 
 
@@ -25,33 +24,10 @@ def get_dusd_price():
     try:
 
 
-        url = (
+        # Platzhalter:
+        # echte Ocean API Anbindung folgt
 
-            OCEAN_API +
-
-            "/prices/dusd-usd"
-
-        )
-
-
-        response = requests.get(
-
-            url,
-
-            timeout=10
-
-        )
-
-
-        data = response.json()
-
-
-        price = data.get(
-            "price"
-        )
-
-
-        return price
+        return None
 
 
 
@@ -78,27 +54,7 @@ def get_dusd_price():
 def get_locked_dusd():
 
 
-    try:
-
-
-        # Vorbereitung für
-        # echte Chain Daten
-
-
-        return None
-
-
-
-    except Exception as e:
-
-
-        print(
-            "Locked DUSD Fehler:",
-            e
-        )
-
-
-        return None
+    return None
 
 
 
@@ -112,27 +68,7 @@ def get_locked_dusd():
 def get_dusd_burn():
 
 
-    try:
-
-
-        # Vorbereitung für
-        # Burn Daten
-
-
-        return None
-
-
-
-    except Exception as e:
-
-
-        print(
-            "DUSD Burn Fehler:",
-            e
-        )
-
-
-        return None
+    return None
 
 
 
@@ -154,9 +90,11 @@ def get_dusd_data():
         get_dusd_price(),
 
 
+
         "locked_dusd":
 
         get_locked_dusd(),
+
 
 
         "burned_dusd":
