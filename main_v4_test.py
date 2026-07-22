@@ -67,7 +67,7 @@ def main():
     community = get_community_data()
 
 
-    blockchain = get_blockchain_data()
+    network_data = get_network_data()
 
 
 
