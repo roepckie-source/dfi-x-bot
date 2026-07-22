@@ -13,19 +13,28 @@ def get_tokenomics_data():
 
     burned = {
 
-    "address":
-        158909764.56,
 
-    "fees":
-        993026.96,
+        "address":
 
-    "auction":
-        3538007.76,
+            158909764.56,
 
-    "payback":
-        61705058.17
+
+        "fees":
+
+            993026.96,
+
+
+        "auction":
+
+            3538007.76,
+
+
+        "payback":
+
+            61705058.17
 
     }
+
 
 
     # ==================================
@@ -33,9 +42,11 @@ def get_tokenomics_data():
     # ==================================
 
     burned["total"] = sum(
-    burned.values()
+        burned.values()
     )
-   
+
+
+
     # ==================================
     # Emission
     # ==================================
@@ -62,13 +73,19 @@ def get_tokenomics_data():
 
     if balance > 0:
 
-        status = "🟢 Inflation reduziert / deflationär"
+        status = "🟢 Deflationär"
+
 
     else:
 
         status = "🔴 Inflationär"
 
 
+
+
+    # ==================================
+    # Ausgabe
+    # ==================================
 
     return {
 
@@ -78,20 +95,21 @@ def get_tokenomics_data():
             burned,
 
 
+
         "emission":
 
             emission,
 
 
-        "burn_vs_emission":
+
+        "net_change":
 
             balance,
+
 
 
         "status":
 
             status
-
-
 
     }
