@@ -1,13 +1,14 @@
 # ======================================
 # DeFiChain Intelligence v4
-# DUSD Health Engine
+# DUSD Analyst Health Engine
+# Variante B
 # ======================================
 
 
 import requests
 
 
-
+# CoinGecko bleibt nur als Preis-Fallback
 COINGECKO_URL = (
     "https://api.coingecko.com/api/v3/simple/price"
 )
@@ -21,48 +22,57 @@ COINGECKO_URL = (
 
 def get_dusd_price():
 
-
     try:
 
+        # mehrere mögliche IDs testen
 
-        # DUSD CoinGecko ID
-        # falls vorhanden
-
-        params = {
-
-            "ids":
+        ids = [
             "defichain-dusd",
-
-            "vs_currencies":
-            "usd"
-
-        }
+            "dusd"
+        ]
 
 
-        response = requests.get(
-
-            COINGECKO_URL,
-
-            params=params,
-
-            timeout=10
-
-        )
+        for coin_id in ids:
 
 
-        data = response.json()
+            params = {
+
+                "ids": coin_id,
+
+                "vs_currencies": "usd"
+
+            }
+
+
+            response = requests.get(
+
+                COINGECKO_URL,
+
+                params=params,
+
+                timeout=10
+
+            )
+
+
+            data = response.json()
+
+
+            price = data.get(
+                coin_id,
+                {}
+            ).get(
+                "usd"
+            )
+
+
+            if price:
+
+                return price
 
 
 
-        price = data.get(
-            "defichain-dusd",
-            {}
-        ).get(
-            "usd"
-        )
-
-
-        return price
+        return None
 
 
 
@@ -82,7 +92,8 @@ def get_dusd_price():
 
 
 # ======================================
-# Peg Score
+# Bewertung Peg
+# Gewicht 40%
 # ======================================
 
 
@@ -100,30 +111,46 @@ def calculate_peg_score(price):
     )
 
 
-
     score = 100 - (
         deviation * 100
     )
 
 
-    if score < 0:
-
-        score = 0
-
-
-    return round(score)
+    return max(
+        0,
+        round(score)
+    )
 
 
 
 
 
 # ======================================
-# Locked DUSD Score
-# später echte Daten
+# Locked DUSD
+# später echte Datenquelle
+# Gewicht 25%
 # ======================================
 
 
-def calculate_locked_score():
+def get_locked_dusd():
+
+
+    return None
+
+
+
+
+
+def calculate_locked_score(value):
+
+
+    if not value:
+
+        return 0
+
+
+    # kommt später mit
+    # echten Schwellenwerten
 
 
     return 50
@@ -133,12 +160,66 @@ def calculate_locked_score():
 
 
 # ======================================
-# Burn Score
-# später echte Daten
+# Burn Aktivität
+# Gewicht 15%
 # ======================================
 
 
-def calculate_burn_score():
+def get_dusd_burn():
+
+
+    return None
+
+
+
+
+
+def calculate_burn_score(value):
+
+
+    if not value:
+
+        return 0
+
+
+    return 50
+
+
+
+
+
+# ======================================
+# Stabilität
+# Gewicht 10%
+# ======================================
+
+
+def calculate_stability_score():
+
+
+    # später:
+    # Stability Fund
+    # Community Fund
+    # DUSD Pools
+
+
+    return 50
+
+
+
+
+
+# ======================================
+# Trend
+# Gewicht 10%
+# ======================================
+
+
+def calculate_trend_score():
+
+
+    # später:
+    # 7 Tage Verlauf
 
 
     return 50
@@ -158,14 +239,18 @@ def calculate_health_score(
 
         locked_score,
 
-        burn_score
+        burn_score,
+
+        stability_score,
+
+        trend_score
 
 ):
 
 
     score = (
 
-        peg_score * 0.50
+        peg_score * 0.40
 
         +
 
@@ -177,7 +262,11 @@ def calculate_health_score(
 
         +
 
-        100 * 0.10
+        stability_score * 0.10
+
+        +
+
+        trend_score * 0.10
 
     )
 
@@ -229,10 +318,10 @@ def get_dusd_health():
     if price:
 
 
-        peg_difference = price - 1
+        peg_difference = (
 
-        peg_score = calculate_peg_score(
-            price
+            price - 1
+
         )
 
 
@@ -241,16 +330,35 @@ def get_dusd_health():
 
         peg_difference = None
 
-        peg_score = 0
 
 
 
+    peg_score = calculate_peg_score(
+        price
+    )
 
 
-    locked_score = calculate_locked_score()
+    locked = get_locked_dusd()
 
 
-    burn_score = calculate_burn_score()
+    burned = get_dusd_burn()
+
+
+
+    locked_score = calculate_locked_score(
+        locked
+    )
+
+
+    burn_score = calculate_burn_score(
+        burned
+    )
+
+
+    stability_score = calculate_stability_score()
+
+
+    trend_score = calculate_trend_score()
 
 
 
@@ -260,7 +368,11 @@ def get_dusd_health():
 
         locked_score,
 
-        burn_score
+        burn_score,
+
+        stability_score,
+
+        trend_score
 
     )
 
@@ -298,10 +410,32 @@ def get_dusd_health():
         peg_score,
 
 
+        "locked_dusd":
+
+        locked
+
+        if locked
+
+        else
+
+        "N/A",
+
+
 
         "locked_score":
 
         locked_score,
+
+
+        "burned_dusd":
+
+        burned
+
+        if burned
+
+        else
+
+        "N/A",
 
 
 
@@ -310,30 +444,26 @@ def get_dusd_health():
         burn_score,
 
 
+        "stability_score":
+
+        stability_score,
+
+
+        "trend_score":
+
+        trend_score,
+
 
         "health_score":
 
         health_score,
 
 
-
         "status":
 
         get_status(
             health_score
-        ),
-
-
-
-        "locked_dusd":
-
-        "N/A",
-
-
-
-        "burned_dusd":
-
-        "N/A"
+        )
 
     }
 
