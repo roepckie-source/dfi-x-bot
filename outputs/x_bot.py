@@ -204,26 +204,72 @@ The fundamentals remain strong.
 
 
         # ==============================
-        # POST 3 INTELLIGENCE
+        # POST 3 INTELLIGENCE + HISTORY
         # ==============================
 
 
-        post3 = """
+score = intelligence.get(
+    "total",
+    "N/A"
+)
+
+
+status = intelligence.get(
+    "status",
+    "N/A"
+)
+
+
+
+post3 = f"""
 🧠 DeFiChain Intelligence
 
 ⭐ Daily Score
 
-🟡 Stable
+{score}/100
 
-🔥 Tokenomics strong
-⚠️ dUSD remains the main risk
+{status}
+
+🔥 Tokenomics:
+Strong
+
+⚠️ Main Risk:
+dUSD stability
 
 Tracking:
 Market | Health | Network
+""".strip()
+
+
+
+# ==============================
+# HISTORY INSIGHT
+# ==============================
+
+
+if history:
+
+    post3 += f"""
+
+📚 History Insight
+
+{history.get(
+    "title",
+    "DeFiChain History"
+)}
+
+💡 {history.get(
+    "text",
+    ""
+)[:150]}...
+"""
+
+
+
+post3 += """
 
 #DeFiChain #DFI
 """.strip()
-
 
 
         result3 = client.create_tweet(
