@@ -66,56 +66,34 @@ def main():
 
     blockchain = get_blockchain_data()
 
-
-
     # ==========================
     # Intelligence
     # ==========================
 
-
     intelligence = calculate_intelligence_score(
-
-    market,
-
-    tokenomics,
-
-    dusd,
-
-    community,
-
-    blockchain
-
-    )    
-
-
-    print(
-        f"🧠 Intelligence Score: {intelligence['total']} /100"
+        market,
+        tokenomics,
+        dusd,
+        community,
+        blockchain
     )
 
+    score = intelligence.get("total", 0)
 
-    score = intelligence.get(
-    "total",
-    0
-)
+    if score >= 80:
+        status = "🟢 Sehr stark"
+    elif score >= 60:
+        status = "🟡 Stabil"
+    elif score >= 40:
+        status = "🟠 Vorsicht"
+    else:
+        status = "🔴 Kritisch"
 
+    intelligence["status"] = status
 
-if score >= 80:
-    status = "🟢 Sehr stark"
-
-elif score >= 60:
-    status = "🟡 Stabil"
-
-elif score >= 40:
-    status = "🟠 Vorsicht"
-
-else:
-    status = "🔴 Kritisch"
-
-
-print(status)
+    print(f"🧠 Intelligence Score: {score} /100")
+    print(status)
     
-
-
     # ==========================
     # Daily Insight
     # ==========================
@@ -141,7 +119,6 @@ print(status)
     print(
         daily_insight
     )
-
 
 
     # ==========================
