@@ -112,7 +112,7 @@ def main():
 
 
     # ==========================
-    # Adapter alte Bots
+    # Network Adapter
     # ==========================
 
 
@@ -122,14 +122,43 @@ def main():
         "network_status":
 
             blockchain.get(
-                "network_status",
+                "status",
+                "🟢 Online"
+            ),
+
+
+
+        "block_height":
+
+            blockchain.get(
+                "block_height",
                 "N/A"
             ),
+
+
+
+        "last_block_time":
+
+            blockchain.get(
+                "last_block_time",
+                "N/A"
+            ),
+
+
+
+        "masternodes":
+
+            blockchain.get(
+                "masternodes",
+                "N/A"
+            ),
+
 
 
         "existing_dfi":
 
             "N/A",
+
 
 
         "burned_dfi":
@@ -145,45 +174,22 @@ def main():
             ),
 
 
+
         "locked_dusd":
 
             dusd.get(
                 "locked_dusd",
-                "N/A"
-            ),
-
-
-        "excess_dfi":
-
-            "N/A",
-
-
-        "block_height":
-
-            blockchain.get(
-                "block_height",
-                "N/A"
-            ),
-
-
-        "last_block_time":
-
-            blockchain.get(
-                "last_block_time",
-                "N/A"
-            ),
-
-
-        "masternodes":
-
-            blockchain.get(
-                "masternodes",
                 "N/A"
             )
 
     }
 
 
+
+
+    # ==========================
+    # Vergleich
+    # ==========================
 
 
     comparison = {
@@ -201,6 +207,11 @@ def main():
     }
 
 
+
+
+    # ==========================
+    # News
+    # ==========================
 
 
     news = {
@@ -227,9 +238,8 @@ def main():
 
 
 
-
     # ==========================
-    # Report erstellen
+    # Report
     # ==========================
 
 
