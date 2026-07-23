@@ -289,27 +289,22 @@ Market | Health | Network
         if history:
 
 
-            post3 += f"""
+    post3 += f"""
 
-📚 History Insight
-
+📚 History
 
 {history.get(
     "title",
-    "DeFiChain History"
+    "DeFiChain"
 )}
-
 
 💡 {history.get(
     "text",
     ""
-)[:150]}...
+)[:60]}...
 """
-
-
-
-
-
+       
+    
         post3 += """
 
 #DeFiChain #DFI
