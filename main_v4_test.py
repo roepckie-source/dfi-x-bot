@@ -275,7 +275,7 @@ def main():
 
         daily_insight,
 
-        history
+        current_history
 
     )
 
