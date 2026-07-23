@@ -7,7 +7,7 @@ import json
 import os
 
 
-HISTORY_FILE = "data/defichain_history.json"
+HISTORY_FILE = "dfi_history.json"
 STATE_FILE = "history_state.json"
 
 
