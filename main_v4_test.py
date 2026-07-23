@@ -103,16 +103,16 @@ def main():
     history = load_history()
 
 
-        current_history = None
+    current_history = None
 
 
     if history:
 
-    current_history = history[0]
+       current_history = history[0]
 
-    print(
-        f"📚 History: {current_history['title']}"
-    )
+        print(
+            f"📚 History: {current_history['title']}"
+        )
     
 
     # ==========================
