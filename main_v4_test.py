@@ -1,7 +1,8 @@
 # ======================================
 # DeFiChain Intelligence v5
-# Main Test Runner
-# + Daily Insight Engine
+# Main Runner
+# + Daily Insight
+# + History Engine
 # ======================================
 
 
@@ -11,16 +12,25 @@ from modules.dusd import get_dusd_data
 from modules.community import get_community_data
 from modules.blockchain import get_blockchain_data
 
+
 from modules.report_formatter import create_report
+
 
 from modules.intelligence import (
     calculate_intelligence_score,
     get_score_status
 )
 
+
 from modules.insight_engine import (
     generate_daily_insight
 )
+
+
+from modules.history_engine import (
+    get_daily_history
+)
+
 
 from language_manager import load_language
 
@@ -102,16 +112,24 @@ def main():
 
 
     print(
+
         "🧠 Intelligence Score:",
-        intelligence["total"],
+
+        intelligence.get("total"),
+
         "/100"
+
     )
 
 
     print(
+
         get_score_status(
-            intelligence["total"]
+
+            intelligence.get("total")
+
         )
+
     )
 
 
@@ -137,13 +155,58 @@ def main():
 
 
     print(
+
         "💡 Daily Insight:"
+
     )
 
 
     print(
+
         daily_insight
+
     )
+
+
+
+    # ==========================
+    # History Chapter
+    # ==========================
+
+
+    history = get_daily_history()
+
+
+
+    if history:
+
+
+        print(
+
+            "📚 History:",
+
+            history["title"]
+
+        )
+
+
+    else:
+
+
+        history = {
+
+
+            "title":
+
+            "No History",
+
+
+            "text":
+
+            ""
+
+        }
+
 
 
 
@@ -158,8 +221,11 @@ def main():
         "network_status":
 
             blockchain.get(
+
                 "network_status",
+
                 "🟢 Online"
+
             ),
 
 
@@ -167,8 +233,11 @@ def main():
         "block_height":
 
             blockchain.get(
+
                 "block_height",
+
                 "N/A"
+
             ),
 
 
@@ -176,8 +245,11 @@ def main():
         "last_block_time":
 
             blockchain.get(
+
                 "last_block_time",
+
                 "N/A"
+
             ),
 
 
@@ -185,37 +257,11 @@ def main():
         "masternodes":
 
             blockchain.get(
+
                 "masternodes",
+
                 "N/A"
-            ),
 
-
-
-        "existing_dfi":
-
-            "N/A",
-
-
-
-        "burned_dfi":
-
-            tokenomics
-            .get(
-                "burn",
-                {}
-            )
-            .get(
-                "total",
-                "N/A"
-            ),
-
-
-
-        "locked_dusd":
-
-            dusd.get(
-                "locked_dusd",
-                "N/A"
             )
 
     }
@@ -245,8 +291,9 @@ def main():
 
 
 
+
     # ==========================
-    # News
+    # News Adapter
     # ==========================
 
 
@@ -275,27 +322,39 @@ def main():
 
 
     # ==========================
-    # Report erstellen
+    # Report
     # ==========================
 
 
     report = create_report(
 
+
         market,
+
 
         tokenomics,
 
+
         dusd,
+
 
         community,
 
+
         network,
+
 
         intelligence,
 
-        daily_insight
+
+        daily_insight,
+
+
+        history
+
 
     )
+
 
 
 
@@ -309,6 +368,7 @@ def main():
         report
 
     )
+
 
 
 
@@ -331,8 +391,9 @@ def main():
 
 
 
+
     # ==========================
-    # X
+    # X Thread
     # ==========================
 
 
@@ -350,8 +411,11 @@ def main():
 
 
 
+
     print(
+
         "✅ v5 Report gesendet"
+
     )
 
 
