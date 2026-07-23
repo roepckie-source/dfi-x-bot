@@ -1,5 +1,5 @@
 # ======================================
-# DeFiChain Intelligence v4
+# DeFiChain Intelligence v5
 # Main Test Runner
 # ======================================
 
@@ -8,11 +8,14 @@ from modules.market import get_market_data
 from modules.tokenomics import get_tokenomics_data
 from modules.dusd import get_dusd_data
 from modules.community import get_community_data
-from modules.network import get_network_data
-
+from modules.blockchain import get_blockchain_data
 
 from modules.report_formatter import create_report
 
+from modules.intelligence import (
+    calculate_intelligence_score,
+    get_score_status
+)
 
 from language_manager import load_language
 
@@ -29,7 +32,7 @@ def main():
 
 
     print(
-        "🚀 DeFiChain Intelligence v4 startet..."
+        "🚀 DeFiChain Intelligence v5 startet..."
     )
 
 
@@ -69,25 +72,64 @@ def main():
     community = get_community_data()
 
 
-    network_data = get_network_data()
-
-
+    blockchain = get_blockchain_data()
 
 
 
     # ==========================
-    # Adapter für alte Outputs
-    # Discord / X
+    # Intelligence Score
+    # ==========================
+
+
+    intelligence = calculate_intelligence_score(
+
+        market,
+
+        tokenomics,
+
+        dusd,
+
+        community,
+
+        blockchain
+
+    )
+
+
+    print(
+        "🧠 Intelligence Score:",
+        intelligence["total"],
+        "/100"
+    )
+
+
+    print(
+        get_score_status(
+            intelligence["total"]
+        )
+    )
+
+
+
+    # ==========================
+    # Adapter alte Bots
     # ==========================
 
 
     network = {
 
 
+        "network_status":
+
+            blockchain.get(
+                "network_status",
+                "N/A"
+            ),
+
+
         "existing_dfi":
 
             "N/A",
-
 
 
         "burned_dfi":
@@ -103,7 +145,6 @@ def main():
             ),
 
 
-
         "locked_dusd":
 
             dusd.get(
@@ -112,13 +153,35 @@ def main():
             ),
 
 
-
         "excess_dfi":
 
-            "N/A"
+            "N/A",
+
+
+        "block_height":
+
+            blockchain.get(
+                "block_height",
+                "N/A"
+            ),
+
+
+        "last_block_time":
+
+            blockchain.get(
+                "last_block_time",
+                "N/A"
+            ),
+
+
+        "masternodes":
+
+            blockchain.get(
+                "masternodes",
+                "N/A"
+            )
 
     }
-
 
 
 
@@ -131,7 +194,6 @@ def main():
             "N/A",
 
 
-
         "vs_eth":
 
             "N/A"
@@ -141,19 +203,18 @@ def main():
 
 
 
-
     news = {
 
 
         "title":
 
-            "DeFiChain Intelligence v4",
+            "DeFiChain Intelligence v5",
 
 
 
         "text":
 
-            "DeFiChain Daily Intelligence Report",
+            "Daily DeFiChain Intelligence Report",
 
 
 
@@ -182,11 +243,11 @@ def main():
 
         community,
 
-        network_data
+        network,
+
+        intelligence
 
     )
-
-
 
 
 
@@ -200,8 +261,6 @@ def main():
         report
 
     )
-
-
 
 
 
@@ -224,8 +283,6 @@ def main():
 
 
 
-
-
     # ==========================
     # X
     # ==========================
@@ -245,12 +302,8 @@ def main():
 
 
 
-
-
     print(
-
-        "✅ v4 Report gesendet"
-
+        "✅ v5 Report gesendet"
     )
 
 
@@ -258,6 +311,5 @@ def main():
 
 
 if __name__ == "__main__":
-
 
     main()
