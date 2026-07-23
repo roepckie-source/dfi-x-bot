@@ -108,7 +108,7 @@ def main():
 
     if history:
 
-       current_history = history[0]
+        current_history = history[0]
 
         print(
             f"📚 History: {current_history['title']}"
