@@ -93,10 +93,27 @@ def main():
     )
 
 
-    print(
-        intelligence["status"]
-    )
+    score = intelligence.get(
+    "total",
+    0
+)
 
+
+if score >= 80:
+    status = "🟢 Sehr stark"
+
+elif score >= 60:
+    status = "🟡 Stabil"
+
+elif score >= 40:
+    status = "🟠 Vorsicht"
+
+else:
+    status = "🔴 Kritisch"
+
+
+print(status)
+    
 
 
     # ==========================
