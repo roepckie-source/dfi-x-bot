@@ -12,7 +12,7 @@ on:
 
 
 
-# Erlaubt dem Bot, news_state.json zurückzuschreiben
+# Erlaubt dem Bot, Dateien zurückzuschreiben
 permissions:
 
   contents: write
@@ -56,41 +56,68 @@ jobs:
 
 
 
+
       # Bot starten
       - name: Run DeFiChain Bot
 
         env:
 
+
+          # Discord
+
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
-          API_KEY: ${{ secrets.API_KEY }}
 
-          API_SECRET: ${{ secrets.API_SECRET }}
 
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          # X / Twitter
+          # Mapping auf neue Variablennamen
 
-          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+          X_API_KEY: ${{ secrets.API_KEY }}
+
+          X_API_SECRET: ${{ secrets.API_SECRET }}
+
+          X_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+          X_ACCESS_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+
+
+
+          # Telegram
 
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
 
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
+
+
         run: |
 
           python main_v4_test.py
-          
+
+
+
+
 
       # History-Zähler speichern
+
       - name: Save news state
 
         run: |
 
+
           git config --global user.name "DeFiChain Bot"
+
 
           git config --global user.email "dfi-bot@github.com"
 
+
+
           git add news_state.json
 
+
+
           git commit -m "Update DFI history state" || echo "No changes"
+
+
 
           git push
