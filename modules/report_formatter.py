@@ -8,125 +8,32 @@ from datetime import datetime
 
 
 
-# ======================================
-# Format Helfer
-# ======================================
-
-
 def format_number(value):
 
-    if value in [None, "None", "N/A", ""]:
+    if value is None:
+
         return "N/A"
 
-    try:
 
-        value = float(value)
+    if isinstance(value, float):
 
-        if value >= 1_000_000:
+        if abs(value) >= 1_000_000:
 
             return f"{value/1_000_000:.2f} M"
 
 
-        if value >= 1_000:
+        if abs(value) >= 1_000:
 
             return f"{value/1_000:.2f} K"
 
 
-        return f"{value:.2f}"
+        return f"{value:.4f}"
 
 
-    except:
-
-        return str(value)
-
+    return str(value)
 
 
 
-def format_block(value):
-
-    if value in [None, "None", "N/A", ""]:
-
-        return "N/A"
-
-
-    try:
-
-        return f"{int(value):,}".replace(",", ".")
-
-
-    except:
-
-        return str(value)
-
-
-
-
-def format_percent(value):
-
-    if value in [None, "None", "N/A"]:
-
-        return "N/A"
-
-
-    try:
-
-        value = float(value)
-
-
-        if value >= 0:
-
-            return f"🟢 +{value:.2f} %"
-
-
-        return f"🔴 {value:.2f} %"
-
-
-    except:
-
-        return "N/A"
-
-
-
-
-
-def score_status(score):
-
-    try:
-
-        score = int(score)
-
-
-        if score >= 80:
-
-            return "🟢 Sehr stark"
-
-
-        elif score >= 60:
-
-            return "🟡 Stabil"
-
-
-        elif score >= 40:
-
-            return "🟠 Vorsicht"
-
-
-        else:
-
-            return "🔴 Kritisch"
-
-
-    except:
-
-        return "N/A"
-
-
-
-
-
-# ======================================
-# Report erstellen
-# ======================================
 
 
 def create_report(
@@ -143,31 +50,34 @@ def create_report(
 
         intelligence,
 
-        daily_insight
+        daily_insight,
+
+        history
 
 ):
 
 
-
     now = datetime.now().strftime(
-
         "%d.%m.%Y %H:%M"
-
     )
 
 
 
-    dfi = market.get(
+    score = intelligence.get(
+        "total",
+        "N/A"
+    )
 
-        "dfi",
 
-        {}
-
+    status = intelligence.get(
+        "status",
+        ""
     )
 
 
 
-    report = f"""🚀 DeFiChain Intelligence
+    report = f"""
+🚀 DeFiChain Intelligence
 
 📅 {now}
 
@@ -176,94 +86,162 @@ def create_report(
 🧠 DFI INTELLIGENCE INDEX
 
 ⭐ Score
-{intelligence.get("total",0)}/100
+{score}/100
 
-{score_status(intelligence.get("total",0))}
+{status}
 
 
 📈 Market
-{intelligence.get("market",0)}/100
+{intelligence.get("market", "N/A")}/100
 
 🔥 Tokenomics
-{intelligence.get("tokenomics",0)}/100
+{intelligence.get("tokenomics", "N/A")}/100
 
 🪙 dUSD
-{intelligence.get("dusd",0)}/100
+{intelligence.get("dusd", "N/A")}/100
 
 🏦 Community
-{intelligence.get("community",0)}/100
+{intelligence.get("community", "N/A")}/100
 
 ⛓ Network
-{intelligence.get("network",0)}/100
+{intelligence.get("network", "N/A")}/100
+
+"""
 
 
+
+    # ==========================
+    # Daily Insight
+    # ==========================
+
+
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 💡 DAILY INSIGHT
 
 {daily_insight}
 
+"""
 
+
+
+    # ==========================
+    # History
+    # ==========================
+
+
+    if history:
+
+
+        report += f"""
+━━━━━━━━━━━━━━━━━━
+
+📚 DEFICHAIN HISTORY
+
+Chapter {history.get("id")}
+
+{history.get("title")}
+
+{history.get("text")}
+
+"""
+
+
+
+    # ==========================
+    # Market
+    # ==========================
+
+
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 💰 MARKET
 
 💎 DFI Price
 
-🇺🇸 ${dfi.get("usd","N/A")} | 🇪🇺 €{dfi.get("eur","N/A")}
+🇺🇸 ${market.get("usd","N/A")} | 🇪🇺 €{market.get("eur","N/A")}
 
 
 📊 24h
 
-{format_percent(dfi.get("change"))}
+{market.get("change","N/A")}
 
 
 🏦 Market Cap
 
-${format_number(dfi.get("market_cap"))}
+{market.get("market_cap","N/A")}
 
 
 📊 Volume
 
-${format_number(dfi.get("volume"))}
+{market.get("volume","N/A")}
+
+"""
 
 
 
+    # ==========================
+    # Tokenomics
+    # ==========================
+
+
+    burn = tokenomics.get(
+        "burn",
+        {}
+    )
+
+
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 🔥 TOKENOMICS
 
-
 🔥 Burn
 
-{format_number(tokenomics.get("burn",{}).get("total"))} DFI
+{format_number(
+    burn.get("total")
+)} DFI
 
 
 📈 Emission
 
-{format_number(tokenomics.get("emission"))} DFI
+{format_number(
+    tokenomics.get("emission")
+)} DFI
 
 
 ⚖️ Net
 
-🟢 +{format_number(tokenomics.get("net_change"))} DFI
+{tokenomics.get("status","")}
+{format_number(
+    tokenomics.get("balance")
+)} DFI
 
 
 
-🏠 Address {format_number(tokenomics.get("burn",{}).get("address"))}
+🏠 Address {format_number(burn.get("address"))}
 
-↩️ Payback {format_number(tokenomics.get("burn",{}).get("payback"))}
+↩️ Payback {format_number(burn.get("payback"))}
 
-🔨 Auction {format_number(tokenomics.get("burn",{}).get("auction"))}
+🔨 Auction {format_number(burn.get("auction"))}
 
-💸 Fees {format_number(tokenomics.get("burn",{}).get("fees"))}
+💸 Fees {format_number(burn.get("fees"))}
+
+"""
 
 
 
+    # ==========================
+    # dUSD
+    # ==========================
+
+
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 🪙 DUSD HEALTH
-
 
 💵 Price
 
@@ -277,20 +255,32 @@ ${dusd.get("price","N/A")}
 
 ❤️ Health Score
 
-{dusd.get("health_score",0)}/100
+{dusd.get("health_score","N/A")}/100
 
 
 🔒 Locked
 
-{format_number(dusd.get("locked_dusd"))} DUSD
+{format_number(
+    dusd.get("locked")
+)} DUSD
 
 
 🔥 Burned
 
-{format_number(dusd.get("burned_dusd"))} DUSD
+{format_number(
+    dusd.get("burned")
+)} DUSD
+
+"""
 
 
 
+    # ==========================
+    # Community Fund
+    # ==========================
+
+
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 🏦 COMMUNITY FUND
@@ -298,25 +288,39 @@ ${dusd.get("price","N/A")}
 
 🪙 DFI
 
-{format_number(community.get("dfi"))} DFI
+{format_number(
+    community.get("dfi")
+)} DFI
 
 
 💵 dUSD
 
-{format_number(community.get("dusd"))} dUSD
+{format_number(
+    community.get("dusd")
+)} dUSD
 
 
 📈 Inflow
 
-{format_number(community.get("daily_inflow"))} DFI
+{format_number(
+    community.get("daily_inflow")
+)} DFI
 
 
 💰 Value
 
-{format_number(community.get("usd_value"))}
+{community.get("usd_value","N/A")}
+
+"""
 
 
 
+    # ==========================
+    # Network
+    # ==========================
+
+
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 ⛓ NETWORK
@@ -329,7 +333,9 @@ ${dusd.get("price","N/A")}
 
 🧱 Block Height
 
-{format_block(network.get("block_height"))}
+{format_number(
+    network.get("block_height")
+)}
 
 
 ⏱ Last Block
@@ -339,9 +345,14 @@ ${dusd.get("price","N/A")}
 
 🖥 Masternodes
 
-{format_block(network.get("masternodes"))}
+{format_number(
+    network.get("masternodes")
+)}
+
+"""
 
 
+    report += """
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -349,4 +360,4 @@ ${dusd.get("price","N/A")}
 """
 
 
-    return report
+    return report.strip()
