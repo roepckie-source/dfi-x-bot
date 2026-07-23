@@ -1,6 +1,7 @@
 # ======================================
 # DeFiChain Intelligence v5
 # Main Test Runner
+# + Daily Insight Engine
 # ======================================
 
 
@@ -15,6 +16,10 @@ from modules.report_formatter import create_report
 from modules.intelligence import (
     calculate_intelligence_score,
     get_score_status
+)
+
+from modules.insight_engine import (
+    generate_daily_insight
 )
 
 from language_manager import load_language
@@ -112,6 +117,37 @@ def main():
 
 
     # ==========================
+    # Daily Insight
+    # ==========================
+
+
+    daily_insight = generate_daily_insight(
+
+        market,
+
+        tokenomics,
+
+        dusd,
+
+        community,
+
+        blockchain
+
+    )
+
+
+    print(
+        "💡 Daily Insight:"
+    )
+
+
+    print(
+        daily_insight
+    )
+
+
+
+    # ==========================
     # Network Adapter
     # ==========================
 
@@ -122,7 +158,7 @@ def main():
         "network_status":
 
             blockchain.get(
-                "status",
+                "network_status",
                 "🟢 Online"
             ),
 
@@ -225,7 +261,7 @@ def main():
 
         "text":
 
-            "Daily DeFiChain Intelligence Report",
+            daily_insight,
 
 
 
@@ -239,7 +275,7 @@ def main():
 
 
     # ==========================
-    # Report
+    # Report erstellen
     # ==========================
 
 
@@ -255,7 +291,9 @@ def main():
 
         network,
 
-        intelligence
+        intelligence,
+
+        daily_insight
 
     )
 
