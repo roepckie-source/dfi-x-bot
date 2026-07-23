@@ -73,19 +73,19 @@ def main():
     # ==========================
 
 
-    intelligence = calculate_intelligence(
+    intelligence = calculate_intelligence_score(
 
-        market,
+    market,
 
-        tokenomics,
+    tokenomics,
 
-        dusd,
+    dusd,
 
-        community,
+    community,
 
-        blockchain
+    blockchain
 
-    )
+    )    
 
 
     print(
