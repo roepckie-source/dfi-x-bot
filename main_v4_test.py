@@ -132,7 +132,7 @@ def main():
     # ==========================
 
 
-    history = get_history()
+    history = load_history()
 
 
     if history:
