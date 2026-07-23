@@ -33,14 +33,12 @@ X_ACCESS_SECRET = os.environ.get(
 
 
 
-
 # ======================================
 # X Client
 # ======================================
 
 
 def get_client():
-
 
     return tweepy.Client(
 
@@ -97,14 +95,22 @@ def short_number(value):
 
 
 def send_x_thread(
+
     market,
+
     tokenomics,
+
     dusd,
+
     network,
+
     intelligence,
+
     history=None
+
 ):
-    
+
+
     try:
 
 
@@ -161,21 +167,40 @@ ${short_number(dfi.get('market_cap'))}
 
 
 
+
+
         # ==============================
         # POST 2 TOKENOMICS
         # ==============================
 
 
-        post2 = """
+        burn = tokenomics.get(
+
+            "burn",
+
+            {}
+
+        )
+
+
+        post2 = f"""
 🔥 DeFiChain Tokenomics
 
 🔥 Burn > Emission
 
-⚖️ Net deflation:
-+126.33M DFI
+⚖️ Net balance:
+
+{short_number(
+    tokenomics.get("balance")
+)} DFI
+
 
 ⛓ Network:
-🟢 Online
+
+{network.get(
+    "network_status",
+    "N/A"
+)}
 
 The fundamentals remain strong.
 
@@ -203,25 +228,33 @@ The fundamentals remain strong.
 
 
 
+
+
         # ==============================
         # POST 3 INTELLIGENCE + HISTORY
         # ==============================
 
 
-score = intelligence.get(
-    "total",
-    "N/A"
-)
+        score = intelligence.get(
+
+            "total",
+
+            "N/A"
+
+        )
 
 
-status = intelligence.get(
-    "status",
-    "N/A"
-)
+        status = intelligence.get(
+
+            "status",
+
+            "N/A"
+
+        )
 
 
 
-post3 = f"""
+        post3 = f"""
 🧠 DeFiChain Intelligence
 
 ⭐ Daily Score
@@ -230,33 +263,42 @@ post3 = f"""
 
 {status}
 
+
 🔥 Tokenomics:
 Strong
+
 
 ⚠️ Main Risk:
 dUSD stability
 
+
 Tracking:
+
 Market | Health | Network
 """.strip()
 
 
 
-# ==============================
-# HISTORY INSIGHT
-# ==============================
 
 
-if history:
+        # ==============================
+        # HISTORY INSIGHT
+        # ==============================
 
-    post3 += f"""
+
+        if history:
+
+
+            post3 += f"""
 
 📚 History Insight
+
 
 {history.get(
     "title",
     "DeFiChain History"
 )}
+
 
 💡 {history.get(
     "text",
@@ -266,10 +308,15 @@ if history:
 
 
 
-post3 += """
+
+
+        post3 += """
 
 #DeFiChain #DFI
 """.strip()
+
+
+
 
 
         result3 = client.create_tweet(
@@ -292,7 +339,9 @@ post3 += """
 
 
         print(
+
             "X Thread erfolgreich"
+
         )
 
 
@@ -302,7 +351,10 @@ post3 += """
 
 
         print(
+
             "⚠️ X Posting aktuell nicht möglich"
+
         )
+
 
         print(e)
