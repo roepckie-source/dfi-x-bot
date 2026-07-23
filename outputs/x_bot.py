@@ -312,7 +312,11 @@ Market | Health | Network
 
 
 
+        # X Zeichenlimit absichern
 
+        if len(post3) > 280:
+
+            post3 = post3[:277] + "..."
 
         result3 = client.create_tweet(
 
