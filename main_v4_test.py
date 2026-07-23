@@ -94,27 +94,21 @@ def main():
     print(f"🧠 Intelligence Score: {score} /100")
     print(status)
     
- 
+
     # ==========================
-    # History
+    # History Engine v2
     # ==========================
 
 
-    history = load_history()
+    current_history = get_history()
 
 
-    current_history = None
-
-
-    if history:
-
-        current_history = history[0]
+    if current_history:
 
         print(
             f"📚 History: {current_history['title']}"
         )
-    
-
+ 
     # ==========================
     # Network Adapter
     # ==========================
