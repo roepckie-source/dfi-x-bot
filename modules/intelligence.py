@@ -1,43 +1,64 @@
 # ======================================
 # DeFiChain Intelligence v5
-# Intelligence Engine
+# Intelligence Score Engine
 # ======================================
+
+
+def clamp(value):
+
+    if value < 0:
+        return 0
+
+    if value > 100:
+        return 100
+
+    return round(value)
+
+
 
 
 def calculate_intelligence_score(
 
-    market,
-    tokenomics,
-    dusd,
-    community,
-    network
+        market,
+        tokenomics,
+        dusd,
+        community,
+        network
 
 ):
 
 
-    # ===============================
-    # MARKET
-    # ===============================
+    # ==============================
+    # MARKET SCORE
+    # ==============================
 
     market_score = 50
+
 
     try:
 
         change = float(
-            market["dfi"]["change"]
+            market
+            .get("dfi", {})
+            .get("change", 0)
         )
 
-        if change > 10:
-            market_score += 20
 
-        elif change > 5:
-            market_score += 10
+        if change >= 10:
+            market_score += 25
 
-        elif change < -10:
-            market_score -= 20
+        elif change >= 5:
+            market_score += 15
 
-        elif change < -5:
-            market_score -= 10
+        elif change >= 0:
+            market_score += 5
+
+        elif change <= -10:
+            market_score -= 25
+
+        elif change <= -5:
+            market_score -= 15
+
 
     except:
 
@@ -45,21 +66,44 @@ def calculate_intelligence_score(
 
 
 
-    # ===============================
-    # TOKENOMICS
-    # ===============================
+    market_score = clamp(
+        market_score
+    )
 
-    tokenomics_score = 100
+
+
+    # ==============================
+    # TOKENOMICS SCORE
+    # ==============================
+
+    tokenomics_score = 50
+
 
     try:
 
-        burn = tokenomics["burn"]["total"]
+        burn = float(
+            tokenomics
+            .get("burn", {})
+            .get("total", 0)
+        )
 
-        emission = tokenomics["emission"]
 
-        if burn < emission:
+        emission = float(
+            tokenomics
+            .get("emission", 0)
+        )
+
+
+        if burn > emission:
+
+            tokenomics_score = 95
+
+
+        else:
 
             tokenomics_score = 40
+
+
 
     except:
 
@@ -67,38 +111,62 @@ def calculate_intelligence_score(
 
 
 
-    # ===============================
-    # DUSD
-    # ===============================
 
-    dusd_score = dusd.get(
-        "health_score",
-        0
+    # ==============================
+    # DUSD SCORE
+    # ==============================
+
+    dusd_score = int(
+
+        dusd
+        .get(
+            "health_score",
+            0
+        )
+
+    )
+
+
+    dusd_score = clamp(
+        dusd_score
     )
 
 
 
-    # ===============================
-    # COMMUNITY
-    # ===============================
 
-    community_score = 70
+    # ==============================
+    # COMMUNITY SCORE
+    # ==============================
+
+    community_score = 50
+
 
     try:
 
-        dfi = community["dfi"]
+        dfi = float(
+            community
+            .get(
+                "dfi",
+                0
+            )
+        )
 
-        if dfi > 9000000:
 
-            community_score = 90
+        if dfi >= 10000000:
 
-        elif dfi > 5000000:
+            community_score = 95
+
+
+        elif dfi >= 5000000:
 
             community_score = 75
+
 
         else:
 
             community_score = 50
+
+
 
     except:
 
@@ -106,23 +174,27 @@ def calculate_intelligence_score(
 
 
 
-    # ===============================
-    # NETWORK
-    # ===============================
 
-    network_score = 100
+    # ==============================
+    # NETWORK SCORE
+    # ==============================
+
+    network_score = 50
+
 
     if network.get(
         "network_status"
-    ) != "🟢 Online":
+    ) == "🟢 Online":
 
-        network_score = 50
+        network_score = 100
 
 
 
-    # ===============================
-    # Gesamt
-    # ===============================
+
+    # ==============================
+    # Gesamt Score
+    # ==============================
+
 
     total = round(
 
@@ -142,6 +214,7 @@ def calculate_intelligence_score(
 
     return {
 
+
         "total": total,
 
         "market": market_score,
@@ -155,3 +228,28 @@ def calculate_intelligence_score(
         "network": network_score
 
     }
+
+
+
+
+def get_score_status(score):
+
+
+    if score >= 80:
+
+        return "🟢 Sehr stark"
+
+
+    elif score >= 60:
+
+        return "🟡 Stabil"
+
+
+    elif score >= 40:
+
+        return "🟠 Vorsicht"
+
+
+    else:
+
+        return "🔴 Kritisch"
