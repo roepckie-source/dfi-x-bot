@@ -1,3 +1,77 @@
+# ======================================
+# DeFiChain Intelligence v5
+# Main Runner
+# ======================================
+
+
+from modules.market import get_market_data
+from modules.tokenomics import get_tokenomics_data
+from modules.dusd import get_dusd_data
+from modules.community import get_community_data
+from modules.blockchain import get_blockchain_data
+
+
+from modules.report_formatter import create_report
+from modules.intelligence import calculate_intelligence
+from modules.insights import generate_daily_insight
+from modules.history_engine import get_history
+
+
+from outputs.telegram_bot import send_telegram
+from outputs.discord_bot import send_discord
+from outputs.x_bot import send_x_thread
+
+
+from language_manager import load_language
+
+
+
+def main():
+
+
+    print(
+        "🚀 DeFiChain Intelligence v5 startet..."
+    )
+
+
+
+    # ==========================
+    # Sprache
+    # ==========================
+
+
+    language = "de"
+
+
+    print(
+        f"🌍 Sprache: {language}"
+    )
+
+
+    load_language(
+        language
+    )
+
+
+
+    # ==========================
+    # Daten laden
+    # ==========================
+
+
+    market = get_market_data()
+
+
+    tokenomics = get_tokenomics_data()
+
+
+    dusd = get_dusd_data()
+
+
+    community = get_community_data()
+
+
+    blockchain = get_blockchain_data()
 # ==========================
 # Daten laden
 # ==========================
