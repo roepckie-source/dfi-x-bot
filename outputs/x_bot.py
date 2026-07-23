@@ -97,18 +97,14 @@ def short_number(value):
 
 
 def send_x_thread(
-
-        market,
-
-        network,
-
-        comparison,
-
-        news
-
+    market,
+    tokenomics,
+    dusd,
+    network,
+    intelligence,
+    history=None
 ):
-
-
+    
     try:
 
 
