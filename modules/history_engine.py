@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# History Engine v2
+# History Engine v2.1
 # ======================================
 
 import json
@@ -10,6 +10,10 @@ HISTORY_FILE = "dfi_history.json"
 STATE_FILE = "history_state.json"
 
 
+
+# ======================================
+# History laden
+# ======================================
 
 def load_history():
 
@@ -35,6 +39,10 @@ def load_history():
 
 
 
+# ======================================
+# State laden
+# ======================================
+
 def load_state():
 
     try:
@@ -51,10 +59,15 @@ def load_state():
     except:
 
         return {
-            "last_id": 0
+            "last_id": 0,
+            "last_title": ""
         }
 
 
+
+# ======================================
+# State speichern
+# ======================================
 
 def save_state(state):
 
@@ -83,7 +96,12 @@ def save_state(state):
 
 
 
+# ======================================
+# Intelligentes Kapitel auswählen
+# ======================================
+
 def get_history():
+
 
     history = load_history()
 
@@ -97,10 +115,20 @@ def get_history():
     state = load_state()
 
 
-    last_id = state.get(
-        "last_id",
-        0
-    )
+
+    try:
+
+        last_id = int(
+            state.get(
+                "last_id",
+                0
+            )
+        )
+
+    except:
+
+        last_id = 0
+
 
 
     next_id = last_id + 1
@@ -121,6 +149,7 @@ def get_history():
 
     for chapter in history:
 
+
         if chapter.get("id") == next_id:
 
             current = chapter
@@ -128,6 +157,8 @@ def get_history():
             break
 
 
+
+    # Falls Kapitel nicht gefunden
 
     if current is None:
 
@@ -137,7 +168,17 @@ def get_history():
 
     # Fortschritt speichern
 
-    state["last_id"] = next_id
+    state["last_id"] = current.get(
+        "id",
+        1
+    )
+
+
+    state["last_title"] = current.get(
+        "title",
+        ""
+    )
+
 
     save_state(state)
 
