@@ -105,10 +105,11 @@ def main():
 
     if history:
 
-        print(
-            f"📚 History: {history['title']}"
-        )
+    current_history = history[0]
 
+    print(
+        f"📚 History: {current_history['title']}"
+    )
 
 
     # ==========================
