@@ -11,7 +11,7 @@ from modules.community import get_community_data
 from modules.blockchain import get_blockchain_data
 
 from modules.report_formatter import create_report
-from modules.intelligence import calculate_intelligence
+from modules.intelligence import calculate_intelligence_score
 from modules.insights import generate_daily_insight
 from modules.history_engine import get_history
 
