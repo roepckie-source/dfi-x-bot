@@ -1,6 +1,6 @@
 # ======================================
-# DeFiChain Intelligence v4
-# Compact Telegram Report Formatter
+# DeFiChain Intelligence v5
+# Compact Report Formatter
 # ======================================
 
 
@@ -37,6 +37,7 @@ def format_number(value):
 
 
 
+
 def format_block(value):
 
     if value in [None, "None", "N/A", ""]:
@@ -49,6 +50,7 @@ def format_block(value):
     except:
 
         return value
+
 
 
 
@@ -75,18 +77,50 @@ def format_percent(value):
 
 
 
+def score_status(score):
+
+    try:
+
+        score = int(score)
+
+        if score >= 80:
+            return "🟢 Sehr stark"
+
+        elif score >= 60:
+            return "🟡 Stabil"
+
+        elif score >= 40:
+            return "🟠 Vorsicht"
+
+        else:
+            return "🔴 Kritisch"
+
+    except:
+
+        return "N/A"
+
+
+
+
+
 # ======================================
-# Report
+# Report erstellen
 # ======================================
 
 
 def create_report(
 
         market,
+
         tokenomics,
+
         dusd,
+
         community,
-        network
+
+        network,
+
+        intelligence
 
 ):
 
@@ -104,57 +138,35 @@ def create_report(
 
 
 
-    # Net Change berechnen
-
-    net_change = tokenomics.get(
-        "net_change"
-    )
-
-
-    if net_change in [
-        None,
-        "N/A"
-    ]:
-
-        try:
-
-            net_change = (
-
-                float(
-                    tokenomics
-                    .get(
-                        "burn",
-                        {}
-                    )
-                    .get(
-                        "total",
-                        0
-                    )
-                )
-
-                -
-
-                float(
-                    tokenomics
-                    .get(
-                        "emission",
-                        0
-                    )
-                )
-
-            )
-
-
-        except:
-
-            net_change = "N/A"
-
-
-
-
     report = f"""🚀 DeFiChain Intelligence
 
 📅 {now}
+
+━━━━━━━━━━━━━━━━━━
+
+🧠 DFI INTELLIGENCE INDEX
+
+⭐ Score
+{intelligence.get("total",0)}/100
+
+{score_status(intelligence.get("total",0))}
+
+
+📈 Market
+{intelligence.get("market",0)}/100
+
+🔥 Tokenomics
+{intelligence.get("tokenomics",0)}/100
+
+🪙 dUSD
+{intelligence.get("dusd",0)}/100
+
+🏦 Community
+{intelligence.get("community",0)}/100
+
+⛓ Network
+{intelligence.get("network",0)}/100
+
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -184,12 +196,15 @@ ${format_number(dfi.get("volume"))}
 {format_number(tokenomics.get("emission"))} DFI
 
 ⚖️ Net
-🟢 +{format_number(net_change)} DFI
+🟢 +{format_number(tokenomics.get("net_change"))} DFI
 
 
 🏠 Address {format_number(tokenomics.get("burn",{}).get("address"))}
+
 ↩️ Payback {format_number(tokenomics.get("burn",{}).get("payback"))}
+
 🔨 Auction {format_number(tokenomics.get("burn",{}).get("auction"))}
+
 💸 Fees {format_number(tokenomics.get("burn",{}).get("fees"))}
 
 
@@ -203,7 +218,7 @@ ${dusd.get("price","N/A")}
 📉 Peg
 {dusd.get("peg_difference","N/A")} %
 
-❤️ Health
+❤️ Health Score
 {dusd.get("health_score",0)}/100
 
 🔒 Locked
