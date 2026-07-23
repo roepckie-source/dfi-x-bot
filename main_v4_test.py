@@ -94,33 +94,7 @@ def main():
     print(f"🧠 Intelligence Score: {score} /100")
     print(status)
     
-    # ==========================
-    # Daily Insight
-    # ==========================
-
-
-    daily_insight = generate_daily_insight(
-
-        market,
-
-        tokenomics,
-
-        dusd,
-
-        blockchain
-
-    )
-
-
-    print(
-        "💡 Daily Insight:"
-    )
-
-    print(
-        daily_insight
-    )
-
-
+ 
     # ==========================
     # History
     # ==========================
@@ -205,6 +179,31 @@ def main():
 
     }
 
+    # ==========================
+    # Daily Insight
+    # ==========================
+
+
+    daily_insight = generate_daily_insight(
+
+        market,
+
+        tokenomics,
+
+        dusd,
+
+        blockchain
+
+    )
+
+
+    print(
+        "💡 Daily Insight:"
+    )
+
+    print(
+        daily_insight
+    )
 
 
     # ==========================
