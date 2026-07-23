@@ -103,18 +103,20 @@ def main():
     current_history = get_history()
 
 
-    if current_history:
+    if current_history and isinstance(current_history, dict):
 
         print(
-            f"📚 History: {current_history['title']}"
+            f"📚 History: {current_history.get('title','N/A')}"
         )
 
     else:
 
+        current_history = None
+
         print(
             "📚 History: keine Daten"
         )
-
+  
 
     # ==========================
     # Network Adapter
