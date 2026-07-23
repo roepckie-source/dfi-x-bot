@@ -192,7 +192,9 @@ def main():
 
         dusd,
 
-        blockchain
+        community,
+        
+        network,
 
     )
 
