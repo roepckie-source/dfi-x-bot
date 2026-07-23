@@ -289,7 +289,7 @@ Market | Health | Network
         if history:
 
 
-    post3 += f"""
+            post3 += f"""
 
 📚 History
 
