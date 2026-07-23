@@ -131,7 +131,7 @@ def create_report(
     # ==========================
 
 
-    if history:
+    if history and isinstance(history, dict):
 
 
         report += f"""
@@ -139,15 +139,14 @@ def create_report(
 
 📚 DEFICHAIN HISTORY
 
-Chapter {history.get("id")}
+Chapter {history.get("id","N/A")}
 
-{history.get("title")}
+{history.get("title","")}
 
-{history.get("text")}
+{history.get("text","")}
 
 """
-
-
+  
 
     # ==========================
     # Market
