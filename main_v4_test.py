@@ -93,7 +93,7 @@ def main():
 
     print(f"🧠 Intelligence Score: {score} /100")
     print(status)
-    
+
 
     # ==========================
     # History Engine v2
@@ -108,13 +108,21 @@ def main():
         print(
             f"📚 History: {current_history['title']}"
         )
- 
+
+    else:
+
+        print(
+            "📚 History: keine Daten"
+        )
+
+
     # ==========================
     # Network Adapter
     # ==========================
 
 
     network = {
+   
 
 
         "network_status":
