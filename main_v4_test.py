@@ -1,218 +1,113 @@
-# ======================================
-# DeFiChain Intelligence v5
-# Main Runner
-# + Daily Insight
-# + History Engine
-# ======================================
+# ==========================
+# Daten laden
+# ==========================
 
 
-from modules.market import get_market_data
-from modules.tokenomics import get_tokenomics_data
-from modules.dusd import get_dusd_data
-from modules.community import get_community_data
-from modules.blockchain import get_blockchain_data
+market = get_market_data()
 
 
-from modules.report_formatter import create_report
+tokenomics = get_tokenomics_data()
 
 
-from modules.intelligence import (
-    calculate_intelligence_score,
-    get_score_status
+dusd = get_dusd_data()
+
+
+community = get_community_data()
+
+
+blockchain = get_blockchain_data()
+
+
+
+# ==========================
+# Intelligence Engine
+# ==========================
+
+
+from modules.intelligence import calculate_intelligence
+
+
+intelligence = calculate_intelligence(
+
+    market,
+
+    tokenomics,
+
+    dusd,
+
+    community,
+
+    blockchain
+
 )
 
 
-from modules.insight_engine import (
-    generate_daily_insight
+
+print(
+    f"🧠 Intelligence Score: {intelligence['total']} /100"
 )
 
 
-from modules.history_engine import (
-    get_daily_history
+print(
+    intelligence["status"]
 )
 
 
-from language_manager import load_language
+
+# ==========================
+# Daily Insight
+# ==========================
 
 
-from outputs.telegram_bot import send_telegram
-from outputs.discord_bot import send_discord
-from outputs.x_bot import send_x_thread
+from modules.insights import generate_daily_insight
 
 
+daily_insight = generate_daily_insight(
+
+    market,
+
+    tokenomics,
+
+    dusd,
+
+    blockchain
+
+)
 
 
-
-def main():
-
-
-    print(
-        "🚀 DeFiChain Intelligence v5 startet..."
-    )
+print(
+    "💡 Daily Insight:"
+)
 
 
-
-    # ==========================
-    # Sprache
-    # ==========================
-
-    language = "de"
-
-
-    print(
-        f"🌍 Sprache: {language}"
-    )
-
-
-    load_language(
-        language
-    )
+print(
+    daily_insight
+)
 
 
 
-    # ==========================
-    # Daten laden
-    # ==========================
+# ==========================
+# History Engine
+# ==========================
 
 
-    market = get_market_data()
+from modules.history_engine import get_history
 
 
-    tokenomics = get_tokenomics_data()
+history = get_history()
 
 
-    dusd = get_dusd_data()
-
-
-    community = get_community_data()
-
-
-    blockchain = get_blockchain_data()
-
-
-
-    # ==========================
-    # Intelligence Score
-    # ==========================
-
-
-    intelligence = calculate_intelligence_score(
-
-        market,
-
-        tokenomics,
-
-        dusd,
-
-        community,
-
-        blockchain
-
-    )
-
+if history:
 
     print(
-
-        "🧠 Intelligence Score:",
-
-        intelligence.get("total"),
-
-        "/100"
-
-    )
-
-
-    print(
-
-        get_score_status(
-
-            intelligence.get("total")
-
-        )
-
+        f"📚 History: {history['title']}"
     )
 
 
 
-    # ==========================
-    # Daily Insight
-    # ==========================
-
-
-    daily_insight = generate_daily_insight(
-
-        market,
-
-        tokenomics,
-
-        dusd,
-
-        community,
-
-        blockchain
-
-    )
-
-
-    print(
-
-        "💡 Daily Insight:"
-
-    )
-
-
-    print(
-
-        daily_insight
-
-    )
-
-
-
-    # ==========================
-    # History Chapter
-    # ==========================
-
-
-    history = get_daily_history()
-
-
-
-    if history:
-
-
-        print(
-
-            "📚 History:",
-
-            history["title"]
-
-        )
-
-
-    else:
-
-
-        history = {
-
-
-            "title":
-
-            "No History",
-
-
-            "text":
-
-            ""
-
-        }
-
-
-
-
-    # ==========================
+# ==========================
 # Network Adapter
-# Kompatibilität v5
+# Alte Bots kompatibel
 # ==========================
 
 
@@ -267,9 +162,7 @@ network = {
 
 
 
-    # ==========================
-    # Alte Discord/X Schnittstelle
-    # ==========================
+    # alte Discord/X Werte
 
 
     "burned_dfi":
@@ -314,158 +207,237 @@ network = {
 
 
 }
-   
+
+
+
+# ==========================
+# Vergleich
+# ==========================
+
+
+comparison = {
+
+
+    "vs_btc":
+
+        "N/A",
+
+
+    "vs_eth":
+
+        "N/A"
+
+
+}
+
+
+
+# ==========================
+# News Adapter
+# ==========================
+
+
+news = {
+
+
+    "title":
+
+        "DeFiChain Intelligence v5",
+
+
+
+    "text":
+
+        "Daily DeFiChain Intelligence Report",
+
+
+
+    "hashtags":
+
+        "#DeFiChain #DFI"
+
+
+}
+
+
+
+# ==========================
+# Report erstellen
+# ==========================
+
+
+report = create_report(
+
+    market,
+
+    tokenomics,
+
+    dusd,
+
+    community,
+
+    network,
+
+    intelligence,
+
+    daily_insight,
+
+    history
+
+)
+
+# ======================================
+# DeFiChain Intelligence v5
+# Main Runner
+# ======================================
+
+
+from modules.market import get_market_data
+from modules.tokenomics import get_tokenomics_data
+from modules.dusd import get_dusd_data
+from modules.community import get_community_data
+from modules.blockchain import get_blockchain_data
+
+from modules.report_formatter import create_report
+
+from modules.intelligence import calculate_intelligence
+
+from modules.insights import generate_daily_insight
+
+from modules.history_engine import get_history
+
+
+from outputs.telegram_bot import send_telegram
+from outputs.discord_bot import send_discord
+from outputs.x_bot import send_x_thread
+
+
+from language_manager import load_language
+
+
+
+
+def main():
+
+
+    print(
+        "🚀 DeFiChain Intelligence v5 startet..."
+    )
+
+
 
     # ==========================
-    # Vergleich
+    # Sprache
     # ==========================
 
 
-    comparison = {
+    language = "de"
 
 
-        "vs_btc":
-
-            "N/A",
-
-
-        "vs_eth":
-
-            "N/A"
-
-    }
+    print(
+        f"🌍 Sprache: {language}"
+    )
 
 
-    # ==========================
-    # News Adapter
-    # ==========================
-
-
-    news = {
-
-
-        "title":
-
-            "DeFiChain Intelligence v5",
-
-
-
-        "text":
-
-            daily_insight,
-
-
-
-        "hashtags":
-
-            "#DeFiChain #DFI"
-
-    }
-
+    load_language(
+        language
+    )
 
 
 
     # ==========================
-    # Report
+    # Daten laden
     # ==========================
 
 
-    report = create_report(
+    market = get_market_data()
 
+
+    tokenomics = get_tokenomics_data()
+
+
+    dusd = get_dusd_data()
+
+
+    community = get_community_data()
+
+
+    blockchain = get_blockchain_data()
+
+
+
+    # ==========================
+    # Intelligence
+    # ==========================
+
+
+    intelligence = calculate_intelligence(
 
         market,
-
 
         tokenomics,
 
-
         dusd,
-
 
         community,
 
-
-        network,
-
-
-        intelligence,
-
-
-        daily_insight,
-
-
-        history
-
+        blockchain
 
     )
-
-
-
-
-    # ==========================
-    # Telegram
-    # ==========================
-
-
-    send_telegram(
-
-        report
-
-    )
-
-
-
-
-    # ==========================
-    # Discord
-    # ==========================
-
-
-    send_discord(
-
-        market,
-
-        network,
-
-        comparison,
-
-        news
-
-    )
-
-
-
-
-    # ==========================
-    # X Thread
-    # ==========================
-
-
-    send_x_thread(
-
-        market,
-
-        network,
-
-        comparison,
-
-        news
-
-    )
-
 
 
 
     print(
+        f"🧠 Intelligence Score: {intelligence['total']} /100"
+    )
 
-        "✅ v5 Report gesendet"
 
+    print(
+        intelligence["status"]
     )
 
 
 
+    # ==========================
+    # Daily Insight
+    # ==========================
 
 
-if __name__ == "__main__":
+    daily_insight = generate_daily_insight(
 
-    main()
+        market,
+
+        tokenomics,
+
+        dusd,
+
+        blockchain
+
+    )
+
+
+    print(
+        "💡 Daily Insight:"
+    )
+
+
+    print(
+        daily_insight
+    )
+
+
+    
+    # ==========================
+    # History
+    # ==========================
+
+
+    history = get_history()
+
+
+    if history:
+
+
+        print(
+            f"📚 History: {history['title']}"
+        )
