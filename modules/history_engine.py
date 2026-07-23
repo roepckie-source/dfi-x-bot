@@ -4,7 +4,6 @@
 # ======================================
 
 import json
-import os
 
 
 HISTORY_FILE = "dfi_history.json"
@@ -36,7 +35,6 @@ def load_history():
 
 
 
-
 def load_state():
 
     try:
@@ -52,13 +50,9 @@ def load_state():
 
     except:
 
-
         return {
-
             "last_id": 0
-
         }
-
 
 
 
@@ -89,7 +83,6 @@ def save_state(state):
 
 
 
-
 def get_history():
 
     history = load_history()
@@ -110,12 +103,11 @@ def get_history():
     )
 
 
-
     next_id = last_id + 1
 
 
 
-    # nach Kapitel 100 wieder von vorne
+    # Nach Kapitel 100 wieder von vorne
 
     if next_id > len(history):
 
@@ -123,23 +115,23 @@ def get_history():
 
 
 
-    chapter = None
+    current = None
 
 
 
-    for item in history:
+    for chapter in history:
 
-        if item.get("id") == next_id:
+        if chapter.get("id") == next_id:
 
-            chapter = item
+            current = chapter
 
             break
 
 
 
-    if chapter is None:
+    if current is None:
 
-        chapter = history[0]
+        current = history[0]
 
 
 
@@ -151,4 +143,4 @@ def get_history():
 
 
 
-    return chapter
+    return current
