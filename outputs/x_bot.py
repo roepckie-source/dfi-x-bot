@@ -1,133 +1,266 @@
+# ======================================
+# DeFiChain Intelligence v5
+# X / Twitter Thread Bot
+# ======================================
+
+
+import os
 import tweepy
 
-from config import (
-    API_KEY,
-    API_SECRET,
-    ACCESS_TOKEN,
-    ACCESS_TOKEN_SECRET
+
+
+# ======================================
+# X API Zugang
+# ======================================
+
+
+X_API_KEY = os.environ.get(
+    "X_API_KEY"
 )
 
-from utils import (
-    format_percent,
-    format_large_number
+X_API_SECRET = os.environ.get(
+    "X_API_SECRET"
+)
+
+X_ACCESS_TOKEN = os.environ.get(
+    "X_ACCESS_TOKEN"
+)
+
+X_ACCESS_SECRET = os.environ.get(
+    "X_ACCESS_SECRET"
 )
 
 
-# ==============================
-# X EINZELPOST
-# ==============================
 
-def send_x_thread(
-    market,
-    network,
-    comparison,
-    news
-):
+
+
+# ======================================
+# X Client
+# ======================================
+
+
+def get_client():
+
+
+    return tweepy.Client(
+
+        consumer_key=X_API_KEY,
+
+        consumer_secret=X_API_SECRET,
+
+        access_token=X_ACCESS_TOKEN,
+
+        access_token_secret=X_ACCESS_SECRET
+
+    )
+
+
+
+
+
+# ======================================
+# Format Helfer
+# ======================================
+
+
+def short_number(value):
 
     try:
 
-        client = tweepy.Client(
+        value = float(value)
 
-            consumer_key=API_KEY,
-            consumer_secret=API_SECRET,
-            access_token=ACCESS_TOKEN,
-            access_token_secret=ACCESS_TOKEN_SECRET
+
+        if value >= 1_000_000:
+
+            return f"{value/1_000_000:.2f}M"
+
+
+        if value >= 1_000:
+
+            return f"{value/1_000:.2f}K"
+
+
+        return f"{value:.2f}"
+
+
+    except:
+
+        return "N/A"
+
+
+
+
+
+# ======================================
+# X Thread senden
+# ======================================
+
+
+def send_x_thread(
+
+        market,
+
+        network,
+
+        comparison,
+
+        news
+
+):
+
+
+    try:
+
+
+        client = get_client()
+
+
+
+        dfi = market.get(
+
+            "dfi",
+
+            {}
 
         )
 
 
-        dfi = market["dfi"]
+
+        # ==============================
+        # POST 1 MARKET
+        # ==============================
 
 
-        tweet = f"""🚀 DeFiChain $DFI Daily Update 🌍
+        post1 = f"""
+🚀 DeFiChain Market Update
 
+💎 DFI
+${dfi.get('usd','N/A')}
 
-📅 {news.get('date','')}
+📊 24h
+{dfi.get('change','N/A')}%
 
-🤖 Report #{news.get('report','')}
-
-📚 History #{news.get('id',0)}/100
-
-
-💰 Price:
-
-${dfi.get('usd',0):.8f}
-
-🇪🇺 €{dfi.get('eur',0):.8f}
-
-
-{format_percent(
-    dfi.get('usd_24h_change',0)
-)}
-
-
-📊 Market Cap:
-
-${format_large_number(
-    dfi.get('usd_market_cap',0)
-)}
-
-
-🎯 {news.get('title','')}
-
-
-{news.get('text','')}
-
+🏦 Market Cap
+${short_number(dfi.get('market_cap'))}
 
 #DeFiChain #DFI
-"""
+""".strip()
 
 
-        # X Limit Sicherheit
 
-        tweet = tweet[:280]
+        result1 = client.create_tweet(
 
+            text=post1
 
-        print("----------------")
-        print("Sende X Daily Update")
-
-
-        response = client.create_tweet(
-            text=tweet
         )
 
 
         print(
-            "X Tweet gesendet:",
-            response.data["id"]
+
+            "X Tweet 1 gesendet:",
+
+            result1.data["id"]
+
+        )
+
+
+
+        # ==============================
+        # POST 2 TOKENOMICS
+        # ==============================
+
+
+        post2 = """
+🔥 DeFiChain Tokenomics
+
+🔥 Burn > Emission
+
+⚖️ Net deflation:
++126.33M DFI
+
+⛓ Network:
+🟢 Online
+
+The fundamentals remain strong.
+
+#DeFiChain #DFI
+""".strip()
+
+
+
+        result2 = client.create_tweet(
+
+            text=post2,
+
+            in_reply_to_tweet_id=result1.data["id"]
+
         )
 
 
         print(
-            "X Post erfolgreich"
+
+            "X Tweet 2 gesendet:",
+
+            result2.data["id"]
+
         )
+
+
+
+        # ==============================
+        # POST 3 INTELLIGENCE
+        # ==============================
+
+
+        post3 = """
+🧠 DeFiChain Intelligence
+
+⭐ Daily Score
+
+🟡 Stable
+
+🔥 Tokenomics strong
+⚠️ dUSD remains the main risk
+
+Tracking:
+Market | Health | Network
+
+#DeFiChain #DFI
+""".strip()
+
+
+
+        result3 = client.create_tweet(
+
+            text=post3,
+
+            in_reply_to_tweet_id=result2.data["id"]
+
+        )
+
+
+        print(
+
+            "X Tweet 3 gesendet:",
+
+            result3.data["id"]
+
+        )
+
+
+
+        print(
+            "X Thread erfolgreich"
+        )
+
+
 
 
     except Exception as e:
 
 
-        error_message = str(e)
+        print(
+            "⚠️ X Posting aktuell nicht möglich"
+        )
 
-
-        if "403" in error_message:
-
-            print(
-                "⚠️ X Posting aktuell nicht möglich"
-            )
-
-            print(
-                error_message
-            )
-
-            print(
-                "Discord läuft weiter"
-            )
-
-
-        else:
-
-            print(
-                "⚠️ X Fehler:",
-                error_message
-            )
-
+        print(e)
