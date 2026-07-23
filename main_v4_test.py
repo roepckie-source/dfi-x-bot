@@ -211,63 +211,110 @@ def main():
 
 
     # ==========================
-    # Network Adapter
+# Network Adapter
+# Kompatibilität v5
+# ==========================
+
+
+network = {
+
+
+    "network_status":
+
+        blockchain.get(
+
+            "network_status",
+
+            "🟢 Online"
+
+        ),
+
+
+
+    "block_height":
+
+        blockchain.get(
+
+            "block_height",
+
+            "N/A"
+
+        ),
+
+
+
+    "last_block_time":
+
+        blockchain.get(
+
+            "last_block_time",
+
+            "N/A"
+
+        ),
+
+
+
+    "masternodes":
+
+        blockchain.get(
+
+            "masternodes",
+
+            "N/A"
+
+        ),
+
+
+
+    # ==========================
+    # Alte Discord/X Schnittstelle
     # ==========================
 
 
-    network = {
+    "burned_dfi":
 
+        tokenomics.get(
 
-        "network_status":
+            "burn",
 
-            blockchain.get(
+            {}
 
-                "network_status",
+        ).get(
 
-                "🟢 Online"
+            "total",
 
-            ),
+            "N/A"
 
-
-
-        "block_height":
-
-            blockchain.get(
-
-                "block_height",
-
-                "N/A"
-
-            ),
+        ),
 
 
 
-        "last_block_time":
+    "locked_dusd":
 
-            blockchain.get(
+        dusd.get(
 
-                "last_block_time",
+            "locked",
 
-                "N/A"
+            "N/A"
 
-            ),
-
-
-
-        "masternodes":
-
-            blockchain.get(
-
-                "masternodes",
-
-                "N/A"
-
-            )
-
-    }
+        ),
 
 
 
+    "excess_dfi":
+
+        tokenomics.get(
+
+            "balance",
+
+            "N/A"
+
+        )
+
+
+}
+   
 
     # ==========================
     # Vergleich
@@ -287,9 +334,6 @@ def main():
             "N/A"
 
     }
-
-
-
 
 
     # ==========================
