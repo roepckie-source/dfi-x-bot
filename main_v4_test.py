@@ -309,16 +309,14 @@ def main():
 
 
     send_x_thread(
-
-        market,
-
-        network,
-
-        comparison,
-
-        news
-
+    market,
+    tokenomics,
+    dusd,
+    network,
+    intelligence,
+    current_history
     )
+    
 
 
 
