@@ -157,6 +157,12 @@ Chapter {history.get("id","N/A")}
     # ==========================
 
 
+    dfi_market = market.get(
+        "dfi",
+        {}
+    )
+
+
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
@@ -164,22 +170,26 @@ Chapter {history.get("id","N/A")}
 
 💎 DFI Price
 
-🇺🇸 ${market.get("usd","N/A")} | 🇪🇺 €{market.get("eur","N/A")}
+🇺🇸 ${dfi_market.get("usd","N/A")} | 🇪🇺 €{dfi_market.get("eur","N/A")}
 
 
 📊 24h
 
-{market.get("change","N/A")}
+{dfi_market.get("change","N/A")} %
 
 
 🏦 Market Cap
 
-{market.get("market_cap","N/A")}
+{format_number(
+    dfi_market.get("market_cap")
+)}
 
 
 📊 Volume
 
-{market.get("volume","N/A")}
+{format_number(
+    dfi_market.get("volume")
+)}
 
 """
 
