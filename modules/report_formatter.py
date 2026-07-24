@@ -77,11 +77,16 @@ def create_report(
 
 
     report = f"""
-🚀 DeFiChain Intelligence
+╔════════════════════════════════════════════╗
+║            🚀 DeFiChain Intelligence        ║
+║                                            ║
+║   Decentralized. Independent.              ║
+║   Beyond Central Control.                  ║
+╚════════════════════════════════════════════╝
 
 📅 {now}
 
-━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🧠 DFI INTELLIGENCE INDEX
 
@@ -89,7 +94,6 @@ def create_report(
 {score}/100
 
 {status}
-
 
 📈 Market
 {intelligence.get("market", "N/A")}/100
