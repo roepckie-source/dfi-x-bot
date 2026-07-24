@@ -1,16 +1,32 @@
 {
   "title": "DeFiChain Daily Intelligence",
+
+  "header_title": "🚀 DeFiChain Intelligence",
+  "header_line1": "Decentralized. Independent.",
+  "header_line2": "Beyond Central Control.",
+
+  "intelligence": "DFI INTELLIGENCE INDEX",
+  "score": "Score",
+
   "market": "Market",
   "price": "Price",
   "change": "Change",
   "market_cap": "Market Cap",
+  "volume": "Volume",
+
   "tokenomics": "Tokenomics",
   "burn": "Burn",
   "emission": "Emission",
   "net_burn": "Net Burn",
+
   "dusd_health": "DUSD Health",
+
   "community": "Community Fund",
+
   "network": "Network",
   "block": "Block Height",
-  "insight": "Daily Insight"
+  "masternodes": "Masternodes",
+
+  "insight": "Daily Insight",
+  "history": "DeFiChain History"
 }
