@@ -369,4 +369,8 @@ ${dusd.get("price","N/A")}
 """
 
 
-    return report.strip()
+return "\n".join(
+    line.rstrip()
+    for line in report.strip().splitlines()
+    if line.strip()
+)
