@@ -76,17 +76,15 @@ def create_report(
 
 
 
-    report = f"""
-╔════════════════════════════════════════════╗
-║    🚀 DeFiChain Intelligence               ║
-║                                            ║
-║   Decentralized. Independent.              ║
-║   Beyond Central Control.                  ║
-╚════════════════════════════════════════════╝
+report = f"""
+🚀 DeFiChain Intelligence
+
+Decentralized. Independent.
+Beyond Central Control.
 
 📅 {now}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 
 🧠 DFI INTELLIGENCE INDEX
 
