@@ -52,7 +52,7 @@ def create_report(
 
         daily_insight,
 
-        history
+        history,
 
         language="de"
 ):
