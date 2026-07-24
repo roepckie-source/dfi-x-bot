@@ -79,10 +79,10 @@ def create_report(
 
 
     report = f"""
-🚀 DeFiChain Intelligence
+{lang.get("header_title","🚀 DeFiChain Intelligence")}
 
-Decentralized. Independent.
-Beyond Central Control.
+{lang.get("header_line1","Decentralized. Independent.")}
+{lang.get("header_line2","Beyond Central Control.")}
 
 📅 {now}
 
