@@ -361,7 +361,7 @@ ${dusd.get("price","N/A")}
 """
 
 
-    report += """
+        report += """
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -369,8 +369,8 @@ ${dusd.get("price","N/A")}
 """
 
 
-return "\n".join(
-    line.rstrip()
-    for line in report.strip().splitlines()
-    if line.strip()
-)
+    return "\n".join(
+        line.rstrip()
+        for line in report.strip().splitlines()
+        if line.strip()
+    )
