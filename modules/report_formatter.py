@@ -209,7 +209,7 @@ Chapter {history.get("id","N/A")}
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-🔥 TOKENOMICS
+🔥 {lang.get("tokenomics")}
 
 🔥 Burn
 
