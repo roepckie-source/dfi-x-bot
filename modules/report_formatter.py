@@ -322,9 +322,7 @@ ${dusd.get("price","N/A")}
 
 💰 Value
 
-{community.get("usd_value","N/A")}
-
-"""
+{community.get("usd_value") or "N/A"}
 
 
 
