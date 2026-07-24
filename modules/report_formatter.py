@@ -335,7 +335,7 @@ ${dusd.get("price","N/A")}
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-⛓ NETWORK
+⛓ {lang.get("network")}
 
 
 🌐 Status
