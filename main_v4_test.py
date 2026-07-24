@@ -39,7 +39,7 @@ def main():
     # ==========================
 
 
-    language = "de"
+    language="zh"
 
 
     print(
