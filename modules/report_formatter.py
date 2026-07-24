@@ -254,7 +254,7 @@ Chapter {history.get("id","N/A")}
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-🪙 DUSD HEALTH
+🪙 {lang.get("dusd_health")}
 
 💵 Price
 
