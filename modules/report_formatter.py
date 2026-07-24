@@ -167,7 +167,7 @@ Chapter {history.get("id","N/A")}
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-💰 MARKET
+💰 {lang.get("market")}
 
 💎 DFI Price
 
