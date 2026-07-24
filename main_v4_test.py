@@ -279,7 +279,9 @@ def main():
 
         daily_insight,
 
-        current_history
+        current_history,
+
+        language="zh"
 
     )
 
