@@ -89,7 +89,7 @@ def create_report(
 
 ━━━━━━━━━━━━━━━━━━
 
-🧠 DFI INTELLIGENCE INDEX
+🧠 {lang.get("intelligence")}
 
 ⭐ Score
 {score}/100
