@@ -230,7 +230,7 @@ Chapter {history.get("id","N/A")}
 {tokenomics.get("status","")}
 
 {format_number(
-    tokenomics.get("net_balance")
+    tokenomics.get("net_change")
 )} DFI
 
 
