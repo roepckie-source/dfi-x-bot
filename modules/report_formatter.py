@@ -175,8 +175,7 @@ Chapter {history.get("id","N/A")}
 
 📊 24h
 
-{dfi_market.get("change","N/A")} %
-
+{float(dfi_market.get("change",0)):.2f} %
 
 🏦 Market Cap
 
