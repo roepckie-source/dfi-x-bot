@@ -5,7 +5,7 @@
 
 
 from datetime import datetime
-
+from modules.language import load_language
 
 
 def format_number(value):
