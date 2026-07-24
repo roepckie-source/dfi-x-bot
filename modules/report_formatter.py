@@ -296,7 +296,7 @@ ${dusd.get("price","N/A")}
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-🏦 COMMUNITY FUND
+🏦 {lang.get("community")}
 
 
 🪙 DFI
