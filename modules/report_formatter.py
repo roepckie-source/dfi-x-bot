@@ -63,7 +63,7 @@ def create_report(
        
     )
     
-     lang = load_language(language)
+    lang = load_language(language)
 
 
     score = intelligence.get(
