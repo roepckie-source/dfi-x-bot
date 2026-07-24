@@ -281,7 +281,7 @@ def main():
 
         current_history,
 
-        language="zh"
+        language="en"
 
     )
 
