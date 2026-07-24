@@ -60,6 +60,7 @@ def create_report(
 
     now = datetime.now().strftime(
         "%d.%m.%Y %H:%M"
+        lang = load_language(language)
     )
 
 
