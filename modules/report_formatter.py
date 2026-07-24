@@ -78,7 +78,7 @@ def create_report(
 
     report = f"""
 ╔════════════════════════════════════════════╗
-║            🚀 DeFiChain Intelligence        ║
+║    🚀 DeFiChain Intelligence               ║
 ║                                            ║
 ║   Decentralized. Independent.              ║
 ║   Beyond Central Control.                  ║
