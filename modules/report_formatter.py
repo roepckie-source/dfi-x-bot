@@ -228,10 +228,10 @@ Chapter {history.get("id","N/A")}
 ⚖️ Net
 
 {tokenomics.get("status","")}
-{format_number(
-    tokenomics.get("balance")
-)} DFI
 
+{format_number(
+    tokenomics.get("net_balance")
+)} DFI
 
 
 🏠 Address {format_number(burn.get("address"))}
