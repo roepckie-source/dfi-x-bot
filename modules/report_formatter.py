@@ -54,7 +54,7 @@ def create_report(
 
         history,
 
-        language="de"
+        language="en"
 ):
 
 
