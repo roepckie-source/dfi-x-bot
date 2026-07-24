@@ -142,7 +142,7 @@ def create_report(
         report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-📚 DEFICHAIN HISTORY
+📚 {lang.get("history")}
 
 Chapter {history.get("id","N/A")}
 
