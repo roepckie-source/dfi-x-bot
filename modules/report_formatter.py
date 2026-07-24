@@ -123,7 +123,7 @@ def create_report(
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
-💡 DAILY INSIGHT
+💡 {lang.get("insight")}
 
 {daily_insight}
 
