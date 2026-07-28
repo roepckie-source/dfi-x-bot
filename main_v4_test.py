@@ -69,6 +69,9 @@ def main():
 
     global_crypto = get_global_crypto()
 
+    print("🌍 Global Crypto:")
+    print(global_crypto)
+
     # ==========================
     # Intelligence
     # ==========================
