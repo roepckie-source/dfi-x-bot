@@ -37,26 +37,17 @@ def format_number(value):
 
 
 def create_report(
-
         market,
-
         tokenomics,
-
         dusd,
-
         community,
-
         network,
-
         intelligence,
-
         daily_insight,
-
         history,
-
-        language="en"
+        global_crypto,
+        language="de"
 ):
-
 
     now = datetime.now().strftime(
         "%d.%m.%Y %H:%M"
