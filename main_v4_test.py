@@ -270,26 +270,17 @@ def main():
 
 
     report = create_report(
-
-        market,
-
-        tokenomics,
-
-        dusd,
-
-        community,
-
-        network,
-
-        intelligence,
-
-        daily_insight,
-
-        current_history,
-
-        language="en"
-
-    )
+    market,
+    tokenomics,
+    dusd,
+    community,
+    network,
+    intelligence,
+    daily_insight,
+    current_history,
+    global_crypto,
+    language="en"
+)    
 
 
 
