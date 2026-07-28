@@ -67,6 +67,8 @@ def main():
 
     blockchain = get_blockchain_data()
 
+    global_crypto = get_global_crypto()
+
     # ==========================
     # Intelligence
     # ==========================
