@@ -9,6 +9,7 @@ from modules.tokenomics import get_tokenomics_data
 from modules.dusd import get_dusd_data
 from modules.community import get_community_data
 from modules.blockchain import get_blockchain_data
+from modules.global_crypto import get_global_crypto
 
 from modules.report_formatter import create_report
 from modules.intelligence import calculate_intelligence_score
