@@ -41,9 +41,9 @@ def generate_daily_insight(
 
         if change >= 5:
 
-            insights.append(
+    insights.append(
 
-                f"🟢 Market recovery detected: DFI gained {change:.2f}% in 24h."
+        f"🟢 {lang.get('market_recovery','Market recovery detected')}: DFI +{change:.2f}% (24h)"
 
             )
 
