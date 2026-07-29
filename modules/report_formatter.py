@@ -111,7 +111,7 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 ━━━━━━━━━━━━━━━━━━
 """
 
-report += f"""
+    report += f"""
 🧠 {lang.get("intelligence")}
 
 ⭐ Score
