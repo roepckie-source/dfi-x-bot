@@ -215,8 +215,6 @@ ${short_number(dfi.get('market_cap'))}
 
 🟢 Burn exceeds emission
 
-#DeFiChain #DFI
-""".strip()
 
         result2 = client.create_tweet(
 
