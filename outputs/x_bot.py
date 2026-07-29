@@ -269,30 +269,7 @@ ${short_number(dfi.get('market_cap'))}
 #DeFiChain #DFI #Bitcoin #Ethereum
 """.strip()
 
-
-
-        # ==============================
-        # HISTORY INSIGHT
-        # ==============================
-
-
-        if history:
-
-
-            post3 += f"""
-
-📚 History
-
-{history.get(
-    "title",
-    "DeFiChain"
-)}
-
-💡 {history.get(
-    "text",
-    ""
-)[:60]}...
-"""
+       
        
     
         post3 += """
