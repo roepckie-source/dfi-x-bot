@@ -335,7 +335,9 @@ def main():
     dusd,
     network,
     intelligence,
-    current_history
+    current_history,
+    global_crypto,
+    comparison
     )
     
 
