@@ -218,12 +218,13 @@ ${short_number(dfi.get('market_cap'))}
 #DeFiChain #DFI
 """.strip()
 
+        result2 = client.create_tweet(
+
             text=post2,
 
             in_reply_to_tweet_id=result1.data["id"]
 
         )
-
 
         print(
 
