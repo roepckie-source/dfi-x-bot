@@ -137,6 +137,40 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 
 """
 
+
+
+    # ==========================
+    # Crypto Market Comparison
+    # ==========================
+
+
+    report += f"""
+━━━━━━━━━━━━━━━━━━
+
+📊 CRYPTO MARKET COMPARISON
+
+₿ Bitcoin
+
+📈 24h
+
+{comparison.get("bitcoin","N/A"):.2f} %
+
+
+Ξ Ethereum
+
+📈 24h
+
+{comparison.get("ethereum","N/A"):.2f} %
+
+
+🔹 DeFiChain DFI
+
+📈 24h
+
+{comparison.get("dfi","N/A"):.2f} %
+
+"""
+    
     # ==========================
     # Daily Insight
     # ==========================
