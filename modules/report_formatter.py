@@ -111,6 +111,7 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 ━━━━━━━━━━━━━━━━━━
 """
 
+report += f"""
 🧠 {lang.get("intelligence")}
 
 ⭐ Score
@@ -134,8 +135,6 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 {intelligence.get("network", "N/A")}/100
 
 """
-
-
 
     # ==========================
     # Daily Insight
