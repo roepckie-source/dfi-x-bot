@@ -70,7 +70,7 @@ def create_report(
 
 
 
-    report = f"""
+report = f"""
 {lang.get("header_title","🚀 DeFiChain Intelligence")}
 
 {lang.get("header_line1","Decentralized. Independent.")}
@@ -79,6 +79,7 @@ def create_report(
 📅 {now}
 
 ━━━━━━━━━━━━━━━━━━
+"""
 
 report += f"""
 🌍 GLOBAL CRYPTO UPDATE
