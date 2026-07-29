@@ -28,40 +28,7 @@
   "masternodes": "Masternodes",
 
   "insight": "Daily Insight",
-  "history": "DeFiChain History"
-
-  {
-  "title": "DeFiChain Daily Intelligence",
-
-  "header_title": "🚀 DeFiChain Intelligence",
-  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
-  "header_line2": "Decentralized. Independent. Beyond Central Control.",
-
-  "intelligence": "DFI INTELLIGENCE INDEX",
-  "score": "Score",
-
-  "market": "Market",
-  "price": "Price",
-  "change": "Change",
-  "market_cap": "Market Cap",
-  "volume": "Volume",
-
-  "tokenomics": "Tokenomics",
-  "burn": "Burn",
-  "emission": "Emission",
-  "net_burn": "Net Burn",
-
-  "dusd_health": "DUSD Health",
-
-  "community": "Community Fund",
-
-  "network": "Network",
-  "block": "Block Height",
-  "masternodes": "Masternodes",
-
-  "insight": "Daily Insight",
   "history": "DeFiChain History",
-
 
   "market_recovery": "Market recovery detected",
   "market_pressure": "Market pressure detected",
@@ -75,5 +42,4 @@
   "dusd_stable": "dUSD health stable",
 
   "network_health": "Network healthy"
-}
 }
