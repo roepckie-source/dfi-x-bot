@@ -1,10 +1,12 @@
 # ======================================
 # DeFiChain Intelligence v5
 # Daily Insight Engine
+# Multi Language Version
 # ======================================
 
 
 from language_manager import load_language
+
 
 
 def generate_daily_insight(
@@ -18,7 +20,9 @@ def generate_daily_insight(
 
 ):
 
+
     lang = load_language(language)
+
 
     insights = []
 
@@ -28,7 +32,9 @@ def generate_daily_insight(
     # Market Analyse
     # ==============================
 
+
     try:
+
 
         change = float(
 
@@ -39,35 +45,47 @@ def generate_daily_insight(
         )
 
 
+
         if change >= 5:
 
-    insights.append(
 
-        f"🟢 {lang.get('market_recovery','Market recovery detected')}: DFI +{change:.2f}% (24h)"
+            insights.append(
+
+                f"🟢 {lang.get('market_recovery','Market recovery detected')}: "
+                f"DFI gained {change:.2f}% in 24h."
 
             )
+
 
 
         elif change <= -5:
 
-    insights.append(
 
-        f"🔴 {lang.get('market_pressure','Market pressure detected')}: DFI -{abs(change):.2f}% (24h)"
+            insights.append(
+
+                f"🔴 {lang.get('market_pressure','Market pressure detected')}: "
+                f"DFI lost {abs(change):.2f}% in 24h."
 
             )
+
+
 
         else:
 
-    insights.append(
 
-        f"🟡 {lang.get('market_stable','Market stable with limited movement')}."
+            insights.append(
+
+                f"🟡 {lang.get('market_stable','Market stable with limited movement')}."
 
             )
 
 
-    except:
+
+    except Exception:
+
 
         pass
+
 
 
 
@@ -80,51 +98,62 @@ def generate_daily_insight(
     try:
 
 
+
         burn = float(
 
             tokenomics
             .get("burn", {})
-            .get("total",0)
+            .get("total", 0)
 
         )
+
 
 
         emission = float(
 
             tokenomics
-            .get("emission",0)
+            .get("emission", 0)
 
         )
+
 
 
         difference = burn - emission
 
 
 
+
         if difference > 0:
+
 
 
             insights.append(
 
-                f"🔥 {lang.get('tokenomics_positive','Tokenomics positive')}: Burn exceeds emission by {difference/1_000_000:.2f} M DFI."
+                f"🔥 {lang.get('tokenomics_positive','Tokenomics positive')}: "
+                f"Burn exceeds emission by "
+                f"{difference/1_000_000:.2f} M DFI."
 
             )
+
 
 
         else:
 
 
+
             insights.append(
 
-                "⚠️ Emission currently exceeds burn."
+                f"⚠️ {lang.get('emission_high','Emission currently exceeds burn')}."
 
             )
 
 
 
-    except:
+    except Exception:
+
 
         pass
+
 
 
 
@@ -135,6 +164,7 @@ def generate_daily_insight(
 
 
     try:
+
 
 
         health = int(
@@ -161,37 +191,48 @@ def generate_daily_insight(
 
 
 
+
         if health < 30:
+
 
 
             insights.append(
 
-                f"⚠️ dUSD remains critical: Peg deviation {peg:.2f}%."
+                f"⚠️ {lang.get('dusd_critical','dUSD remains critical')}: "
+                f"Peg deviation {peg:.2f}%."
 
             )
+
+
 
 
         elif health < 60:
 
 
+
             insights.append(
 
-                "🟡 dUSD health improving but remains under pressure."
+                f"🟡 {lang.get('dusd_warning','dUSD health improving but remains under pressure')}."
 
             )
+
+
 
 
         else:
 
 
+
             insights.append(
 
-                "🟢 dUSD health stable."
+                f"🟢 {lang.get('dusd_stable','dUSD health stable')}."
 
             )
 
 
-    except:
+
+    except Exception:
+
 
         pass
 
@@ -207,6 +248,7 @@ def generate_daily_insight(
     try:
 
 
+
         status = network.get(
 
             "network_status",
@@ -216,19 +258,25 @@ def generate_daily_insight(
         )
 
 
+
         if "Online" in status:
+
 
 
             insights.append(
 
-                "⛓ Network healthy: Blockchain operating normally."
+                f"⛓ {lang.get('network_health','Network healthy')}: "
+                f"Blockchain operating normally."
 
             )
 
 
-    except:
+
+    except Exception:
+
 
         pass
+
 
 
 
