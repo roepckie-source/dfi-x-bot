@@ -181,46 +181,42 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 
 
         # ==============================
-        # POST 2 TOKENOMICS
+        # POST 2 DEFICHAIN MARKET UPDATE
         # ==============================
 
 
-        burn = tokenomics.get(
-
-            "burn",
-
-            {}
-
+        score = intelligence.get(
+            "total",
+            "N/A"
         )
 
 
         post2 = f"""
-🔥 DeFiChain Tokenomics
+🚀 DeFiChain Daily Market Update
 
-🔥 Burn > Emission
+💎 DFI
 
-⚖️ Net balance:
+💵 Price
+${dfi.get('usd','N/A')}
 
-{short_number(
-    tokenomics.get("balance")
-)} DFI
+📈 24h
+{dfi.get('change','N/A')} %
+
+🏦 Market Cap
+${short_number(dfi.get('market_cap'))}
 
 
-⛓ Network:
+🧠 Intelligence Score
 
-{network.get(
-    "network_status",
-    "N/A"
-)}
+⭐ {score}/100
 
-The fundamentals remain strong.
+
+🔥 Tokenomics
+
+🟢 Burn exceeds emission
 
 #DeFiChain #DFI
 """.strip()
-
-
-
-        result2 = client.create_tweet(
 
             text=post2,
 
