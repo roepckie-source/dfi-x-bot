@@ -1,18 +1,18 @@
 {
   "header_title": "🇨🇳 🚀 DeFiChain 智能分析",
   "header_line1": "去中心化。独立。",
-  "header_line2": "超越中心化控制。"
+  "header_line2": "超越中心化控制。",
 
   "market_recovery": "市场恢复迹象",
-"market_pressure": "市场压力增加",
-"market_stable": "市场保持稳定，波动有限",
+  "market_pressure": "市场压力增加",
+  "market_stable": "市场保持稳定，波动有限",
 
-"tokenomics_positive": "代币经济表现积极",
-"emission_high": "当前发行量高于销毁量",
+  "tokenomics_positive": "代币经济表现积极",
+  "emission_high": "当前发行量高于销毁量",
 
-"dusd_critical": "dUSD 状态严重",
-"dusd_warning": "dUSD 状态改善但仍有压力",
-"dusd_stable": "dUSD 状态稳定",
+  "dusd_critical": "dUSD 状态严重",
+  "dusd_warning": "dUSD 状态改善但仍有压力",
+  "dusd_stable": "dUSD 状态稳定",
 
-"network_health": "网络运行正常"
+  "network_health": "网络运行正常"
 }
