@@ -236,56 +236,38 @@ ${short_number(dfi.get('market_cap'))}
 
 
 
-
-
         # ==============================
-        # POST 3 INTELLIGENCE + HISTORY
+        # POST 3 CRYPTO MARKET COMPARISON
         # ==============================
-
-
-        score = intelligence.get(
-
-            "total",
-
-            "N/A"
-
-        )
-
-
-        status = intelligence.get(
-
-            "status",
-
-            "N/A"
-
-        )
-
 
 
         post3 = f"""
-🧠 DeFiChain Intelligence
+📊 Crypto Market Comparison
 
-⭐ Daily Score
+₿ Bitcoin
 
-{score}/100
-
-{status}
-
-
-🔥 Tokenomics:
-Strong
+📈 24h
+{comparison.get("bitcoin", "N/A"):.2f} %
 
 
-⚠️ Main Risk:
-dUSD stability
+Ξ Ethereum
+
+📈 24h
+{comparison.get("ethereum", "N/A"):.2f} %
 
 
-Tracking:
+🔹 DeFiChain DFI
 
-Market | Health | Network
+📈 24h
+{comparison.get("dfi", "N/A"):.2f} %
+
+
+💡 Daily Insight
+
+{status if 'status' in locals() else "DeFiChain Intelligence"}
+
+#DeFiChain #DFI #Bitcoin #Ethereum
 """.strip()
-
-
 
 
 
