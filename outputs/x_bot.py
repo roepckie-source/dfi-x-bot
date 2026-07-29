@@ -266,15 +266,7 @@ ${short_number(dfi.get('market_cap'))}
 
 {status if 'status' in locals() else "DeFiChain Intelligence"}
 
-#DeFiChain #DFI #Bitcoin #Ethereum
-""".strip()
-
-       
-       
-    
-        post3 += """
-
-#DeFiChain #DFI
+#Bitcoin #Ethereum #DeFiChain #DFI
 """.strip()
 
 
