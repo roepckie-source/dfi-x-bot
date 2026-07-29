@@ -46,6 +46,7 @@ def create_report(
         daily_insight,
         history,
         global_crypto,
+        comparison,
         language="de"
 ):
 
