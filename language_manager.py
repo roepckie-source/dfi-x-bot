@@ -1,25 +1,24 @@
-# ==============================
+# ======================================
 # DeFiChain Intelligence v5
 # Language Manager
-# ==============================
+# ======================================
 
-
+from datetime import datetime
 import json
 import os
-from datetime import datetime
 
 
 
 LANGUAGE_ORDER = [
 
-    "de",
     "en",
+    "de",
+    "es",
     "zh",
-    "ja",
+    "fr",
     "hi",
     "id",
-    "fr",
-    "es",
+    "ja",
     "pt",
     "ru",
     "ar"
@@ -28,28 +27,26 @@ LANGUAGE_ORDER = [
 
 
 
-DEFAULT_LANGUAGE = "en"
-
-
-
 def get_daily_language():
-
 
     day = datetime.now().weekday()
 
-
-    return LANGUAGE_ORDER[
-        day % len(LANGUAGE_ORDER)
-    ]
+    return LANGUAGE_ORDER[day]
 
 
 
 
+def load_language(language):
 
-def load_language(language=DEFAULT_LANGUAGE):
+
+    base_path = os.path.dirname(
+        os.path.abspath(__file__)
+    )
 
 
     path = os.path.join(
+
+        base_path,
 
         "languages",
 
@@ -76,7 +73,7 @@ def load_language(language=DEFAULT_LANGUAGE):
 
 
 
-    except Exception:
+    except Exception as e:
 
 
         print(
@@ -88,40 +85,24 @@ def load_language(language=DEFAULT_LANGUAGE):
 
         fallback = os.path.join(
 
+            base_path,
+
             "languages",
 
-            f"{DEFAULT_LANGUAGE}.json"
+            "en.json"
 
         )
 
 
-        try:
+        with open(
+
+            fallback,
+
+            "r",
+
+            encoding="utf-8"
+
+        ) as file:
 
 
-            with open(
-
-                fallback,
-
-                "r",
-
-                encoding="utf-8"
-
-            ) as file:
-
-
-                return json.load(file)
-
-
-        except Exception as e:
-
-
-            print(
-
-                "❌ English language file missing:",
-
-                e
-
-            )
-
-
-            return {}
+            return json.load(file)
