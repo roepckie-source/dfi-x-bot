@@ -80,6 +80,36 @@ def create_report(
 
 ━━━━━━━━━━━━━━━━━━
 
+report += f"""
+🌍 GLOBAL CRYPTO UPDATE
+
+━━━━━━━━━━━━━━━━━━
+
+₿ Bitcoin
+
+💵 Price
+
+${global_crypto.get("bitcoin", {}).get("price", "N/A")}
+
+📈 24h
+
+{global_crypto.get("bitcoin", {}).get("change", 0):.2f} %
+
+━━━━━━━━━━━━━━━━━━
+
+Ξ Ethereum
+
+💵 Price
+
+${global_crypto.get("ethereum", {}).get("price", "N/A")}
+
+📈 24h
+
+{global_crypto.get("ethereum", {}).get("change", 0):.2f} %
+
+━━━━━━━━━━━━━━━━━━
+"""
+
 🧠 {lang.get("intelligence")}
 
 ⭐ Score
