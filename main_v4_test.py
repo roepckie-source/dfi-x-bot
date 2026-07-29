@@ -227,33 +227,33 @@ def main():
     # ==========================
 
 
-dfi_change = float(
-    market.get("dfi", {}).get("change", 0)
-)
+    dfi_change = float(
+        market.get("dfi", {}).get("change", 0)
+    )
 
 
-btc_change = float(
-    global_crypto.get("bitcoin", {}).get("change", 0)
-)
+    btc_change = float(
+        global_crypto.get("bitcoin", {}).get("change", 0)
+    )
 
 
-eth_change = float(
-    global_crypto.get("ethereum", {}).get("change", 0)
-)
+    eth_change = float(
+        global_crypto.get("ethereum", {}).get("change", 0)
+    )
 
 
-comparison = {
+    comparison = {
 
-    "bitcoin":
-        btc_change,
+        "bitcoin":
+            btc_change,
 
-    "ethereum":
-        eth_change,
+        "ethereum":
+            eth_change,
 
-    "dfi":
-        dfi_change
+        "dfi":
+            dfi_change
 
-}
+    }
 
 
     # ==========================
