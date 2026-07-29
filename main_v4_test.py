@@ -300,6 +300,7 @@ def main():
     daily_insight,
     current_history,
     global_crypto,
+    comparison,
     language="en"
 )    
 
