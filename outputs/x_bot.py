@@ -136,7 +136,7 @@ def send_x_thread(
         # ==============================
 
 
-post1 = f"""
+        post1 = f"""
 🌍 Global Crypto Update
 
 ₿ Bitcoin
