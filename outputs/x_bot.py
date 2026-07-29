@@ -106,10 +106,13 @@ def send_x_thread(
 
     intelligence,
 
-    history=None
+    history=None,
+
+    global_crypto=None,
+
+    comparison=None
 
 ):
-
 
     try:
 
