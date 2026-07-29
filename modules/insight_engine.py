@@ -4,16 +4,21 @@
 # ======================================
 
 
+from language_manager import load_language
+
+
 def generate_daily_insight(
 
         market,
         tokenomics,
         dusd,
         community,
-        network
+        network,
+        language="en"
 
 ):
 
+    lang = load_language(language)
 
     insights = []
 
