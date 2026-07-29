@@ -54,8 +54,7 @@ def load_language(language):
 
     )
 
-    print("🔍 Suche Sprachdatei:", path)
-    
+       
     try:
 
 
