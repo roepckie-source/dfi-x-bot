@@ -132,25 +132,33 @@ def send_x_thread(
 
 
         # ==============================
-        # POST 1 MARKET
+        # POST 1 GLOBAL CRYPTO
         # ==============================
 
 
-        post1 = f"""
-🚀 DeFiChain Market Update
+post1 = f"""
+🌍 Global Crypto Update
 
-💎 DFI
-${dfi.get('usd','N/A')}
+₿ Bitcoin
 
-📊 24h
-{dfi.get('change','N/A')}%
+💵 Price
+${global_crypto.get("bitcoin", {}).get("price", "N/A")}
 
-🏦 Market Cap
-${short_number(dfi.get('market_cap'))}
+📈 24h
+{global_crypto.get("bitcoin", {}).get("change", 0):.2f} %
 
-#DeFiChain #DFI
+━━━━━━━━━━
+
+Ξ Ethereum
+
+💵 Price
+${global_crypto.get("ethereum", {}).get("price", "N/A")}
+
+📈 24h
+{global_crypto.get("ethereum", {}).get("change", 0):.2f} %
+
+#Bitcoin #Ethereum #Crypto
 """.strip()
-
 
 
         result1 = client.create_tweet(
