@@ -244,17 +244,23 @@ def main():
 
     comparison = {
 
-        "bitcoin":
-            btc_change,
+    "bitcoin":
+        btc_change,
 
-        "ethereum":
-            eth_change,
+    "ethereum":
+        eth_change,
 
-        "dfi":
-            dfi_change
+    "dfi":
+        dfi_change,
+
+    # alte Discord-Kompatibilität
+    "vs_btc":
+        btc_change,
+
+    "vs_eth":
+        eth_change
 
     }
-
 
     # ==========================
     # News
