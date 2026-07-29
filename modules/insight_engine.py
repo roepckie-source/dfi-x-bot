@@ -50,18 +50,17 @@ def generate_daily_insight(
 
         elif change <= -5:
 
-            insights.append(
+    insights.append(
 
-                f"🔴 Market pressure detected: DFI lost {abs(change):.2f}% in 24h."
+        f"🔴 {lang.get('market_pressure','Market pressure detected')}: DFI -{abs(change):.2f}% (24h)"
 
             )
 
-
         else:
 
-            insights.append(
+    insights.append(
 
-                "🟡 Market stable with limited movement."
+        f"🟡 {lang.get('market_stable','Market stable with limited movement')}."
 
             )
 
@@ -107,7 +106,7 @@ def generate_daily_insight(
 
             insights.append(
 
-                f"🔥 Tokenomics positive: Burn exceeds emission by {difference/1_000_000:.2f} M DFI."
+                f"🔥 {lang.get('tokenomics_positive','Tokenomics positive')}: Burn exceeds emission by {difference/1_000_000:.2f} M DFI."
 
             )
 
