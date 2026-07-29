@@ -223,22 +223,37 @@ def main():
 
 
     # ==========================
-    # Vergleich
+    # Crypto Market Comparison
     # ==========================
 
 
-    comparison = {
+dfi_change = float(
+    market.get("dfi", {}).get("change", 0)
+)
 
 
-        "vs_btc":
-            "N/A",
+btc_change = float(
+    global_crypto.get("bitcoin", {}).get("change", 0)
+)
 
 
-        "vs_eth":
-            "N/A"
+eth_change = float(
+    global_crypto.get("ethereum", {}).get("change", 0)
+)
 
-    }
 
+comparison = {
+
+    "bitcoin":
+        btc_change,
+
+    "ethereum":
+        eth_change,
+
+    "dfi":
+        dfi_change
+
+}
 
 
     # ==========================
