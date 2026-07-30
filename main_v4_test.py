@@ -15,6 +15,7 @@ from modules.report_formatter import create_report
 from modules.intelligence import calculate_intelligence_score
 from modules.insight_engine import generate_daily_insight
 from modules.history_engine import get_history
+from news import get_dfi_news
 
 
 from outputs.telegram_bot import send_telegram
