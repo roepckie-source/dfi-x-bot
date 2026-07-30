@@ -33,9 +33,6 @@ def format_number(value):
     return str(value)
 
 
-
-
-
 def create_report(
         market,
         tokenomics,
@@ -146,21 +143,7 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 
 """
     
-    # ==========================
-    # Daily Insight
-    # ==========================
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-💡 {lang.get("insight")}
-
-{daily_insight}
-
-"""
-
-
+    
 
     # ==========================
     # History
