@@ -363,7 +363,7 @@ DeFiChain ecosystem monitoring active.
 
 
 
-               # X Limit
+        # X Limit
 
         if len(post3) > 280:
 
@@ -387,11 +387,7 @@ DeFiChain ecosystem monitoring active.
 
         )
 
-            result3.data["id"]
-
-        )
-
-
+  
         print(
 
             "X Thread erfolgreich"
