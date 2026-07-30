@@ -325,7 +325,8 @@ def main():
     intelligence,
     current_history,
     global_crypto,
-    comparison
+    comparison,
+    news
     )
     
 
