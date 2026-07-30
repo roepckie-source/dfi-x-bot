@@ -270,22 +270,7 @@ def main():
     # ==========================
 
 
-    news = {
-
-
-        "title":
-            "DeFiChain Intelligence v5",
-
-
-        "text":
-            "Daily DeFiChain Intelligence Report",
-
-
-        "hashtags":
-            "#DeFiChain #DFI"
-
-    }
-
+    news = get_dfi_news()
 
 
     # ==========================
