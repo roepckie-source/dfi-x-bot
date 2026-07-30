@@ -197,8 +197,10 @@ ${short_number(dfi.get('market_cap'))}
 #Bitcoin #Ethereum #DeFiChain #DFI
 """.strip()
 
+        print("DEBUG Tweet 1:")
+        print(post1)
 
-
+        
         result1 = client.create_tweet(
 
             text=post1
