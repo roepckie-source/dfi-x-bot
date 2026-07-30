@@ -279,41 +279,39 @@ ${dfi.get('usd','N/A')}
 
         # ==================================
         # TWEET 3
-        # News / History
+        # News + History + Insight
         # ==================================
 
-
         post3 = """
-📰 DeFiChain News
+📰 DeFiChain Ecosystem Update
 
 """.strip()
 
 
-
         # ==============================
-        # News vorhanden
+        # News
         # ==============================
 
         if news:
 
             post3 += f"""
 
-📢 {news.get(
+📢 Latest News
+
+{news.get(
     "title",
     "DeFiChain Update"
 )}
 
-
 {news.get(
     "text",
     ""
-)}
+)[:120]}
 """
 
 
-
         # ==============================
-        # sonst History
+        # History
         # ==============================
 
         elif history:
@@ -322,32 +320,43 @@ ${dfi.get('usd','N/A')}
 
 📚 DeFiChain History
 
-
 {history.get(
     "title",
     "DeFiChain"
 )}
 
-
 {history.get(
     "text",
     ""
-)}
+)[:120]}
 """
 
 
+        # ==============================
+        # Fallback
+        # ==============================
 
         else:
 
             post3 += """
 
-DeFiChain ecosystem update active.
-
+DeFiChain ecosystem monitoring active.
 """
 
 
+        # ==============================
+        # Intelligence Insight
+        # ==============================
 
-        post3 += """
+        post3 += f"""
+
+💡 Insight
+
+{intelligence.get(
+    'daily_insight',
+    'DeFiChain analysis active'
+)[:120]}
+
 
 #DeFiChain #DFI
 """.strip()
@@ -359,11 +368,6 @@ DeFiChain ecosystem update active.
         if len(post3) > 280:
 
             post3 = post3[:277] + "..."
-
-
-
-        result3 = client.create_tweet(
-
             text=post3,
 
             in_reply_to_tweet_id=result2.data["id"]
