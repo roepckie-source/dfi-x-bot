@@ -363,11 +363,15 @@ DeFiChain ecosystem monitoring active.
 
 
 
-        # X Limit
+               # X Limit
 
         if len(post3) > 280:
 
             post3 = post3[:277] + "..."
+
+
+        result3 = client.create_tweet(
+
             text=post3,
 
             in_reply_to_tweet_id=result2.data["id"]
@@ -378,6 +382,10 @@ DeFiChain ecosystem monitoring active.
         print(
 
             "X Tweet 3 gesendet:",
+
+            result3.data["id"]
+
+        )
 
             result3.data["id"]
 
