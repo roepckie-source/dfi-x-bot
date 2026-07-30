@@ -224,33 +224,21 @@ ${dfi.get('usd','N/A')}
 
 
         post2 = f"""
-🧠 DeFiChain Intelligence
+🔥 DeFiChain Tokenomics
+
+🧠 Intelligence Score
+
+⭐ {score}/100
+{status}
 
 
-⭐ Score
-
-{score}/100
-
-
-🔥 Tokenomics
+🔥 Burn vs Emission
 
 🟢 Burn exceeds emission
 
-⚖️ Net:
+⚖️ Net Burn:
 
 {short_number(net_burn)} DFI
-
-
-🪙 dUSD Health
-
-❤️ Score:
-
-{dusd.get('health_score','N/A')}/100
-
-
-📉 Peg:
-
-{dusd.get('peg_difference','N/A')}%
 
 
 ⛓ Network
@@ -265,8 +253,6 @@ ${dfi.get('usd','N/A')}
 
 #DeFiChain #DFI
 """.strip()
-
-
 
         if len(post2) > 280:
 
