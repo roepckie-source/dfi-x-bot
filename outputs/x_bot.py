@@ -155,46 +155,19 @@ def send_x_thread(
 
 
         post1 = f"""
-🚀 DeFiChain Daily Intelligence
+🚀 DeFiChain Daily Update
 
-🌍 Global Crypto
+DFI Price: ${dfi.get('usd','N/A')}
 
-₿ Bitcoin
+24h Change: {safe_change(dfi.get('change'))}%
 
-💵 ${btc.get('price','N/A')}
+Bitcoin: {btc.get('price','N/A')}
 
-📈 {safe_change(btc.get('change'))}%
+Ethereum: {eth.get('price','N/A')}
 
+Score: {score}/100
 
-Ξ Ethereum
-
-💵 ${eth.get('price','N/A')}
-
-📈 {safe_change(eth.get('change'))}%
-
-
-━━━━━━━━━━
-
-💎 DeFiChain DFI
-
-💵 ${dfi.get('usd','N/A')}
-
-📈 {safe_change(dfi.get('change'))}%
-
-
-🏦 Market Cap
-
-${short_number(dfi.get('market_cap'))}
-
-
-🧠 Intelligence Score
-
-⭐ {score}/100
-
-{status}
-
-
-#Bitcoin #Ethereum #DeFiChain #DFI
+#DeFiChain #DFI
 """.strip()
 
         print("DEBUG Tweet 1:")
