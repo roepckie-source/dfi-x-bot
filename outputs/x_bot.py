@@ -102,6 +102,11 @@ def send_x_thread(
 
         client = get_client()
 
+       test = client.create_tweet(
+    text="DeFiChain Bot API Test"
+)
+
+print(test.data) 
 
         dfi = market.get(
 
