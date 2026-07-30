@@ -269,7 +269,7 @@ ${short_number(dfi.get('market_cap'))}
 
 💡 Daily Insight
 
-{intelligence.get('insight','DeFiChain analysis active')}
+{intelligence.get('daily_insight','DeFiChain analysis active')}
 
 
 #DeFiChain #DFI
