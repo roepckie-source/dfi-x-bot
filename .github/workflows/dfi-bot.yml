@@ -112,7 +112,7 @@ jobs:
 
 
 
-          git add news_state.json
+          git add history_state.json
 
 
 
