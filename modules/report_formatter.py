@@ -112,31 +112,6 @@ ${global_crypto.get("ethereum", {}).get("price", "N/A")}
 ━━━━━━━━━━━━━━━━━━
 """
 
-    report += f"""
-🧠 {lang.get("intelligence")}
-
-⭐ Score
-{score}/100
-
-{status}
-
-📈 Market
-{intelligence.get("market", "N/A")}/100
-
-🔥 Tokenomics
-{intelligence.get("tokenomics", "N/A")}/100
-
-🪙 dUSD
-{intelligence.get("dusd", "N/A")}/100
-
-🏦 Community
-{intelligence.get("community", "N/A")}/100
-
-⛓ Network
-{intelligence.get("network", "N/A")}/100
-
-"""
-
 
 
     # ==========================
