@@ -260,47 +260,6 @@ Chapter {history.get("id","N/A")}
 
 
 
-    # ==========================
-    # dUSD
-    # ==========================
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-🪙 {lang.get("dusd_health")}
-
-💵 Price
-
-${dusd.get("price","N/A")}
-
-
-📉 Peg
-
-{dusd.get("peg_difference","N/A")} %
-
-
-❤️ Health Score
-
-{dusd.get("health_score","N/A")}/100
-
-
-🔒 Locked
-
-{format_number(
-    dusd.get("locked")
-)} DUSD
-
-
-🔥 Burned
-
-{format_number(
-    dusd.get("burned")
-)} DUSD
-
-"""
-
-
 
     # ==========================
     # Community Fund
