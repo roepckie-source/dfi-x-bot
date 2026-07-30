@@ -4,10 +4,12 @@
 # ======================================
 
 import json
+import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-HISTORY_FILE = "dfi_history.json"
-STATE_FILE = "history_state.json"
+HISTORY_FILE = os.path.join(BASE_DIR, "dfi_history.json")
+STATE_FILE = os.path.join(BASE_DIR, "history_state.json")
 
 
 
