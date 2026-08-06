@@ -266,10 +266,12 @@ def main():
     }
 
     # ==========================
-    # Content
+    # Content / History
     # ==========================
 
-    content = get_content() 
+    content = get_content()
+
+    news = content
 
     # ==========================
     # Report
