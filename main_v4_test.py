@@ -14,7 +14,7 @@ from modules.global_crypto import get_global_crypto
 from modules.report_formatter import create_report
 from modules.intelligence import calculate_intelligence_score
 from modules.insight_engine import generate_daily_insight
-from modules.history_engine import get_history
+from modules.content_engine import get_content
 from news import get_dfi_news
 
 
@@ -107,7 +107,7 @@ def main():
     # ==========================
 
 
-    current_history = get_history()
+    current_history = get_content()
 
 
     if current_history and isinstance(current_history, dict):
