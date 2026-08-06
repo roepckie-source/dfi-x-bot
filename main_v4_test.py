@@ -266,12 +266,10 @@ def main():
     }
 
     # ==========================
-    # News
+    # Content
     # ==========================
 
-
-    news = get_dfi_news()
-
+    content = get_content() 
 
     # ==========================
     # Report
