@@ -157,6 +157,8 @@ def send_x_thread(
         post1 = f"""
 🚀 DeFiChain Daily Intelligence
 
+🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦
+
 🌍 Global Crypto
 
 Bitcoin
