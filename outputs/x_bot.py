@@ -318,7 +318,13 @@ ${dfi.get('usd','N/A')}
 
             post3 += f"""
 
-📚 DeFiChain History
+📰 DeFiChain Daily Update
+
+📚 Chapter X
+
+Titel
+
+Text
 
 {history.get(
     "title",
