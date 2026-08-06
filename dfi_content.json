@@ -1,1 +1,23 @@
-
+[
+  {
+    "id": 1,
+    "type": "history",
+    "title": "The Beginning of DeFiChain",
+    "text": "DeFiChain was created to bring decentralized financial services to the Bitcoin ecosystem.",
+    "hashtags": "#DeFiChain #DFI"
+  },
+  {
+    "id": 2,
+    "type": "history",
+    "title": "Why Bitcoin?",
+    "text": "DeFiChain chose Bitcoin as its foundation because of its security, decentralization and long-term stability.",
+    "hashtags": "#DeFiChain #Bitcoin"
+  },
+  {
+    "id": 3,
+    "type": "history",
+    "title": "What is DFI?",
+    "text": "DFI is the native asset of DeFiChain. It powers governance, staking, liquidity mining and transaction fees.",
+    "hashtags": "#DFI #DeFiChain"
+  }
+]
