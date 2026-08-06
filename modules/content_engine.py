@@ -8,7 +8,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-HISTORY_FILE = os.path.join(BASE_DIR, "dfi_history.json")
+CONTENT_FILE = "dfi_content.json"
 STATE_FILE = os.path.join(BASE_DIR, "history_state.json")
 
 
@@ -17,7 +17,7 @@ STATE_FILE = os.path.join(BASE_DIR, "history_state.json")
 # History laden
 # ======================================
 
-def load_history():
+def load_content():
 
     try:
 
