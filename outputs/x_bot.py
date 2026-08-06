@@ -360,7 +360,16 @@ DeFiChain ecosystem update active.
 
 
         print(
-
             "X Thread erfolgreich"
-
         )
+
+
+    except Exception as e:
+
+
+        print(
+            "⚠️ X Posting aktuell nicht möglich"
+        )
+
+
+        print(e)
