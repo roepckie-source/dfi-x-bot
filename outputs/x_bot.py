@@ -279,62 +279,37 @@ ${dfi.get('usd','N/A')}
 
         # ==================================
         # TWEET 3
-        # News + History + Insight
+        # DeFiChain Content Update
         # ==================================
 
         post3 = """
-📰 DeFiChain Ecosystem Update
+📰 DeFiChain Daily Update
 
 """.strip()
 
 
         # ==============================
-        # News
+        # Content / History
         # ==============================
 
-        if news:
+        if history:
 
             post3 += f"""
 
-📢 Latest News
+📚 Chapter {history.get(
+    "id",
+    "N/A"
+)}
 
-{news.get(
+{history.get(
     "title",
     "DeFiChain Update"
 )}
 
-{news.get(
-    "text",
-    ""
-)[:120]}
-"""
-
-
-        # ==============================
-        # History
-        # ==============================
-
-        elif history:
-
-            post3 += f"""
-
-📰 DeFiChain Daily Update
-
-📚 Chapter X
-
-Titel
-
-Text
-
-{history.get(
-    "title",
-    "DeFiChain"
-)}
-
 {history.get(
     "text",
     ""
-)[:120]}
+)[:160]}
 """
 
 
@@ -346,23 +321,12 @@ Text
 
             post3 += """
 
-DeFiChain ecosystem monitoring active.
+DeFiChain ecosystem update active.
+
 """
 
 
-        # ==============================
-        # Intelligence Insight
-        # ==============================
-
-        post3 += f"""
-
-💡 Insight
-
-{intelligence.get(
-    'daily_insight',
-    'DeFiChain analysis active'
-)[:120]}
-
+        post3 += """
 
 #DeFiChain #DFI
 """.strip()
@@ -374,6 +338,7 @@ DeFiChain ecosystem monitoring active.
         if len(post3) > 280:
 
             post3 = post3[:277] + "..."
+
 
 
         result3 = client.create_tweet(
@@ -393,23 +358,9 @@ DeFiChain ecosystem monitoring active.
 
         )
 
-  
+
         print(
 
             "X Thread erfolgreich"
 
         )
-
-
-
-    except Exception as e:
-
-
-        print(
-
-            "⚠️ X Posting aktuell nicht möglich"
-
-        )
-
-
-        print(e)
