@@ -1,20 +1,29 @@
 # ======================================
 # DeFiChain Intelligence v5
-# History Engine v2.1
+# Content Engine v1
 # ======================================
 
 import json
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
 
 CONTENT_FILE = "dfi_content.json"
-STATE_FILE = os.path.join(BASE_DIR, "history_state.json")
 
+STATE_FILE = os.path.join(
+    BASE_DIR,
+    "history_state.json"
+)
 
 
 # ======================================
-# History laden
+# Content laden
 # ======================================
 
 def load_content():
@@ -22,7 +31,10 @@ def load_content():
     try:
 
         with open(
-            HISTORY_FILE,
+            os.path.join(
+                BASE_DIR,
+                CONTENT_FILE
+            ),
             "r",
             encoding="utf-8"
         ) as file:
@@ -33,7 +45,7 @@ def load_content():
     except Exception as e:
 
         print(
-            "History Load Fehler:",
+            "Content Load Fehler:",
             e
         )
 
@@ -92,30 +104,28 @@ def save_state(state):
     except Exception as e:
 
         print(
-            "History State Fehler:",
+            "Content State Fehler:",
             e
         )
 
 
 
 # ======================================
-# Intelligentes Kapitel auswählen
+# Nächsten Content auswählen
 # ======================================
 
-def get_history():
+def get_content():
+
+    content = load_content()
 
 
-    history = load_history()
-
-
-    if not history:
+    if not content:
 
         return None
 
 
 
     state = load_state()
-
 
 
     try:
@@ -127,6 +137,7 @@ def get_history():
             )
         )
 
+
     except:
 
         last_id = 0
@@ -137,9 +148,9 @@ def get_history():
 
 
 
-    # Nach Kapitel 100 wieder von vorne
+    # Wenn Ende erreicht -> wieder vorne beginnen
 
-    if next_id > len(history):
+    if next_id > len(content):
 
         next_id = 1
 
@@ -149,22 +160,22 @@ def get_history():
 
 
 
-    for chapter in history:
+    for item in content:
 
 
-        if chapter.get("id") == next_id:
+        if item.get("id") == next_id:
 
-            current = chapter
+            current = item
 
             break
 
 
 
-    # Falls Kapitel nicht gefunden
+    # Falls Kapitel fehlt
 
     if current is None:
 
-        current = history[0]
+        current = content[0]
 
 
 
