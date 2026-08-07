@@ -24,6 +24,8 @@ def send_telegram(message, language="en"):
 
     try:
 
+        lang = load_language(language)
+        
         url = (
             f"https://api.telegram.org/"
             f"bot{TELEGRAM_TOKEN}/sendMessage"
