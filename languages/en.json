@@ -30,7 +30,8 @@
 
   "insight": "Daily Insight",
   "history": "DeFiChain History",
-
+  "content_update": "DeFiChain Daily Update",
+  
   "market_recovery": "Market recovery detected",
   "market_pressure": "Market pressure detected",
   "market_stable": "Market stable with limited movement",
