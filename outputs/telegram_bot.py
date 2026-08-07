@@ -20,7 +20,7 @@ TELEGRAM_CHAT_ID = os.environ.get(
 # SEND TELEGRAM MESSAGE
 # ==============================
 
-def send_telegram(message):
+def send_telegram(message, language="en"):
 
     try:
 
