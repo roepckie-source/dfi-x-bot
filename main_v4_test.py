@@ -41,7 +41,7 @@ def main():
     # ==========================
 
 
-    language="zh"
+    language = get_next_language()
 
 
     print(
