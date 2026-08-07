@@ -96,6 +96,8 @@ def send_x_thread(
 
     news=None
 
+    language="en"
+
 ):
 
     try:
