@@ -23,7 +23,7 @@ from outputs.discord_bot import send_discord
 from outputs.x_bot import send_x_thread
 
 
-from language_manager import load_language
+from modules.language_engine import get_next_language
 
 
 
