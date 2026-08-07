@@ -301,6 +301,7 @@ def main():
 
     send_telegram(
         report
+        language
     )
 
 
