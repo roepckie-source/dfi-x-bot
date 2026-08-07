@@ -300,7 +300,7 @@ def main():
 
 
     send_telegram(
-        report
+        report,
         language
     )
 
