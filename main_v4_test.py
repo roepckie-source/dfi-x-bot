@@ -289,7 +289,7 @@ def main():
     current_history,
     global_crypto,
     comparison,
-    language="en"
+    language=language
 )    
 
 
