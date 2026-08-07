@@ -163,7 +163,7 @@ def send_x_thread(
         post1 = f"""
 {lang.get("header_title", "🚀 DeFiChain Daily Intelligence")}
 
-🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦
+{lang.get("header_line1", "")}
 
 🌍 {lang.get("global_crypto", "Global Crypto")}
 
@@ -186,7 +186,7 @@ ${dfi.get('usd','N/A')}
 {safe_change(dfi.get('change'))}%
 
 
-🧠 Intelligence Score
+{lang.get("intelligence", "🧠 Intelligence Score")}
 
 ⭐ {score}/100
 {status}
@@ -290,9 +290,8 @@ ${dfi.get('usd','N/A')}
         # DeFiChain Content Update
         # ==================================
 
-        post3 = """
-📰 DeFiChain Daily Update
-
+        post3 = f"""
+📰 {lang.get("content_update", "DeFiChain Daily Update")}
 """.strip()
 
 
