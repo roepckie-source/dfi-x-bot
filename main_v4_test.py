@@ -326,7 +326,8 @@ def main():
     current_history,
     global_crypto,
     comparison,
-    news
+    news,
+    language
     )
     
 
