@@ -96,7 +96,7 @@ def send_x_thread(
 
     comparison=None,
 
-    news=None
+    news=None,
 
     language="en"
 
