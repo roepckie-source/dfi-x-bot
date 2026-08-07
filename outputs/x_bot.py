@@ -161,11 +161,11 @@ def send_x_thread(
 
 
         post1 = f"""
-🚀 DeFiChain Daily Intelligence
+{lang.get("header_title", "🚀 DeFiChain Daily Intelligence")}
 
 🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦
 
-🌍 Global Crypto
+🌍 {lang.get("global_crypto", "Global Crypto")}
 
 Bitcoin
 💵 ${btc.get('price','N/A')}
