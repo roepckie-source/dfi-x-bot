@@ -6,6 +6,8 @@
 import os
 import tweepy
 
+from modules.language import load_language
+
 
 # ======================================
 # X API Zugang
