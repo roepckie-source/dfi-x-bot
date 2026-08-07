@@ -1,6 +1,7 @@
 import os
 import requests
 
+from modules.language import load_language
 
 # ==============================
 # TELEGRAM CONFIG
