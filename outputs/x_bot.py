@@ -104,6 +104,8 @@ def send_x_thread(
 
     try:
 
+        lang = load_language(language)
+        
         client = get_client()
 
         dfi = market.get(
