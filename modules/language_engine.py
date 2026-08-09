@@ -1,6 +1,5 @@
 # ======================================
-# Language Engine v2
-# Daily Language Rotation
+# Language Engine
 # ======================================
 
 import json
@@ -8,12 +7,15 @@ import os
 from datetime import datetime
 
 
+# ======================================
+# Pfade
+# ======================================
+
 BASE_DIR = os.path.dirname(
     os.path.dirname(
         os.path.abspath(__file__)
     )
 )
-
 
 STATE_FILE = os.path.join(
     BASE_DIR,
@@ -21,7 +23,9 @@ STATE_FILE = os.path.join(
 )
 
 
-# Reihenfolge der täglichen Sprachen
+# ======================================
+# Sprachreihenfolge
+# ======================================
 
 LANGUAGES = [
     "en",
@@ -54,14 +58,12 @@ def load_state():
 
             return json.load(file)
 
-
-    except:
+    except Exception:
 
         return {
-            "last_language": "ar",
+            "last_language": "en",
             "last_date": ""
         }
-
 
 
 # ======================================
@@ -70,19 +72,27 @@ def load_state():
 
 def save_state(state):
 
-    with open(
-        STATE_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
+    try:
 
-        json.dump(
-            state,
-            file,
-            indent=4,
-            ensure_ascii=False
+        with open(
+            STATE_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                state,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+    except Exception as e:
+
+        print(
+            "Language State Fehler:",
+            e
         )
-
 
 
 # ======================================
@@ -93,13 +103,14 @@ def get_next_language():
 
     state = load_state()
 
-
     today = datetime.now().strftime(
         "%Y-%m-%d"
     )
 
 
-    # gleiche Sprache am gleichen Tag
+    # ==================================
+    # Gleiche Sprache am gleichen Tag
+    # ==================================
 
     if state.get("last_date") == today:
 
@@ -109,9 +120,13 @@ def get_next_language():
         )
 
 
+    # ==================================
+    # Letzte Sprache
+    # ==================================
+
     last = state.get(
         "last_language",
-        "ar"
+        "en"
     )
 
 
@@ -121,22 +136,28 @@ def get_next_language():
             last
         )
 
-    except:
+    except ValueError:
 
         index = 0
 
 
+    # ==================================
+    # Nächste Sprache
+    # ==================================
 
     next_index = (
         index + 1
     ) % len(LANGUAGES)
 
 
-
     language = LANGUAGES[
         next_index
     ]
 
+
+    # ==================================
+    # State aktualisieren
+    # ==================================
 
     state = {
 
@@ -149,6 +170,15 @@ def get_next_language():
 
     save_state(
         state
+    )
+
+
+    print(
+        f"🌐 Sprache gespeichert: {language}"
+    )
+
+    print(
+        f"📅 Datum gespeichert: {today}"
     )
 
 
