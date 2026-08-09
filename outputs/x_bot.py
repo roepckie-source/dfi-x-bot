@@ -160,10 +160,10 @@ def send_x_thread(
 
 
 
-        post1 = f"""
+    post1 = f"""
 {lang.get("header_title", "🚀 DeFiChain Daily Intelligence")}
 
-{lang.get("header_line1", "")}
+🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦
 
 🌍 {lang.get("global_crypto", "Global Crypto")}
 
