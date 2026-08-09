@@ -1,4 +1,3 @@
-```python
 # ======================================
 # DeFiChain Intelligence v5
 # X Thread Bot
