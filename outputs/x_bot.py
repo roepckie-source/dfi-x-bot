@@ -1,3 +1,4 @@
+```python
 # ======================================
 # DeFiChain Intelligence v5
 # X Thread Bot
@@ -50,16 +51,15 @@ def short_number(value):
 
         if value >= 1_000_000:
 
-            return f"{value/1_000_000:.2f}M"
+            return f"{value / 1_000_000:.2f}M"
 
         if value >= 1_000:
 
-            return f"{value/1_000:.2f}K"
+            return f"{value / 1_000:.2f}K"
 
         return f"{value:.2f}"
 
-
-    except:
+    except Exception:
 
         return "N/A"
 
@@ -70,9 +70,10 @@ def safe_change(value):
 
         return f"{float(value):.2f}"
 
-    except:
+    except Exception:
 
         return "N/A"
+
 
 # ======================================
 # X Thread senden
@@ -104,9 +105,18 @@ def send_x_thread(
 
     try:
 
+        # ==================================
+        # Sprache laden
+        # ==================================
+
         lang = load_language(language)
-        
+
         client = get_client()
+
+
+        # ==================================
+        # DFI Daten
+        # ==================================
 
         dfi = market.get(
 
@@ -118,28 +128,40 @@ def send_x_thread(
 
 
         # ==================================
-        # TWEET 1
-        # Global Crypto + DeFiChain
+        # Globale Kryptowährungen
         # ==================================
 
-        btc = global_crypto.get(
+        btc = (
 
-            "bitcoin",
+            global_crypto.get(
+                "bitcoin",
+                {}
+            )
 
-            {}
+            if global_crypto
 
-        ) if global_crypto else {}
+            else {}
 
-
-        eth = global_crypto.get(
-
-            "ethereum",
-
-            {}
-
-        ) if global_crypto else {}
+        )
 
 
+        eth = (
+
+            global_crypto.get(
+                "ethereum",
+                {}
+            )
+
+            if global_crypto
+
+            else {}
+
+        )
+
+
+        # ==================================
+        # Intelligence
+        # ==================================
 
         score = intelligence.get(
 
@@ -159,46 +181,70 @@ def send_x_thread(
         )
 
 
+        # ==================================
+        # TWEET 1
+        # Global Crypto + DeFiChain
+        # ==================================
 
-    post1 = f"""
-{lang.get("header_title", "🚀 DeFiChain Daily Intelligence")}
+        post1 = f"""
+{lang.get(
+    "header_title",
+    "🚀 DeFiChain Daily Intelligence"
+)}
 
 🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦
 
-🌍 {lang.get("global_crypto", "Global Crypto")}
+🌍 {lang.get(
+    "global_crypto",
+    "Global Crypto"
+)}
 
 Bitcoin
-💵 ${btc.get('price','N/A')}
+💵 ${btc.get('price', 'N/A')}
 📈 {safe_change(btc.get('change'))}%
 
-
 Ethereum
-💵 ${eth.get('price','N/A')}
+💵 ${eth.get('price', 'N/A')}
 📈 {safe_change(eth.get('change'))}%
-
 
 💎 DeFiChain DFI
 
 Price:
-${dfi.get('usd','N/A')}
+${dfi.get('usd', 'N/A')}
 
 24h:
 {safe_change(dfi.get('change'))}%
 
-
-{lang.get("intelligence", "🧠 Intelligence Score")}
+{lang.get(
+    "intelligence",
+    "🧠 Intelligence Score"
+)}
 
 ⭐ {score}/100
 {status}
 
-
 #DeFiChain #DFI
 """.strip()
-        
-        print("DEBUG Tweet 1:")
-        print(post1)
 
-        
+
+        # ==================================
+        # X Limit Tweet 1
+        # ==================================
+
+        if len(post1) > 280:
+
+            post1 = post1[:277] + "..."
+
+
+        print(
+            "DEBUG Tweet 1:"
+        )
+
+        print(
+            post1
+        )
+
+
         result1 = client.create_tweet(
 
             text=post1
@@ -215,18 +261,34 @@ ${dfi.get('usd','N/A')}
         )
 
 
-
         # ==================================
         # TWEET 2
-        # DeFiChain Intelligence
+        # Tokenomics + Intelligence
         # ==================================
-
 
         net_burn = tokenomics.get(
 
             "balance",
 
             0
+
+        )
+
+
+        network_status = network.get(
+
+            "network_status",
+
+            "N/A"
+
+        )
+
+
+        daily_insight = intelligence.get(
+
+            "daily_insight",
+
+            "DeFiChain analysis active"
 
         )
 
@@ -239,7 +301,6 @@ ${dfi.get('usd','N/A')}
 ⭐ {score}/100
 {status}
 
-
 🔥 Burn vs Emission
 
 🟢 Burn exceeds emission
@@ -248,24 +309,25 @@ ${dfi.get('usd','N/A')}
 
 {short_number(net_burn)} DFI
 
-
 ⛓ Network
 
-🟢 {network.get('network_status','N/A')}
-
+🟢 {network_status}
 
 💡 Daily Insight
 
-{intelligence.get('daily_insight','DeFiChain analysis active')}
-
+{daily_insight}
 
 #DeFiChain #DFI
 """.strip()
 
+
+        # ==================================
+        # X Limit Tweet 2
+        # ==================================
+
         if len(post2) > 280:
 
             post2 = post2[:277] + "..."
-
 
 
         result2 = client.create_tweet(
@@ -285,19 +347,21 @@ ${dfi.get('usd','N/A')}
 
         )
 
+
         # ==================================
         # TWEET 3
-        # DeFiChain Content Update
+        # DeFiChain Content / History
         # ==================================
 
-        post3 = f"""
-📰 {lang.get("content_update", "DeFiChain Daily Update")}
+        post3 = """
+📰 DeFiChain Daily Update
+
 """.strip()
 
 
-        # ==============================
-        # Content / History
-        # ==============================
+        # ==================================
+        # History
+        # ==================================
 
         if history:
 
@@ -320,9 +384,9 @@ ${dfi.get('usd','N/A')}
 """
 
 
-        # ==============================
+        # ==================================
         # Fallback
-        # ==============================
+        # ==================================
 
         else:
 
@@ -333,19 +397,23 @@ DeFiChain ecosystem update active.
 """
 
 
+        # ==================================
+        # Hashtags
+        # ==================================
+
         post3 += """
 
 #DeFiChain #DFI
 """.strip()
 
 
-
-        # X Limit
+        # ==================================
+        # X Limit Tweet 3
+        # ==================================
 
         if len(post3) > 280:
 
             post3 = post3[:277] + "..."
-
 
 
         result3 = client.create_tweet(
@@ -366,17 +434,28 @@ DeFiChain ecosystem update active.
         )
 
 
+        # ==================================
+        # Erfolgreich
+        # ==================================
+
         print(
+
             "X Thread erfolgreich"
+
         )
 
+
+    # ======================================
+    # Fehler
+    # ======================================
 
     except Exception as e:
 
-
         print(
+
             "⚠️ X Posting aktuell nicht möglich"
+
         )
 
-
         print(e)
+```
