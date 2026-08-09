@@ -28,11 +28,8 @@ def get_client():
     return tweepy.Client(
 
         consumer_key=X_API_KEY,
-
         consumer_secret=X_API_SECRET,
-
         access_token=X_ACCESS_TOKEN,
-
         access_token_secret=X_ACCESS_SECRET
 
     )
@@ -49,11 +46,9 @@ def short_number(value):
         value = float(value)
 
         if value >= 1_000_000:
-
             return f"{value / 1_000_000:.2f}M"
 
         if value >= 1_000:
-
             return f"{value / 1_000:.2f}K"
 
         return f"{value:.2f}"
@@ -79,27 +74,16 @@ def safe_change(value):
 # ======================================
 
 def send_x_thread(
-
     market,
-
     tokenomics,
-
     dusd,
-
     network,
-
     intelligence,
-
     history=None,
-
     global_crypto=None,
-
     comparison=None,
-
     news=None,
-
     language="en"
-
 ):
 
     try:
@@ -118,11 +102,8 @@ def send_x_thread(
         # ==================================
 
         dfi = market.get(
-
             "dfi",
-
             {}
-
         )
 
 
@@ -131,30 +112,21 @@ def send_x_thread(
         # ==================================
 
         btc = (
-
             global_crypto.get(
                 "bitcoin",
                 {}
             )
-
             if global_crypto
-
             else {}
-
         )
 
-
         eth = (
-
             global_crypto.get(
                 "ethereum",
                 {}
             )
-
             if global_crypto
-
             else {}
-
         )
 
 
@@ -163,20 +135,13 @@ def send_x_thread(
         # ==================================
 
         score = intelligence.get(
-
             "total",
-
             "N/A"
-
         )
 
-
         status = intelligence.get(
-
             "status",
-
             "N/A"
-
         )
 
 
@@ -235,28 +200,18 @@ ${dfi.get('usd', 'N/A')}
             post1 = post1[:277] + "..."
 
 
-        print(
-            "DEBUG Tweet 1:"
-        )
-
-        print(
-            post1
-        )
+        print("DEBUG Tweet 1:")
+        print(post1)
 
 
         result1 = client.create_tweet(
-
             text=post1
-
         )
 
 
         print(
-
             "X Tweet 1 gesendet:",
-
             result1.data["id"]
-
         )
 
 
@@ -266,29 +221,18 @@ ${dfi.get('usd', 'N/A')}
         # ==================================
 
         net_burn = tokenomics.get(
-
             "balance",
-
             0
-
         )
-
 
         network_status = network.get(
-
             "network_status",
-
             "N/A"
-
         )
 
-
         daily_insight = intelligence.get(
-
             "daily_insight",
-
             "DeFiChain analysis active"
-
         )
 
 
@@ -330,20 +274,14 @@ ${dfi.get('usd', 'N/A')}
 
 
         result2 = client.create_tweet(
-
             text=post2,
-
             in_reply_to_tweet_id=result1.data["id"]
-
         )
 
 
         print(
-
             "X Tweet 2 gesendet:",
-
             result2.data["id"]
-
         )
 
 
@@ -354,7 +292,6 @@ ${dfi.get('usd', 'N/A')}
 
         post3 = """
 📰 DeFiChain Daily Update
-
 """.strip()
 
 
@@ -392,7 +329,6 @@ ${dfi.get('usd', 'N/A')}
             post3 += """
 
 DeFiChain ecosystem update active.
-
 """
 
 
@@ -416,20 +352,14 @@ DeFiChain ecosystem update active.
 
 
         result3 = client.create_tweet(
-
             text=post3,
-
             in_reply_to_tweet_id=result2.data["id"]
-
         )
 
 
         print(
-
             "X Tweet 3 gesendet:",
-
             result3.data["id"]
-
         )
 
 
@@ -438,9 +368,7 @@ DeFiChain ecosystem update active.
         # ==================================
 
         print(
-
             "X Thread erfolgreich"
-
         )
 
 
@@ -451,10 +379,7 @@ DeFiChain ecosystem update active.
     except Exception as e:
 
         print(
-
             "⚠️ X Posting aktuell nicht möglich"
-
         )
 
         print(e)
-```
