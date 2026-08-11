@@ -156,7 +156,7 @@ def send_x_thread(
     "🚀 DeFiChain Daily Intelligence"
 )}
 
-🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦
+
 
 🌍 {lang.get(
     "global_crypto",
