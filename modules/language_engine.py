@@ -24,7 +24,7 @@ STATE_FILE = os.path.join(
 
 
 # ======================================
-# Sprachreihenfolge
+# Sprachreihenfolge (Genau deine 10 Sprachdateien)
 # ======================================
 
 LANGUAGES = [
@@ -35,7 +35,6 @@ LANGUAGES = [
     "pt",
     "ru",
     "ja",
-    "zh",
     "hi",
     "id",
     "ar"
@@ -47,21 +46,17 @@ LANGUAGES = [
 # ======================================
 
 def load_state():
-
     try:
-
         with open(
             STATE_FILE,
             "r",
             encoding="utf-8"
         ) as file:
-
             return json.load(file)
-
     except Exception:
-
+        # Fallback: Setzt "ar" als Start, damit als Erstes "en" gewählt wird
         return {
-            "last_language": "en",
+            "last_language": "ar",
             "last_date": ""
         }
 
@@ -71,24 +66,19 @@ def load_state():
 # ======================================
 
 def save_state(state):
-
     try:
-
         with open(
             STATE_FILE,
             "w",
             encoding="utf-8"
         ) as file:
-
             json.dump(
                 state,
                 file,
                 indent=4,
                 ensure_ascii=False
             )
-
     except Exception as e:
-
         print(
             "Language State Fehler:",
             e
@@ -100,86 +90,48 @@ def save_state(state):
 # ======================================
 
 def get_next_language():
-
     state = load_state()
-
-    today = datetime.now().strftime(
-        "%Y-%m-%d"
-    )
-
+    today = datetime.now().strftime("%Y-%m-%d")
 
     # ==================================
     # Gleiche Sprache am gleichen Tag
     # ==================================
-
     if state.get("last_date") == today:
-
         return state.get(
             "last_language",
             "en"
         )
 
-
     # ==================================
-    # Letzte Sprache
+    # Letzte Sprache ermitteln
     # ==================================
-
     last = state.get(
         "last_language",
-        "en"
+        "ar"
     )
 
-
     try:
-
-        index = LANGUAGES.index(
-            last
-        )
-
+        index = LANGUAGES.index(last)
     except ValueError:
-
-        index = 0
-
+        index = len(LANGUAGES) - 1
 
     # ==================================
-    # Nächste Sprache
+    # Nächste Sprache in der Schleife
     # ==================================
-
-    next_index = (
-        index + 1
-    ) % len(LANGUAGES)
-
-
-    language = LANGUAGES[
-        next_index
-    ]
-
+    next_index = (index + 1) % len(LANGUAGES)
+    language = LANGUAGES[next_index]
 
     # ==================================
     # State aktualisieren
     # ==================================
-
     state = {
-
         "last_language": language,
-
         "last_date": today
-
     }
 
+    save_state(state)
 
-    save_state(
-        state
-    )
-
-
-    print(
-        f"🌐 Sprache gespeichert: {language}"
-    )
-
-    print(
-        f"📅 Datum gespeichert: {today}"
-    )
-
+    print(f"🌐 Sprache für heute gesetzt: {language.upper()}")
+    print(f"📅 Datum gespeichert: {today}")
 
     return language
