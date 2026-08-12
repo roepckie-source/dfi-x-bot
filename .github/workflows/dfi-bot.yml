@@ -1,123 +1,63 @@
 name: DeFiChain Bot
 
-
 on:
-
   workflow_dispatch:
-
   schedule:
-
     # täglich 23:00 Uhr deutscher Zeit (UTC+2 Sommerzeit)
     - cron: "0 21 * * *"
 
-
-
 # Erlaubt dem Bot, Dateien zurückzuschreiben
 permissions:
-
   contents: write
 
-
-
 jobs:
-
   run-bot:
-
     runs-on: ubuntu-latest
 
-
     steps:
-
-
       # Repository laden
       - name: Checkout repository
-
         uses: actions/checkout@v4
-
-
 
       # Python installieren
       - name: Setup Python
-
         uses: actions/setup-python@v5
-
         with:
-
           python-version: "3.12"
-
-
 
       # Abhängigkeiten installieren
       - name: Install dependencies
-
         run: |
-
           pip install -r requirements.txt
-
-
-
 
       # Bot starten
       - name: Run DeFiChain Bot
-
         env:
-
-
           # Discord
-
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
-
-
           # X / Twitter
-          # Mapping auf neue Variablennamen
-
           X_API_KEY: ${{ secrets.API_KEY }}
-
           X_API_SECRET: ${{ secrets.API_SECRET }}
-
           X_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
           X_ACCESS_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
 
-
-
           # Telegram
-
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
-
-
         run: |
-
           python main_v4_test.py
 
-
-
-
-
-      # History-Zähler speichern
-
-      - name: Save news state
-
+      # Status-Dateien speichern (History & Sprache)
+      - name: Save states (History & Language)
+        if: always()
         run: |
-
-
           git config --global user.name "DeFiChain Bot"
-
-
           git config --global user.email "dfi-bot@github.com"
 
+          # Fügt sowohl History- als auch Sprachzustand hinzu
+          git add history_state.json language_state.json
 
-
-          git add history_state.json
-
-
-
-          git commit -m "Update DFI history state" || echo "No changes"
-
-
-
+          git commit -m "Update DFI history and language state" || echo "No changes"
           git push
