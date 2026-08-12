@@ -7,17 +7,18 @@ import os
 import tweepy
 from modules.language import load_language
 
-# Flaggen-Mapping für unterstützte Sprachen & Regionen
+# Flaggen-Mapping für alle 10 Sprachdateien aus /languages
 FLAGS = {
-    "en": "🇺🇸", "us": "🇺🇸",
+    "ar": "🇸🇦",
     "de": "🇩🇪",
-    "zh": "🇨🇳", "cn": "🇨🇳",
+    "en": "🇺🇸",
+    "es": "🇪🇸",
+    "fr": "🇫🇷",
+    "hi": "🇮🇳",
     "id": "🇮🇩",
-    "hi": "🇮🇳", "in": "🇮🇳",
-    "ru": "🇷🇺",
-    "pt": "🇧🇷", "br": "🇧🇷",
-    "tr": "🇹🇷",
-    "global": "🌐", "world": "🌐"
+    "ja": "🇯🇵",
+    "pt": "🇧🇷",
+    "ru": "🇷🇺"
 }
 
 # X API Zugang
