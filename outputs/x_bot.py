@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (Ultra-Kompakt + Flaggen + Net Burn Fix)
+# X Thread Bot (Alle Flaggen in Tweet 1)
 # ======================================
 
 import os
@@ -9,16 +9,16 @@ from modules.language import load_language
 
 # Flaggen-Mapping für alle 10 Sprachdateien aus /languages
 FLAGS = {
-    "ar": "🇸🇦",
-    "de": "🇩🇪",
     "en": "🇺🇸",
+    "de": "🇩🇪",
     "es": "🇪🇸",
     "fr": "🇫🇷",
+    "pt": "🇧🇷",
+    "ru": "🇷🇺",
+    "ja": "🇯🇵",
     "hi": "🇮🇳",
     "id": "🇮🇩",
-    "ja": "🇯🇵",
-    "pt": "🇧🇷",
-    "ru": "🇷🇺"
+    "ar": "🇸🇦"
 }
 
 # X API Zugang
@@ -79,8 +79,11 @@ def send_x_thread(
         lang = load_language(language)
         client = get_client()
 
-        # Flagge der aktuellen Sprache holen (Fallback auf 🌐)
+        # Flagge der heutigen Sprache
         lang_flag = FLAGS.get(str(language).lower(), "🌐")
+
+        # String mit allen 10 Flaggen nebeneinander
+        all_flags = "".join(FLAGS.values())
 
         dfi = market.get("dfi", {}) if isinstance(market, dict) else {}
         btc = global_crypto.get("bitcoin", {}) if isinstance(global_crypto, dict) else {}
@@ -90,9 +93,11 @@ def send_x_thread(
         status = intelligence.get("status", "N/A") if isinstance(intelligence, dict) else "N/A"
 
         # ==================================
-        # TWEET 1: Marktübersicht
+        # TWEET 1: Marktübersicht + Alle Flaggen
         # ==================================
-        post1 = f"""🚀 DeFiChain Daily {lang_flag}🌐
+        post1 = f"""🚀 DeFiChain Daily {lang_flag}
+
+🌐 {all_flags}
 
 ₿ BTC: ${btc.get('price', 'N/A')} ({fmt_change(btc.get('change'))})
 Ξ ETH: ${eth.get('price', 'N/A')} ({fmt_change(eth.get('change'))})
@@ -120,11 +125,9 @@ def send_x_thread(
                 else tokenomics.get("burn")
             )
 
-        # Fallback auf Intelligence Daten
         if (raw_burn is None or raw_burn == 0) and isinstance(intelligence, dict):
             raw_burn = intelligence.get("net_burn", intelligence.get("burn", 0))
 
-        # Falls raw_burn ein Dictionary ist (z. B. {'address': ..., 'total': ...}), zieht er 'total'
         if isinstance(raw_burn, dict):
             raw_burn = raw_burn.get("total", raw_burn.get("balance", 0))
 
