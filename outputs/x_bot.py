@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (Ultra-Kompakt + Flaggen)
+# X Thread Bot (Ultra-Kompakt + Flaggen + Net Burn Fix)
 # ======================================
 
 import os
@@ -48,6 +48,7 @@ def short_num(val):
     except Exception:
         return str(val) if val else "0.00"
 
+
 def fmt_change(val):
     try:
         v = float(val)
@@ -79,17 +80,17 @@ def send_x_thread(
         client = get_client()
 
         # Flagge der aktuellen Sprache holen (Fallback auf 🌐)
-        lang_flag = FLAGS.get(language.lower(), "🌐")
+        lang_flag = FLAGS.get(str(language).lower(), "🌐")
 
-        dfi = market.get("dfi", {})
-        btc = global_crypto.get("bitcoin", {}) if global_crypto else {}
-        eth = global_crypto.get("ethereum", {}) if global_crypto else {}
+        dfi = market.get("dfi", {}) if isinstance(market, dict) else {}
+        btc = global_crypto.get("bitcoin", {}) if isinstance(global_crypto, dict) else {}
+        eth = global_crypto.get("ethereum", {}) if isinstance(global_crypto, dict) else {}
 
-        score = intelligence.get("total", "N/A")
-        status = intelligence.get("status", "N/A")
+        score = intelligence.get("total", "N/A") if isinstance(intelligence, dict) else "N/A"
+        status = intelligence.get("status", "N/A") if isinstance(intelligence, dict) else "N/A"
 
         # ==================================
-        # TWEET 1: Ultra-Kompakte Marktübersicht
+        # TWEET 1: Marktübersicht
         # ==================================
         post1 = f"""🚀 DeFiChain Daily {lang_flag}🌐
 
@@ -107,16 +108,34 @@ def send_x_thread(
         tweet1_id = res1.data["id"]
 
         # ==================================
-        # TWEET 2: Tokenomics & Netzwerk
+        # TWEET 2: Tokenomics & Network
         # ==================================
-        net_burn = tokenomics.get("balance", 0)
-        net_status = network.get("network_status", "Active")
-        insight = intelligence.get("daily_insight", "Monitoring active")
-        burn_emoji = "🟢" if float(net_burn) >= 0 else "🔴"
+        # Robuster Abruf: Prüft nacheinander alle möglichen Keys für den Burn-Wert
+        raw_burn = None
+        if isinstance(tokenomics, dict):
+            raw_burn = (
+                tokenomics.get("net_burn")
+                if tokenomics.get("net_burn") is not None
+                else tokenomics.get("balance")
+                if tokenomics.get("balance") is not None
+                else tokenomics.get("burn")
+            )
+
+        if (raw_burn is None or raw_burn == 0) and isinstance(intelligence, dict):
+            raw_burn = intelligence.get("net_burn", intelligence.get("burn", 0))
+
+        net_status = network.get("network_status", "Active") if isinstance(network, dict) else "Active"
+        insight = intelligence.get("daily_insight", "Monitoring active") if isinstance(intelligence, dict) else "Monitoring active"
+
+        try:
+            burn_val = float(raw_burn)
+            burn_emoji = "🟢" if burn_val >= 0 else "🔴"
+        except (ValueError, TypeError):
+            burn_emoji = "🟢"
 
         post2 = f"""🔥 DFI Tokenomics & Network {lang_flag}
 
-⚖️ Net Burn: {burn_emoji} {short_num(net_burn)} DFI
+⚖️ Net Burn: {burn_emoji} {short_num(raw_burn)} DFI
 ⛓️ Status: {net_status}
 
 💡 Insight:
@@ -130,25 +149,32 @@ def send_x_thread(
         tweet2_id = res2.data["id"]
 
         # ==================================
-        # TWEET 3: Historie / Update
+        # TWEET 3: DeFiChain History
         # ==================================
-        if history:
-            c_id = history.get("id", "N/A")
-            c_title = history.get("title", "Update")
-            c_text = history.get("text", "")
+        if history and isinstance(history, dict):
+            c_id = history.get("id", "")
+            c_title = history.get("title", "Milestone")
+            c_text = history.get("text", history.get("description", ""))
+            c_date = history.get("date", history.get("year", ""))
+
+            date_str = f" ({c_date})" if c_date else ""
+            chap_str = f"Ch.{c_id}: " if c_id else ""
+
             if len(c_text) > 120:
                 c_text = c_text[:117].rsplit(' ', 1)[0] + "..."
 
             post3 = f"""📰 DFI History {lang_flag}
 
-📚 Ch.{c_id}: {c_title}
+📚 {chap_str}{c_title}{date_str}
 "{c_text}"
 
 #DeFiChain #DFI""".strip()
-        else:
-            post3 = f"""📰 DFI Update {lang_flag}
 
-Ecosystem & DEX metrics actively monitored.
+        else:
+            post3 = f"""📰 DFI History {lang_flag}
+
+📚 Native DeFi built on Bitcoin since 2019.
+Decentralized financial applications empowering Bitcoin holders worldwide.
 
 #DeFiChain #DFI""".strip()
 
