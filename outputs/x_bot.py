@@ -1,77 +1,64 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot
+# X Thread Bot (Ultra-Kompakt + Flaggen)
 # ======================================
 
 import os
 import tweepy
-
 from modules.language import load_language
 
+# Flaggen-Mapping für unterstützte Sprachen & Regionen
+FLAGS = {
+    "en": "🇺🇸", "us": "🇺🇸",
+    "de": "🇩🇪",
+    "zh": "🇨🇳", "cn": "🇨🇳",
+    "id": "🇮🇩",
+    "hi": "🇮🇳", "in": "🇮🇳",
+    "ru": "🇷🇺",
+    "pt": "🇧🇷", "br": "🇧🇷",
+    "tr": "🇹🇷",
+    "global": "🌐", "world": "🌐"
+}
 
-# ======================================
 # X API Zugang
-# ======================================
-
 X_API_KEY = os.environ.get("X_API_KEY")
 X_API_SECRET = os.environ.get("X_API_SECRET")
 X_ACCESS_TOKEN = os.environ.get("X_ACCESS_TOKEN")
 X_ACCESS_SECRET = os.environ.get("X_ACCESS_SECRET")
 
 
-# ======================================
-# X Client
-# ======================================
-
 def get_client():
-
     return tweepy.Client(
-
         consumer_key=X_API_KEY,
         consumer_secret=X_API_SECRET,
         access_token=X_ACCESS_TOKEN,
         access_token_secret=X_ACCESS_SECRET
-
     )
 
 
-# ======================================
-# Format Helfer
-# ======================================
-
-def short_number(value):
-
+def short_num(val):
     try:
-
-        value = float(value)
-
-        if value >= 1_000_000:
-            return f"{value / 1_000_000:.2f}M"
-
-        if value >= 1_000:
-            return f"{value / 1_000:.2f}K"
-
-        return f"{value:.2f}"
-
+        val = float(val)
+        if val >= 1_000_000: return f"{val / 1_000_000:.2f}M"
+        if val >= 1_000: return f"{val / 1_000:.2f}K"
+        return f"{val:.2f}"
     except Exception:
-
         return "N/A"
 
 
-def safe_change(value):
-
+def fmt_change(val):
     try:
-
-        return f"{float(value):.2f}"
-
+        v = float(val)
+        return f"{'🟢' if v >= 0 else '🔴'} {v:+.2f}%"
     except Exception:
+        return "⚪ N/A"
 
-        return "N/A"
 
+def truncate(text, max_len=275):
+    if len(text) <= max_len:
+        return text
+    return text[:max_len - 3].rsplit(' ', 1)[0] + "..."
 
-# ======================================
-# X Thread senden
-# ======================================
 
 def send_x_thread(
     market,
@@ -85,301 +72,89 @@ def send_x_thread(
     news=None,
     language="en"
 ):
-
     try:
-
-        # ==================================
-        # Sprache laden
-        # ==================================
-
         lang = load_language(language)
-
         client = get_client()
 
+        # Flagge der aktuellen Sprache holen (Fallback auf 🌐)
+        lang_flag = FLAGS.get(language.lower(), "🌐")
+
+        dfi = market.get("dfi", {})
+        btc = global_crypto.get("bitcoin", {}) if global_crypto else {}
+        eth = global_crypto.get("ethereum", {}) if global_crypto else {}
+
+        score = intelligence.get("total", "N/A")
+        status = intelligence.get("status", "N/A")
 
         # ==================================
-        # DFI Daten
+        # TWEET 1: Ultra-Kompakte Marktübersicht
         # ==================================
+        post1 = f"""🚀 DeFiChain Daily {lang_flag}🌐
 
-        dfi = market.get(
-            "dfi",
-            {}
-        )
+₿ BTC: ${btc.get('price', 'N/A')} ({fmt_change(btc.get('change'))})
+Ξ ETH: ${eth.get('price', 'N/A')} ({fmt_change(eth.get('change'))})
+💎 DFI: ${dfi.get('usd', 'N/A')} ({fmt_change(dfi.get('change'))})
 
+🧠 Score: ⭐ {score}/100 ({status})
 
-        # ==================================
-        # Globale Kryptowährungen
-        # ==================================
+#DeFiChain #DFI #Crypto""".strip()
 
-        btc = (
-            global_crypto.get(
-                "bitcoin",
-                {}
-            )
-            if global_crypto
-            else {}
-        )
-
-        eth = (
-            global_crypto.get(
-                "ethereum",
-                {}
-            )
-            if global_crypto
-            else {}
-        )
-
+        post1 = truncate(post1)
+        print("DEBUG Tweet 1:\n", post1)
+        res1 = client.create_tweet(text=post1)
+        tweet1_id = res1.data["id"]
 
         # ==================================
-        # Intelligence
+        # TWEET 2: Tokenomics & Netzwerk
         # ==================================
+        net_burn = tokenomics.get("balance", 0)
+        net_status = network.get("network_status", "Active")
+        insight = intelligence.get("daily_insight", "Monitoring active")
+        burn_emoji = "🟢" if float(net_burn) >= 0 else "🔴"
 
-        score = intelligence.get(
-            "total",
-            "N/A"
-        )
+        post2 = f"""🔥 DFI Tokenomics & Network {lang_flag}
 
-        status = intelligence.get(
-            "status",
-            "N/A"
-        )
+⚖️ Net Burn: {burn_emoji} {short_num(net_burn)} DFI
+⛓️ Status: {net_status}
 
+💡 Insight:
+{insight}
 
-        # ==================================
-        # TWEET 1
-        # Global Crypto + DeFiChain
-        # ==================================
+#DeFiChain #DFI""".strip()
 
-        post1 = f"""
-{lang.get(
-    "header_title",
-    "🚀 DeFiChain Daily Intelligence"
-)}
-
-
-
-🌍 {lang.get(
-    "global_crypto",
-    "Global Crypto"
-)}
-
-Bitcoin
-💵 ${btc.get('price', 'N/A')}
-📈 {safe_change(btc.get('change'))}%
-
-Ethereum
-💵 ${eth.get('price', 'N/A')}
-📈 {safe_change(eth.get('change'))}%
-
-💎 DeFiChain DFI
-
-Price:
-${dfi.get('usd', 'N/A')}
-
-24h:
-{safe_change(dfi.get('change'))}%
-
-{lang.get(
-    "intelligence",
-    "🧠 Intelligence Score"
-)}
-
-⭐ {score}/100
-{status}
-
-#DeFiChain #DFI
-""".strip()
-
+        post2 = truncate(post2)
+        print("DEBUG Tweet 2:\n", post2)
+        res2 = client.create_tweet(text=post2, in_reply_to_tweet_id=tweet1_id)
+        tweet2_id = res2.data["id"]
 
         # ==================================
-        # X Limit Tweet 1
+        # TWEET 3: Historie / Update
         # ==================================
-
-        if len(post1) > 280:
-
-            post1 = post1[:277] + "..."
-
-
-        print("DEBUG Tweet 1:")
-        print(post1)
-
-
-        result1 = client.create_tweet(
-            text=post1
-        )
-
-
-        print(
-            "X Tweet 1 gesendet:",
-            result1.data["id"]
-        )
-
-
-        # ==================================
-        # TWEET 2
-        # Tokenomics + Intelligence
-        # ==================================
-
-        net_burn = tokenomics.get(
-            "balance",
-            0
-        )
-
-        network_status = network.get(
-            "network_status",
-            "N/A"
-        )
-
-        daily_insight = intelligence.get(
-            "daily_insight",
-            "DeFiChain analysis active"
-        )
-
-
-        post2 = f"""
-🔥 DeFiChain Tokenomics
-
-🧠 Intelligence Score
-
-⭐ {score}/100
-{status}
-
-🔥 Burn vs Emission
-
-🟢 Burn exceeds emission
-
-⚖️ Net Burn:
-
-{short_number(net_burn)} DFI
-
-⛓ Network
-
-🟢 {network_status}
-
-💡 Daily Insight
-
-{daily_insight}
-
-#DeFiChain #DFI
-""".strip()
-
-
-        # ==================================
-        # X Limit Tweet 2
-        # ==================================
-
-        if len(post2) > 280:
-
-            post2 = post2[:277] + "..."
-
-
-        result2 = client.create_tweet(
-            text=post2,
-            in_reply_to_tweet_id=result1.data["id"]
-        )
-
-
-        print(
-            "X Tweet 2 gesendet:",
-            result2.data["id"]
-        )
-
-
-        # ==================================
-        # TWEET 3
-        # DeFiChain Content / History
-        # ==================================
-
-        post3 = """
-📰 DeFiChain Daily Update
-""".strip()
-
-
-        # ==================================
-        # History
-        # ==================================
-
         if history:
+            c_id = history.get("id", "N/A")
+            c_title = history.get("title", "Update")
+            c_text = history.get("text", "")
+            if len(c_text) > 120:
+                c_text = c_text[:117].rsplit(' ', 1)[0] + "..."
 
-            post3 += f"""
+            post3 = f"""📰 DFI History {lang_flag}
 
-📚 Chapter {history.get(
-    "id",
-    "N/A"
-)}
+📚 Ch.{c_id}: {c_title}
+"{c_text}"
 
-{history.get(
-    "title",
-    "DeFiChain Update"
-)}
-
-{history.get(
-    "text",
-    ""
-)[:160]}
-"""
-
-
-        # ==================================
-        # Fallback
-        # ==================================
-
+#DeFiChain #DFI""".strip()
         else:
+            post3 = f"""📰 DFI Update {lang_flag}
 
-            post3 += """
+Ecosystem & DEX metrics actively monitored.
 
-DeFiChain ecosystem update active.
-"""
+#DeFiChain #DFI""".strip()
 
+        post3 = truncate(post3)
+        print("DEBUG Tweet 3:\n", post3)
+        client.create_tweet(text=post3, in_reply_to_tweet_id=tweet2_id)
 
-        # ==================================
-        # Hashtags
-        # ==================================
-
-        post3 += """
-
-#DeFiChain #DFI
-""".strip()
-
-
-        # ==================================
-        # X Limit Tweet 3
-        # ==================================
-
-        if len(post3) > 280:
-
-            post3 = post3[:277] + "..."
-
-
-        result3 = client.create_tweet(
-            text=post3,
-            in_reply_to_tweet_id=result2.data["id"]
-        )
-
-
-        print(
-            "X Tweet 3 gesendet:",
-            result3.data["id"]
-        )
-
-
-        # ==================================
-        # Erfolgreich
-        # ==================================
-
-        print(
-            "X Thread erfolgreich"
-        )
-
-
-    # ======================================
-    # Fehler
-    # ======================================
+        print("🎉 X Thread erfolgreich gesendet!")
 
     except Exception as e:
-
-        print(
-            "⚠️ X Posting aktuell nicht möglich"
-        )
-
-        print(e)
+        print("⚠️ X Posting fehlgeschlagen:", e)
