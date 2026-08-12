@@ -40,12 +40,13 @@ def get_client():
 def short_num(val):
     try:
         val = float(val)
-        if val >= 1_000_000: return f"{val / 1_000_000:.2f}M"
-        if val >= 1_000: return f"{val / 1_000:.2f}K"
+        if abs(val) >= 1_000_000:
+            return f"{val / 1_000_000:.2f}M"
+        if abs(val) >= 1_000:
+            return f"{val / 1_000:.2f}K"
         return f"{val:.2f}"
     except Exception:
-        return "N/A"
-
+        return str(val) if val else "0.00"
 
 def fmt_change(val):
     try:
