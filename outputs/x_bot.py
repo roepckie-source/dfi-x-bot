@@ -110,7 +110,6 @@ def send_x_thread(
         # ==================================
         # TWEET 2: Tokenomics & Network
         # ==================================
-        # Robuster Abruf: Prüft nacheinander alle möglichen Keys für den Burn-Wert
         raw_burn = None
         if isinstance(tokenomics, dict):
             raw_burn = (
@@ -121,8 +120,13 @@ def send_x_thread(
                 else tokenomics.get("burn")
             )
 
+        # Fallback auf Intelligence Daten
         if (raw_burn is None or raw_burn == 0) and isinstance(intelligence, dict):
             raw_burn = intelligence.get("net_burn", intelligence.get("burn", 0))
+
+        # Falls raw_burn ein Dictionary ist (z. B. {'address': ..., 'total': ...}), zieht er 'total'
+        if isinstance(raw_burn, dict):
+            raw_burn = raw_burn.get("total", raw_burn.get("balance", 0))
 
         net_status = network.get("network_status", "Active") if isinstance(network, dict) else "Active"
         insight = intelligence.get("daily_insight", "Monitoring active") if isinstance(intelligence, dict) else "Monitoring active"
