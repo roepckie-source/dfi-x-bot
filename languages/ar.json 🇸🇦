@@ -1,5 +1,55 @@
 {
-  "header_title": "🚀 ذكاء DeFiChain",
-  "header_line1": "لامركزي. مستقل.",
-  "header_line2": "ما وراء السيطرة المركزية."
+  "title": "استخبارات DeFiChain اليومية",
+
+  "header_title": "🚀 استخبارات DeFiChain",
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "لامركزي. مستقل. خارج السيطرة المركزية.",
+
+  "intelligence": "مؤشر استخبارات DFI",
+  "score": "النتيجة",
+
+  "market": "السوق",
+  "price": "السعر",
+  "change": "التغيير",
+  "market_cap": "القيمة السوقية",
+  "volume": "حجم التداول",
+  "global_crypto": "العملات المشفرة العالمية",
+
+  "tokenomics": "اقتصاديات التوكن",
+  "burn": "الحرق",
+  "emission": "الإصدار",
+  "net_burn": "الحرق الصافي",
+
+  "dusd_health": "صحة DUSD",
+
+  "community": "صندوق المجتمع",
+
+  "network": "الشبكة",
+  "block": "ارتفاع الكتلة",
+  "masternodes": "العقد الرئيسية",
+
+  "insight": "رؤية يومية",
+  "history": "تاريخ DeFiChain",
+  "content_update": "تحديث DeFiChain اليومي",
+
+  "market_recovery": "تم رصد تعافي في السوق",
+  "market_pressure": "تم رصد ضغط في السوق",
+  "market_stable": "السوق مستقر مع حركة محدودة",
+
+  "tokenomics_positive": "اقتصاديات التوكن إيجابية",
+  "emission_high": "الإصدار يتجاوز الحرق حالياً",
+
+  "dusd_critical": "dUSD لا يزال في حالة حرجة",
+  "dusd_warning": "صحة dUSD تحسنت ولكنها تظل تحت الضغط",
+  "dusd_stable": "صحة dUSD مستقرة",
+
+  "network_health": "الشبكة تعمل بشكل جيد",
+
+  "x_title_daily": "🚀 DeFiChain يومي",
+  "x_title_tokenomics": "🔥 اقتصاديات DFI والشبكة",
+  "x_title_history": "📰 تاريخ DFI",
+  "score_title": "النتيجة",
+  "status": "الحالة",
+  "insight_title": "رؤية يومية",
+  "monitoring_active": "المراقبة نشطة"
 }
