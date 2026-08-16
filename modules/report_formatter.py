@@ -3,350 +3,60 @@
 # Report Formatter
 # ======================================
 
-
-from datetime import datetime
 from modules.language import load_language
 
 
-def format_number(value):
-
-    if value is None:
-
-        return "N/A"
-
-
-    if isinstance(value, float):
-
-        if abs(value) >= 1_000_000:
-
-            return f"{value/1_000_000:.2f} M"
-
-
-        if abs(value) >= 1_000:
-
-            return f"{value/1_000:.2f} K"
-
-
-        return f"{value:.4f}"
-
-
-    return str(value)
-
-
 def create_report(
-        market,
-        tokenomics,
-        dusd,
-        community,
-        network,
-        intelligence,
-        daily_insight,
-        history,
-        global_crypto,
-        comparison,
-        language="de"
+    market,
+    tokenomics,
+    dusd,
+    community,
+    network,
+    intelligence,
+    daily_insight,
+    current_history,
+    global_crypto,
+    comparison,
+    language="de",
+    lang_data=None,
 ):
-
-    now = datetime.now().strftime(
-        "%d.%m.%Y %H:%M"
-       
-    )
-    
-    lang = load_language(language) or load_language("en")
-
-
-    score = intelligence.get(
-        "total",
-        "N/A"
-    )
-
-
-    status = intelligence.get(
-        "status",
-        ""
-    )
-
-
-
-    report = f"""
-{lang.get("header_title","🚀 DeFiChain Intelligence")}
-
-{lang.get("header_line1","Decentralized. Independent.")}
-{lang.get("header_line2","Beyond Central Control.")}
-
-📅 {now}
-
-━━━━━━━━━━━━━━━━━━
-"""
-
-    report += f"""
-🌍 GLOBAL CRYPTO UPDATE
-
-━━━━━━━━━━━━━━━━━━
-
-₿ Bitcoin
-
-💵 Price
-
-${global_crypto.get("bitcoin", {}).get("price", "N/A")}
-
-📈 24h
-
-{global_crypto.get("bitcoin", {}).get("change", 0):.2f} %
-
-━━━━━━━━━━━━━━━━━━
-
-Ξ Ethereum
-
-💵 Price
-
-${global_crypto.get("ethereum", {}).get("price", "N/A")}
-
-📈 24h
-
-{global_crypto.get("ethereum", {}).get("change", 0):.2f} %
-
-━━━━━━━━━━━━━━━━━━
-"""
-
-
-
-    # ==========================
-    # Crypto Market Comparison
-    # ==========================
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-📊 CRYPTO MARKET COMPARISON
-
-₿ Bitcoin
-
-📈 24h
-
-{comparison.get("bitcoin","N/A"):.2f} %
-
-
-Ξ Ethereum
-
-📈 24h
-
-{comparison.get("ethereum","N/A"):.2f} %
-
-
-🔹 DeFiChain DFI
-
-📈 24h
-
-{comparison.get("dfi","N/A"):.2f} %
-
-"""
-    
-    
-
-    # ==========================
-    # History
-    # ==========================
-
-
-    if history and isinstance(history, dict):
-
-
-        report += f"""
-━━━━━━━━━━━━━━━━━━
-
-📚 {lang.get("history")}
-
-Chapter {history.get("id","N/A")}
-
-{history.get("title","")}
-
-{history.get("text","")}
-
-"""
-  
-
-    # ==========================
-    # Market
-    # ==========================
-
-
-    dfi_market = market.get(
-        "dfi",
-        {}
-    )
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-💰 {lang.get("market")}
-
-💎 DFI Price
-
-🇺🇸 ${dfi_market.get("usd","N/A")} | 🇪🇺 €{dfi_market.get("eur","N/A")}
-
-
-📊 24h
-
-{float(dfi_market.get("change",0)):.2f} %
-
-🏦 Market Cap
-
-{format_number(
-    dfi_market.get("market_cap")
-)}
-
-
-📊 Volume
-
-{format_number(
-    dfi_market.get("volume")
-)}
-
-"""
-
-
-
-    # ==========================
-    # Tokenomics
-    # ==========================
-
-
-    burn = tokenomics.get(
-        "burn",
-        {}
-    )
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-🔥 {lang.get("tokenomics")}
-
-🔥 Burn
-
-{format_number(
-    burn.get("total")
-)} DFI
-
-
-📈 Emission
-
-{format_number(
-    tokenomics.get("emission")
-)} DFI
-
-
-⚖️ Net
-
-{tokenomics.get("status","")}
-
-{format_number(
-    tokenomics.get("net_change")
-)} DFI
-
-
-🏠 Address {format_number(burn.get("address"))}
-
-↩️ Payback {format_number(burn.get("payback"))}
-
-🔨 Auction {format_number(burn.get("auction"))}
-
-💸 Fees {format_number(burn.get("fees"))}
-
-"""
-
-
-
-
-    # ==========================
-    # Community Fund
-    # ==========================
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-🏦 {lang.get("community")}
-
-
-🪙 DFI
-
-{format_number(
-    community.get("dfi")
-)} DFI
-
-
-💵 dUSD
-
-{format_number(
-    community.get("dusd")
-)} dUSD
-
-
-📈 Inflow
-
-{format_number(
-    community.get("daily_inflow")
-)} DFI
-
-
-💰 Value
-
-{community.get("usd_value") or "N/A"}
-
-"""
-
-
-    # ==========================
-    # Network
-    # ==========================
-
-
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-⛓ {lang.get("network")}
-
-
-🌐 Status
-
-{network.get("network_status","N/A")}
-
-
-🧱 Block Height
-
-{format_number(
-    network.get("block_height")
-)}
-
-
-⏱ Last Block
-
-{network.get("last_block_time","N/A")}
-
-
-🖥 Masternodes
-
-{format_number(
-    network.get("masternodes")
-)}
-
-"""
-
-
-    report += """
-
-━━━━━━━━━━━━━━━━━━
-
-#DeFiChain #DFI
-"""
-
-
-    return "\n".join(
-        line.rstrip()
-        for line in report.strip().splitlines()
-        if line.strip()
-    )
+    # Falls lang_data nicht aus main übergeben wurde, selbst laden
+    if not lang_data:
+        lang_data = load_language(language)
+
+    # Fallback-Texte, falls ein Key im JSON fehlen sollte
+    h_title = lang_data.get("header_title", "🚀 DeFiChain Intelligence")
+    h_line1 = lang_data.get("header_line1", "Decentralized. Independent.")
+    h_line2 = lang_data.get("header_line2", "Beyond Centralized Control.")
+
+    # Marktdaten
+    dfi_price = market.get("dfi", {}).get("price", "N/A")
+    dfi_change = market.get("dfi", {}).get("change", 0)
+    change_emoji = "🟢" if dfi_change >= 0 else "🔴"
+
+    # Score & Status
+    score = intelligence.get("total", 0)
+    status = intelligence.get("status", "N/A")
+
+    # History / Kapitel
+    hist_title = "N/A"
+    hist_content = ""
+    if current_history and isinstance(current_history, dict):
+        hist_title = current_history.get("title", "N/A")
+        hist_content = current_history.get("content", "")
+
+    # Bericht zusammenbauen
+    report = f"{h_title} ({language.upper()})\n"
+    report += f"{h_line1}\n"
+    report += f"{h_line2}\n\n"
+
+    report += f"📊 Market: DFI ${dfi_price} ({change_emoji} {dfi_change:.2f}%)\n"
+    report += f"🧠 Score: {score}/100 ({status})\n\n"
+
+    if daily_insight:
+        report += f"💡 Insight:\n{daily_insight}\n\n"
+
+    if hist_title != "N/A":
+        report += f"📚 History: {hist_title}\n{hist_content}\n"
+
+    return report
