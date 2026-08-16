@@ -59,14 +59,21 @@ def send_x_thread(
     eth_change = global_crypto.get("ethereum", {}).get("change", 0)
     eth_emoji = "🟢" if eth_change >= 0 else "🔴"
 
-    dfi_price = market.get("dfi", {}).get("price", "N/A")
-    dfi_change = market.get("dfi", {}).get("change", 0)
+    # DFI Preis robuster auslesen (prüft mehrere mögliche Schlüssel)
+    dfi_data = market.get("dfi", {})
+    dfi_price = (
+        dfi_data.get("price")
+        or dfi_data.get("price_usd")
+        or dfi_data.get("last_price")
+        or "N/A"
+    )
+    dfi_change = dfi_data.get("change", 0)
     dfi_emoji = "🟢" if dfi_change >= 0 else "🔴"
 
     score = intelligence.get("total", 0)
     status = intelligence.get("status", "N/A")
 
-    # Flaggen & Übersetzungen
+    # Flaggen-Zuordnung
     flag_map = {
         "de": "🇩🇪",
         "en": "🇺🇸",
@@ -92,7 +99,12 @@ def send_x_thread(
     # --------------------------------------------------
     # Tweet 2: Tokenomics & Network
     # --------------------------------------------------
-    net_burn = tokenomics.get("burn", {}).get("total", "N/A")
+    raw_burn = tokenomics.get("burn", {}).get("total", 0)
+    try:
+        net_burn = f"{float(raw_burn) / 1_000_000:.2f}M"
+    except (ValueError, TypeError):
+        net_burn = str(raw_burn)
+
     net_status = network.get("network_status", "🟢 Online")
 
     tweet2 = f"🔥 DFI Tokenomics & Network {lang_flag}\n\n"
@@ -110,7 +122,13 @@ def send_x_thread(
 
     if current_history and isinstance(current_history, dict):
         hist_title = current_history.get("title", "N/A")
-        hist_text = current_history.get("content", "")
+        # Sucht nacheinander nach 'content', 'text' oder 'description'
+        hist_text = (
+            current_history.get("content")
+            or current_history.get("text")
+            or current_history.get("description")
+            or ""
+        )
         hist_id = current_history.get("id", "")
 
     # Text-Länge für Twitter begrenzen
@@ -123,7 +141,8 @@ def send_x_thread(
     else:
         tweet3 += f"📚 {hist_title}\n"
 
-    tweet3 += f'"{hist_text}"\n\n'
+    if hist_text:
+        tweet3 += f'"{hist_text}"\n\n'
     tweet3 += "#DeFiChain #DFI"
 
     # --------------------------------------------------
