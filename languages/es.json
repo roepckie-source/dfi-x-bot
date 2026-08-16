@@ -1,5 +1,55 @@
 {
+  "title": "Inteligencia Diaria DeFiChain",
+
   "header_title": "🚀 Inteligencia DeFiChain",
-  "header_line1": "Descentralizado. Independiente.",
-  "header_line2": "Más allá del control central."
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "Descentralizado. Independiente. Más allá del control central.",
+
+  "intelligence": "ÍNDICE DE INTELIGENCIA DFI",
+  "score": "Puntuación",
+
+  "market": "Mercado",
+  "price": "Precio",
+  "change": "Cambio",
+  "market_cap": "Capitalización de mercado",
+  "volume": "Volumen",
+  "global_crypto": "Cripto Global",
+
+  "tokenomics": "Tokenómica",
+  "burn": "Quema",
+  "emission": "Emisión",
+  "net_burn": "Quema neta",
+
+  "dusd_health": "Salud de DUSD",
+
+  "community": "Fondo de la Comunidad",
+
+  "network": "Red",
+  "block": "Altura de bloque",
+  "masternodes": "Masternodos",
+
+  "insight": "Análisis diario",
+  "history": "Historia de DeFiChain",
+  "content_update": "Actualización diaria de DeFiChain",
+
+  "market_recovery": "Recuperación del mercado detectada",
+  "market_pressure": "Presión del mercado detectada",
+  "market_stable": "Mercado estable con poco movimiento",
+
+  "tokenomics_positive": "Tokenómica positiva",
+  "emission_high": "La emisión supera actualmente la quema",
+
+  "dusd_critical": "dUSD sigue siendo crítico",
+  "dusd_warning": "La salud de dUSD mejora pero sigue bajo presión",
+  "dusd_stable": "Salud de dUSD estable",
+
+  "network_health": "Red saludable",
+
+  "x_title_daily": "🚀 DeFiChain Diario",
+  "x_title_tokenomics": "🔥 Tokenómica de DFI y Red",
+  "x_title_history": "📰 Historia de DFI",
+  "score_title": "Puntuación",
+  "status": "Estado",
+  "insight_title": "Análisis diario",
+  "monitoring_active": "Monitoreo activo"
 }
