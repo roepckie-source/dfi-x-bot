@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X / Twitter Bot Output
+# X / Twitter Bot Output (Language-Aware)
 # ======================================
 
 import os
@@ -48,6 +48,17 @@ def send_x_thread(
     if not lang_data:
         lang_data = load_language(language)
 
+    # Dynamic Übersetzungen aus lang_data (mit Fallbacks)
+    title_daily = lang_data.get("x_title_daily", "🚀 DeFiChain Daily")
+    title_tokenomics = lang_data.get("x_title_tokenomics", "🔥 DFI Tokenomics & Network")
+    title_history = lang_data.get("x_title_history", "📰 DFI History")
+    
+    lbl_score = lang_data.get("score_title", "Score")
+    lbl_burn = lang_data.get("net_burn", "Net Burn")
+    lbl_status = lang_data.get("status", "Status")
+    lbl_insight = lang_data.get("insight_title", "Insight")
+    lbl_monitoring = lang_data.get("monitoring_active", "Monitoring active")
+
     # --------------------------------------------------
     # Tweet 1: Market & Intelligence
     # --------------------------------------------------
@@ -59,13 +70,8 @@ def send_x_thread(
     eth_change = global_crypto.get("ethereum", {}).get("change", 0)
     eth_emoji = "🟢" if eth_change >= 0 else "🔴"
 
-    # DFI Preis robuster auslesen
     dfi_raw = market.get("dfi", {})
-    print(f"DEBUG DFI Market Data: {dfi_raw}")
-
-    dfi_data = dfi_raw
-    if isinstance(dfi_raw, dict) and "dfi" in dfi_raw:
-        dfi_data = dfi_raw.get("dfi", {})
+    dfi_data = dfi_raw.get("dfi", {}) if isinstance(dfi_raw, dict) and "dfi" in dfi_raw else dfi_raw
 
     dfi_price = (
         dfi_data.get("price")
@@ -80,27 +86,19 @@ def send_x_thread(
     score = intelligence.get("total", 0)
     status = intelligence.get("status", "N/A")
 
-    # Flaggen-Zuordnung
     flag_map = {
-        "de": "🇩🇪",
-        "en": "🇺🇸",
-        "ru": "🇷🇺",
-        "es": "🇪🇸",
-        "fr": "🇫🇷",
-        "br": "🇧🇷",
-        "jp": "🇯🇵",
-        "in": "🇮🇳",
-        "id": "🇮🇩",
-        "sa": "🇸🇦",
+        "de": "🇩🇪", "en": "🇺🇸", "ru": "🇷🇺", "es": "🇪🇸",
+        "fr": "🇫🇷", "br": "🇧🇷", "jp": "🇯🇵", "in": "🇮🇳",
+        "id": "🇮🇩", "sa": "🇸🇦"
     }
     lang_flag = flag_map.get(language, "🌐")
 
-    tweet1 = f"🚀 DeFiChain Daily {lang_flag}\n\n"
+    tweet1 = f"{title_daily} {lang_flag}\n\n"
     tweet1 += "🌐 🇺🇸🇩🇪🇪🇸🇫🇷🇧🇷🇷🇺🇯🇵🇮🇳🇮🇩🇸🇦\n\n"
     tweet1 += f"₿ BTC: ${btc_price} ({btc_emoji} {btc_change:+.2f}%)\n"
     tweet1 += f"Ξ ETH: ${eth_price} ({eth_emoji} {eth_change:+.2f}%)\n"
     tweet1 += f"💎 DFI: ${dfi_price} ({dfi_emoji} {dfi_change:+.2f}%)\n\n"
-    tweet1 += f"🧠 Score: ⭐ {score}/100 ({status})\n\n"
+    tweet1 += f"🧠 {lbl_score}: ⭐ {score}/100 ({status})\n\n"
     tweet1 += "#DeFiChain #DFI #Crypto"
 
     # --------------------------------------------------
@@ -114,10 +112,10 @@ def send_x_thread(
 
     net_status = network.get("network_status", "🟢 Online")
 
-    tweet2 = f"🔥 DFI Tokenomics & Network {lang_flag}\n\n"
-    tweet2 += f"⚖️ Net Burn: {net_burn} DFI\n"
-    tweet2 += f"⛓️ Status: {net_status}\n\n"
-    tweet2 += "💡 Insight:\nMonitoring active\n\n"
+    tweet2 = f"{title_tokenomics} {lang_flag}\n\n"
+    tweet2 += f"⚖️ {lbl_burn}: {net_burn} DFI\n"
+    tweet2 += f"⛓️ {lbl_status}: {net_status}\n\n"
+    tweet2 += f"💡 {lbl_insight}:\n{lbl_monitoring}\n\n"
     tweet2 += "#DeFiChain #DFI"
 
     # --------------------------------------------------
@@ -140,7 +138,7 @@ def send_x_thread(
     if len(hist_text) > 180:
         hist_text = hist_text[:177] + "..."
 
-    tweet3 = f"📰 DFI History {lang_flag}\n\n"
+    tweet3 = f"{title_history} {lang_flag}\n\n"
     if hist_id:
         tweet3 += f"📚 Ch.{hist_id}: {hist_title}\n"
     else:
@@ -151,21 +149,15 @@ def send_x_thread(
     tweet3 += "#DeFiChain #DFI"
 
     # --------------------------------------------------
-    # Tweets ausgeben & senden
+    # Tweets senden
     # --------------------------------------------------
-    print("DEBUG Tweet 1:\n", tweet1)
-    print("DEBUG Tweet 2:\n", tweet2)
-    print("DEBUG Tweet 3:\n", tweet3)
-
     client = get_x_api()
     if client:
         try:
             res1 = client.create_tweet(text=tweet1)
             tweet_id = res1.data["id"]
 
-            res2 = client.create_tweet(
-                text=tweet2, in_reply_to_tweet_id=tweet_id
-            )
+            res2 = client.create_tweet(text=tweet2, in_reply_to_tweet_id=tweet_id)
             tweet_id = res2.data["id"]
 
             client.create_tweet(text=tweet3, in_reply_to_tweet_id=tweet_id)
