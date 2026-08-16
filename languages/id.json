@@ -1,5 +1,55 @@
 {
-  "header_title": "🚀 DeFiChain Intelligence",
-  "header_line1": "Terdesentralisasi. Mandiri.",
-  "header_line2": "Melampaui Kendali Terpusat."
+  "title": "Intelijen Harian DeFiChain",
+
+  "header_title": "🚀 Intelijen DeFiChain",
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "Tersentralisasi. Independen. Di luar kontrol tersentralisasi.",
+
+  "intelligence": "INDEKS INTELIJEN DFI",
+  "score": "Skor",
+
+  "market": "Pasar",
+  "price": "Harga",
+  "change": "Perubahan",
+  "market_cap": "Kapitalisasi Pasar",
+  "volume": "Volume",
+  "global_crypto": "Kripto Global",
+
+  "tokenomics": "Tokenomik",
+  "burn": "Pembakaran",
+  "emission": "Emisi",
+  "net_burn": "Pembakaran Bersih",
+
+  "dusd_health": "Kesehatan DUSD",
+
+  "community": "Dana Komunitas",
+
+  "network": "Jaringan",
+  "block": "Tinggi Blok",
+  "masternodes": "Masternode",
+
+  "insight": "Wawasan Harian",
+  "history": "Sejarah DeFiChain",
+  "content_update": "Pembaruan Harian DeFiChain",
+
+  "market_recovery": "Pemulihan pasar terdeteksi",
+  "market_pressure": "Tekanan pasar terdeteksi",
+  "market_stable": "Pasar stabil dengan pergerakan terbatas",
+
+  "tokenomics_positive": "Tokenomik positif",
+  "emission_high": "Emisi saat ini melebihi pembakaran",
+
+  "dusd_critical": "dUSD masih dalam kondisi kritis",
+  "dusd_warning": "Kesehatan dUSD membaik tetapi masih di bawah tekanan",
+  "dusd_stable": "Kesehatan dUSD stabil",
+
+  "network_health": "Jaringan sehat",
+
+  "x_title_daily": "🚀 DeFiChain Harian",
+  "x_title_tokenomics": "🔥 Tokenomik DFI & Jaringan",
+  "x_title_history": "📰 Sejarah DFI",
+  "score_title": "Skor",
+  "status": "Status",
+  "insight_title": "Wawasan Harian",
+  "monitoring_active": "Pemantauan aktif"
 }
