@@ -2,8 +2,8 @@
   "title": "DeFiChain Daily Intelligence",
 
   "header_title": "🚀 DeFiChain Intelligence",
-  "header_line1": "Dezentral. Unabhängig.",
-  "header_line2": "Jenseits zentraler Kontrolle.",
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "Dezentral. Unabhängig. Jenseits zentraler Kontrolle.",
 
   "intelligence": "DFI INTELLIGENCE INDEX",
   "score": "Score",
@@ -13,20 +13,43 @@
   "change": "Veränderung",
   "market_cap": "Marktkapitalisierung",
   "volume": "Volumen",
+  "global_crypto": "Globaler Kryptomarkt",
 
   "tokenomics": "Tokenomics",
   "burn": "Burn",
   "emission": "Emission",
-  "net_burn": "Netto Burn",
+  "net_burn": "Net Burn",
 
-  "dusd_health": "DUSD Gesundheit",
+  "dusd_health": "DUSD Zustand",
 
-  "community": "Community Fund",
+  "community": "Community-Fonds",
 
   "network": "Netzwerk",
   "block": "Blockhöhe",
   "masternodes": "Masternodes",
 
   "insight": "Täglicher Einblick",
-  "history": "DeFiChain Geschichte"
+  "history": "DeFiChain Geschichte",
+  "content_update": "DeFiChain Tägliches Update",
+
+  "market_recovery": "Markterholung erkannt",
+  "market_pressure": "Marktdruck erkannt",
+  "market_stable": "Markt stabil mit geringer Bewegung",
+
+  "tokenomics_positive": "Tokenomics positiv",
+  "emission_high": "Emission übersteigt derzeit den Burn",
+
+  "dusd_critical": "dUSD bleibt kritisch",
+  "dusd_warning": "dUSD Zustand verbessert sich, bleibt aber unter Druck",
+  "dusd_stable": "dUSD Zustand stabil",
+
+  "network_health": "Netzwerk gesund",
+
+  "x_title_daily": "🚀 DeFiChain Täglich",
+  "x_title_tokenomics": "🔥 DFI Tokenomics & Netzwerk",
+  "x_title_history": "📰 DFI Geschichte",
+  "score_title": "Score",
+  "status": "Status",
+  "insight_title": "Täglicher Einblick",
+  "monitoring_active": "Überwachung aktiv"
 }
