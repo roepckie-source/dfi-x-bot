@@ -1,5 +1,55 @@
 {
+  "title": "DeFiChain दैनिक इंटेलिजेंस",
+
   "header_title": "🚀 DeFiChain इंटेलिजेंस",
-  "header_line1": "विकेंद्रीकृत। स्वतंत्र।",
-  "header_line2": "केंद्रीय नियंत्रण से परे।"
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "विकेंद्रीकृत। स्वतंत्र। केंद्रीय नियंत्रण से परे।",
+
+  "intelligence": "DFI इंटेलिजेंस इंडेक्स",
+  "score": "स्कोर",
+
+  "market": "बाज़ार",
+  "price": "कीमत",
+  "change": "बदलाव",
+  "market_cap": "मार्केट कैप",
+  "volume": "वॉल्यूम",
+  "global_crypto": "ग्लोबल क्रिप्टो",
+
+  "tokenomics": "टोकनॉमिक्स",
+  "burn": "बर्न",
+  "emission": "उत्सर्जन",
+  "net_burn": "नेट बर्न",
+
+  "dusd_health": "DUSD स्वास्थ्य",
+
+  "community": "कम्युनिटी फंड",
+
+  "network": "नेटवर्क",
+  "block": "ब्लॉक ऊंचाई",
+  "masternodes": "मास्टरनोड्स",
+
+  "insight": "दैनिक इनसाइट",
+  "history": "DeFiChain का इतिहास",
+  "content_update": "DeFiChain दैनिक अपडेट",
+
+  "market_recovery": "बाज़ार में सुधार देखा गया",
+  "market_pressure": "बाज़ार में दबाव देखा गया",
+  "market_stable": "कम हलचल के साथ बाज़ार स्थिर",
+
+  "tokenomics_positive": "टोकनॉमिक्स सकारात्मक",
+  "emission_high": "उत्सर्जन वर्तमान में बर्न से अधिक है",
+
+  "dusd_critical": "dUSD स्थिति अभी भी गंभीर है",
+  "dusd_warning": "dUSD स्वास्थ्य में सुधार हो रहा है लेकिन दबाव बना हुआ है",
+  "dusd_stable": "dUSD स्वास्थ्य स्थिर",
+
+  "network_health": "नेटवर्क स्वस्थ",
+
+  "x_title_daily": "🚀 DeFiChain दैनिक",
+  "x_title_tokenomics": "🔥 DFI टोकनॉमिक्स और नेटवर्क",
+  "x_title_history": "📰 DFI इतिहास",
+  "score_title": "स्कोर",
+  "status": "स्थिति",
+  "insight_title": "दैनिक इनसाइट",
+  "monitoring_active": "निगरानी सक्रिय"
 }
