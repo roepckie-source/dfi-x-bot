@@ -59,15 +59,22 @@ def send_x_thread(
     eth_change = global_crypto.get("ethereum", {}).get("change", 0)
     eth_emoji = "🟢" if eth_change >= 0 else "🔴"
 
-    # DFI Preis robuster auslesen (prüft mehrere mögliche Schlüssel)
-    dfi_data = market.get("dfi", {})
+    # DFI Preis robuster auslesen
+    dfi_raw = market.get("dfi", {})
+    print(f"DEBUG DFI Market Data: {dfi_raw}")
+
+    dfi_data = dfi_raw
+    if isinstance(dfi_raw, dict) and "dfi" in dfi_raw:
+        dfi_data = dfi_raw.get("dfi", {})
+
     dfi_price = (
         dfi_data.get("price")
         or dfi_data.get("price_usd")
+        or dfi_data.get("usd")
         or dfi_data.get("last_price")
         or "N/A"
     )
-    dfi_change = dfi_data.get("change", 0)
+    dfi_change = dfi_data.get("change", 0) if isinstance(dfi_data, dict) else 0
     dfi_emoji = "🟢" if dfi_change >= 0 else "🔴"
 
     score = intelligence.get("total", 0)
@@ -122,7 +129,6 @@ def send_x_thread(
 
     if current_history and isinstance(current_history, dict):
         hist_title = current_history.get("title", "N/A")
-        # Sucht nacheinander nach 'content', 'text' oder 'description'
         hist_text = (
             current_history.get("content")
             or current_history.get("text")
@@ -131,7 +137,6 @@ def send_x_thread(
         )
         hist_id = current_history.get("id", "")
 
-    # Text-Länge für Twitter begrenzen
     if len(hist_text) > 180:
         hist_text = hist_text[:177] + "..."
 
