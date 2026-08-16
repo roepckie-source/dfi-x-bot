@@ -1,5 +1,55 @@
 {
+  "title": "Ежедневная аналитика DeFiChain",
+
   "header_title": "🚀 Интеллект DeFiChain",
-  "header_line1": "Децентрализованный. Независимый.",
-  "header_line2": "За пределами централизованного контроля."
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "Децентрализованный. Независимый. Вне централизованного контроля.",
+
+  "intelligence": "ИНДЕКС ИНТЕЛЛЕКТА DFI",
+  "score": "Оценка",
+
+  "market": "Рынок",
+  "price": "Цена",
+  "change": "Изменение",
+  "market_cap": "Рыночная капитализация",
+  "volume": "Объем",
+  "global_crypto": "Глобальный крипторынок",
+
+  "tokenomics": "Токеномика",
+  "burn": "Сжиг",
+  "emission": "Эмиссия",
+  "net_burn": "Чистый сжиг",
+
+  "dusd_health": "Состояние DUSD",
+
+  "community": "Фонд сообщества",
+
+  "network": "Сеть",
+  "block": "Высота блока",
+  "masternodes": "Мастерноды",
+
+  "insight": "Ежедневная аналитика",
+  "history": "История DeFiChain",
+  "content_update": "Ежедневное обновление DeFiChain",
+
+  "market_recovery": "Зафиксировано восстановление рынка",
+  "market_pressure": "Зафиксировано давление на рынок",
+  "market_stable": "Рынок стабилен с небольшим движением",
+
+  "tokenomics_positive": "Токеномика положительная",
+  "emission_high": "Эмиссия в настоящее время превышает сжиг",
+
+  "dusd_critical": "dUSD остается в критическом состоянии",
+  "dusd_warning": "Состояние dUSD улучшается, но остается под давлением",
+  "dusd_stable": "Состояние dUSD стабильное",
+
+  "network_health": "Сеть работает нормально",
+
+  "x_title_daily": "🚀 DeFiChain Ежедневно",
+  "x_title_tokenomics": "🔥 Токеномика DFI и Сеть",
+  "x_title_history": "📰 История DFI",
+  "score_title": "Оценка",
+  "status": "Статус",
+  "insight_title": "Ежедневная аналитика",
+  "monitoring_active": "Мониторинг активен"
 }
