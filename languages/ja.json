@@ -1,5 +1,55 @@
 {
+  "title": "DeFiChain デイリーインテリジェンス",
+
   "header_title": "🚀 DeFiChain インテリジェンス",
-  "header_line1": "分散型。独立。",
-  "header_line2": "中央管理を超えて。"
+  "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
+  "header_line2": "分散型。独立型。中央集権的な管理を超えて。",
+
+  "intelligence": "DFI インテリジェンスインデックス",
+  "score": "スコア",
+
+  "market": "市場",
+  "price": "価格",
+  "change": "変動",
+  "market_cap": "時価総額",
+  "volume": "取引量",
+  "global_crypto": "全体暗号資産",
+
+  "tokenomics": "トークノミクス",
+  "burn": "バーン",
+  "emission": "排出",
+  "net_burn": "ネットバーン",
+
+  "dusd_health": "DUSDの健全性",
+
+  "community": "コミュニティファンド",
+
+  "network": "ネットワーク",
+  "block": "ブロック高",
+  "masternodes": "マスターノード",
+
+  "insight": "本日のインサイト",
+  "history": "DeFiChainの歴史",
+  "content_update": "DeFiChain デイリーアップデート",
+
+  "market_recovery": "市場の回復を検出",
+  "market_pressure": "市場の売り圧力を検出",
+  "market_stable": "小幅な動きで市場は安定",
+
+  "tokenomics_positive": "トークノミクスは好調",
+  "emission_high": "現在、排出量がバーン量を上回っています",
+
+  "dusd_critical": "dUSDは引き続き危機的状態です",
+  "dusd_warning": "dUSDの健全性は改善していますが圧力下にあります",
+  "dusd_stable": "dUSDの健全性は安定しています",
+
+  "network_health": "ネットワークは正常です",
+
+  "x_title_daily": "🚀 DeFiChain デイリー",
+  "x_title_tokenomics": "🔥 DFI トークノミクス & ネットワーク",
+  "x_title_history": "📰 DFI の歴史",
+  "score_title": "スコア",
+  "status": "ステータス",
+  "insight_title": "本日のインサイト",
+  "monitoring_active": "モニタリング有効"
 }
