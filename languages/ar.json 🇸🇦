@@ -52,4 +52,14 @@
   "status": "الحالة",
   "insight_title": "رؤية يومية",
   "monitoring_active": "المراقبة نشطة"
+
+  "status_vorsicht": "🟠 حذر",
+  "status_caution": "🟠 حذر",
+  "insight_market_gain": "ارتفع DFI بنسبة {change:.2f}% خلال 24 ساعة.",
+  "insight_market_loss": "انخفض DFI بنسبة {change:.2f}% خلال 24 ساعة.",
+  "insight_burn_exceeds": "الحرق يتجاوز الإصدار بمقدار {amount:.2f} مليون DFI.",
+  "insight_peg_dev": "انحراف الربط {peg:.2f}%.",
+  "insight_chain_normal": "سلسلة الكتل تعمل بشكل طبيعي."
+
+
 }
