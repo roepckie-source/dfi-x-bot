@@ -52,4 +52,14 @@
   "status": "स्थिति",
   "insight_title": "दैनिक इनसाइट",
   "monitoring_active": "निगरानी सक्रिय"
+
+
+  "status_vorsicht": "🟠 सावधानी",
+  "status_caution": "🟠 सावधानी",
+  "insight_market_gain": "DFI ने 24 घंटे में {change:.2f}% की बढ़त दर्ज की।",
+  "insight_market_loss": "DFI में 24 घंटे में {change:.2f}% की गिरावट आई।",
+  "insight_burn_exceeds": "बर्न उत्सर्जन से {amount:.2f} M DFI अधिक है।",
+  "insight_peg_dev": "पेग विचलन {peg:.2f}%।",
+  "insight_chain_normal": "ब्लॉकचेन सामान्य रूप से काम कर रहा है।"
+
 }
