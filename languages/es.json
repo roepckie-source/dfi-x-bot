@@ -52,4 +52,15 @@
   "status": "Estado",
   "insight_title": "Análisis diario",
   "monitoring_active": "Monitoreo activo"
+
+
+  "status_vorsicht": "🟠 Precaución",
+  "status_caution": "🟠 Precaución",
+  "insight_market_gain": "DFI ganó un {change:.2f}% en 24h.",
+  "insight_market_loss": "DFI perdió un {change:.2f}% en 24h.",
+  "insight_burn_exceeds": "La quema supera la emisión en {amount:.2f} M DFI.",
+  "insight_peg_dev": "Desviación de paridad {peg:.2f}%.",
+  "insight_chain_normal": "La cadena de bloques funciona con normalidad."
+
+
 }
