@@ -52,4 +52,13 @@
   "status": "Statut",
   "insight_title": "Aperçu quotidien",
   "monitoring_active": "Surveillance active"
+
+  "status_vorsicht": "🟠 Prudence",
+  "status_caution": "🟠 Prudence",
+  "insight_market_gain": "DFI a gagné {change:.2f}% en 24h.",
+  "insight_market_loss": "DFI a perdu {change:.2f}% en 24h.",
+  "insight_burn_exceeds": "Le brûlage dépasse l'émission de {amount:.2f} M DFI.",
+  "insight_peg_dev": "Écart d'ancrage {peg:.2f}%.",
+  "insight_chain_normal": "La blockchain fonctionne normalement."
+
 }
