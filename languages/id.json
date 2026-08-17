@@ -52,4 +52,14 @@
   "status": "Status",
   "insight_title": "Wawasan Harian",
   "monitoring_active": "Pemantauan aktif"
+
+  "status_vorsicht": "🟠 Hati-hati",
+  "status_caution": "🟠 Hati-hati",
+  "insight_market_gain": "DFI naik {change:.2f}% dalam 24j.",
+  "insight_market_loss": "DFI turun {change:.2f}% dalam 24j.",
+  "insight_burn_exceeds": "Pembakaran melebihi emisi sebesar {amount:.2f} M DFI.",
+  "insight_peg_dev": "Deviasi pasokan {peg:.2f}%.",
+  "insight_chain_normal": "Blockchain beroperasi secara normal."
+
+
 }
