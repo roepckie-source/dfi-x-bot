@@ -51,5 +51,13 @@
   "score_title": "Оценка",
   "status": "Статус",
   "insight_title": "Ежедневная аналитика",
-  "monitoring_active": "Мониторинг активен"
+  "monitoring_active": "Мониторинг активен",
+
+  "status_vorsicht": "🟠 Осторожно",
+  "status_caution": "🟠 Осторожно",
+  "insight_market_gain": "DFI вырос на {change:.2f}% за 24ч.",
+  "insight_market_loss": "DFI потерял {change:.2f}% за 24ч.",
+  "insight_burn_exceeds": "Сжигание превышает эмиссию на {amount:.2f} M DFI.",
+  "insight_peg_dev": "Отклонение привязки {peg:.2f}%.",
+  "insight_chain_normal": "Блокчейн работает в штатном режиме."
 }
