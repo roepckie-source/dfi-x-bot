@@ -51,8 +51,7 @@
   "score_title": "स्कोर",
   "status": "स्थिति",
   "insight_title": "दैनिक इनसाइट",
-  "monitoring_active": "निगरानी सक्रिय"
-
+  "monitoring_active": "निगरानी सक्रिय",
 
   "status_vorsicht": "🟠 सावधानी",
   "status_caution": "🟠 सावधानी",
@@ -61,5 +60,4 @@
   "insight_burn_exceeds": "बर्न उत्सर्जन से {amount:.2f} M DFI अधिक है।",
   "insight_peg_dev": "पेग विचलन {peg:.2f}%।",
   "insight_chain_normal": "ब्लॉकचेन सामान्य रूप से काम कर रहा है।"
-
 }
