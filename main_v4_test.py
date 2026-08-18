@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 # Setzt das Hauptverzeichnis (Root) garantiert in den Python-Suchpfad
@@ -67,11 +68,24 @@ def main():
     else:
         history_title = str(history_chapter)
 
-    # 5. Vollständigen Bericht in der Zielsprache zusammensetzen
+    # Marktpreise extrahieren
+    dfi_price = market_data.get("price", 0.0) if isinstance(market_data, dict) else 0.0
+    dfi_change = market_data.get("change_24h", 0.0) if isinstance(market_data, dict) else 0.0
+
+    btc_price = global_data.get("bitcoin", {}).get("price", 0) if isinstance(global_data, dict) else 0
+    eth_price = global_data.get("ethereum", {}).get("price", 0) if isinstance(global_data, dict) else 0
+
+    # Zeitstempel zur Identifikation
+    current_date = datetime.now().strftime("%d.%m.%Y")
+
+    # 5. Vollständigen Bericht MIT Marktpreisen zusammensetzen
     full_report = (
-        f"{lang_data.get('header_title', '🚀 DeFiChain Intelligence')}\n"
+        f"{lang_data.get('header_title', '🚀 DeFiChain Intelligence')} ({current_date})\n"
         f"{lang_data.get('header_line1', '')}\n"
         f"-----------------------------------------\n\n"
+        f"💰 {lang_data.get('market', 'Markt')}:\n"
+        f"• DFI: ${dfi_price:.4f} USD ({dfi_change:+.2f}%)\n"
+        f"• BTC: ${btc_price:,.0f} USD | ETH: ${eth_price:,.0f} USD\n\n"
         f"🧠 {lang_data.get('intelligence', 'DFI INTELLIGENCE INDEX')}: {score_val} / 100\n"
         f"{status_val}\n\n"
         f"💡 {lang_data.get('insight', 'Daily Insight')}:\n"
@@ -85,7 +99,7 @@ def main():
     print(full_report)
     print("--------------------------\n")
 
-    # 6. Telegram-Versand (Vollständiger Bericht)
+    # 6. Telegram-Versand
     telegram_success = send_telegram(full_report)
     if telegram_success:
         print("✅ Telegram erfolgreich gesendet")
@@ -108,7 +122,7 @@ def main():
     else:
         print("⚠️ Discord nicht gesendet oder übersprungen")
 
-    # 8. X (Twitter)-Versand (Als Thread/Posting)
+    # 8. X (Twitter)-Versand
     x_success = send_x_thread(
         full_report,
         tokenomics_data,
