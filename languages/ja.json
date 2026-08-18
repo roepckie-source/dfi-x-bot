@@ -51,7 +51,7 @@
   "score_title": "スコア",
   "status": "ステータス",
   "insight_title": "本日のインサイト",
-  "monitoring_active": "モニタリング有効"
+  "monitoring_active": "モニタリング有効",
 
   "status_vorsicht": "🟠 注意",
   "status_caution": "🟠 注意",
@@ -60,5 +60,4 @@
   "insight_burn_exceeds": "バーン量が排出量を{amount:.2f} M DFI上回っています。",
   "insight_peg_dev": "ペグ乖離率 {peg:.2f}%。",
   "insight_chain_normal": "ブロックチェーンは正常に稼働しています。"
-
 }
