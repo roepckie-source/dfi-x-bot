@@ -51,7 +51,7 @@
   "score_title": "Pontuação",
   "status": "Status",
   "insight_title": "Análise diária",
-  "monitoring_active": "Monitoramento ativo"
+  "monitoring_active": "Monitoramento ativo",
 
   "status_vorsicht": "🟠 Cuidado",
   "status_caution": "🟠 Cuidado",
@@ -60,6 +60,4 @@
   "insight_burn_exceeds": "A queima excede a emissão em {amount:.2f} M DFI.",
   "insight_peg_dev": "Desvio da paridade {peg:.2f}%.",
   "insight_chain_normal": "Blockchain operando normalmente."
-
-
 }
