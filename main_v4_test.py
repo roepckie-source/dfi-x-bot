@@ -7,12 +7,20 @@ ROOT_DIR = Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-# Modul-Imports mit korrekten Funktionsnamen
+# Modul-Imports
 from modules.language import load_language
-from modules.global_crypto import get_global_crypto  # Korrigiert: get_global_crypto
+from modules.global_crypto import get_global_crypto
 from modules.intelligence import calculate_intelligence_score
-from modules.history_engine import get_history_chapter
 from modules.insight_engine import generate_daily_insight
+
+# Prüft den exakten Funktionsnamen in modules.history_engine
+try:
+    from modules.history_engine import get_history_chapter
+except ImportError:
+    try:
+        from modules.history_engine import get_next_chapter as get_history_chapter
+    except ImportError:
+        from modules.history_engine import get_history as get_history_chapter
 
 # Output-Imports
 from outputs.telegram_bot import send_telegram
@@ -40,7 +48,10 @@ def main():
 
     # 4. Historischen Kontext & Insights laden
     history_chapter = get_history_chapter()
-    print(f"📚 History: {history_chapter.get('title', '')}")
+    if isinstance(history_chapter, dict):
+        print(f"📚 History: {history_chapter.get('title', '')}")
+    else:
+        print(f"📚 History: {history_chapter}")
 
     daily_insight = generate_daily_insight()
     print("💡 Daily Insight:")
