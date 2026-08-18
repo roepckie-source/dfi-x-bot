@@ -26,6 +26,7 @@ from outputs.discord_bot import send_discord
 from outputs.telegram_bot import send_telegram
 from outputs.x_bot import send_x_thread
 
+# Liste der unterstützten Sprachen für die tägliche Rotation
 SUPPORTED_LANGUAGES = ["de", "en", "es", "fr", "pt", "ru"]
 STATE_FILE = ROOT_DIR / "language_state.json"
 
@@ -44,9 +45,11 @@ def get_next_language():
         except Exception as e:
             print(f"⚠️ Fehler beim Lesen von {STATE_FILE.name}: {e}")
 
+    # Nächsten Index ermitteln (Rotationsprinzip)
     next_index = (last_index + 1) % len(SUPPORTED_LANGUAGES)
     next_lang = SUPPORTED_LANGUAGES[next_index]
 
+    # Neuen Zustand speichern
     try:
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump({"last_language": next_lang}, f, indent=2)
@@ -59,7 +62,7 @@ def get_next_language():
 def main():
     print("🚀 DeFiChain Intelligence v5 startet...")
 
-    # 1. Sprache wählen (Rotation oder Fallback)
+    # 1. Automatische Sprachauswahl (Rotation)
     lang_code = os.getenv("APP_LANG")
     if not lang_code:
         lang_code = get_next_language()
@@ -67,7 +70,7 @@ def main():
     lang_data = load_language(lang_code)
     print(f"🌍 Aktuelle Sprache für diesen Lauf: {lang_code.upper()}")
 
-    # 2. Daten abrufen
+    # 2. Daten aus allen Modulen abrufen
     global_data = get_global_crypto()
     market_data = get_market_data()
     tokenomics_data = get_tokenomics_data()
@@ -80,11 +83,11 @@ def main():
         market_data, tokenomics_data, dusd_data, community_data, network_data
     )
 
-    # 4. Historie & Insights laden
+    # 4. Historischen Kontext & Insights laden
     history_chapter = get_history_chapter()
     daily_insight = generate_daily_insight(lang_code)
 
-    # Werte für die Anzeige aufbereiten
+    # Score & Status-Anzeige
     if isinstance(score_data, dict):
         score_val = score_data.get("score", 0)
         status_val = score_data.get(
@@ -94,7 +97,7 @@ def main():
         score_val = score_data
         status_val = lang_data.get("status_vorsicht", "🟠 Caution")
 
-    # Historien-Titel und Text voll ausschreiben
+    # History-Abschnitt voll ausschreiben
     if isinstance(history_chapter, dict):
         history_title = history_chapter.get("title", "")
         history_desc = history_chapter.get("description", "")
@@ -106,7 +109,7 @@ def main():
     if history_desc:
         history_block += f"\n  {history_desc}"
 
-    # Marktpreise für DFI, BTC und ETH aufbereiten
+    # Marktpreise extrahieren
     dfi_price = (
         market_data.get("price", 0.0) if isinstance(market_data, dict) else 0.0
     )
@@ -138,9 +141,26 @@ def main():
         else 0.0
     )
 
+    # Geburnte DFI-Token extrahieren
+    burned_dfi = 0.0
+    if isinstance(tokenomics_data, dict):
+        burned_dfi = (
+            tokenomics_data.get("total_burned")
+            or tokenomics_data.get("burned")
+            or tokenomics_data.get("net_burn")
+            or 0.0
+        )
+
+    if burned_dfi >= 1_000_000:
+        burned_str = f"{burned_dfi / 1_000_000:,.2f}M DFI"
+    elif burned_dfi > 0:
+        burned_str = f"{burned_dfi:,.0f} DFI"
+    else:
+        burned_str = "N/A"
+
     current_date = datetime.now().strftime("%d.%m.%Y")
 
-    # 5. Bericht mit sauberen Umbrüchen und voll ausgeschriebenen Texten zusammensetzen
+    # 5. Vollständigen Bericht mit sauberen Umbrüchen und vollen Texten zusammensetzen
     full_report = (
         f"{lang_data.get('header_title', '🚀 DeFiChain Intelligence')} ({current_date})\n"
         f"{lang_data.get('header_line1', '')}\n"
@@ -149,6 +169,8 @@ def main():
         f"• DFI: ${dfi_price:.4f} USD ({dfi_change:+.2f}%)\n"
         f"• BTC: ${btc_price:,.0f} USD ({btc_change:+.2f}%)\n"
         f"• ETH: ${eth_price:,.0f} USD ({eth_change:+.2f}%)\n\n"
+        f"🔥 Burn-Status:\n"
+        f"• Total Burned: {burned_str}\n\n"
         f"🧠 {lang_data.get('intelligence', 'DFI INTELLIGENCE INDEX')}: {score_val} / 100\n"
         f"{status_val}\n\n"
         f"💡 {lang_data.get('insight', 'Täglicher Einblick')}:\n"
