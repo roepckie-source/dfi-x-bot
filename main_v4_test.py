@@ -52,7 +52,7 @@ def main():
 
     # 4. Historischen Kontext & Insights laden
     history_chapter = get_history_chapter()
-    daily_insight = generate_daily_insight()
+    daily_insight = generate_daily_insight(lang_code)
 
     # Werte für die Berichterstellung aufbereiten
     if isinstance(score_data, dict):
