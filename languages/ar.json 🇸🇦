@@ -51,7 +51,7 @@
   "score_title": "النتيجة",
   "status": "الحالة",
   "insight_title": "رؤية يومية",
-  "monitoring_active": "المراقبة نشطة"
+  "monitoring_active": "المراقبة نشطة",
 
   "status_vorsicht": "🟠 حذر",
   "status_caution": "🟠 حذر",
@@ -60,6 +60,4 @@
   "insight_burn_exceeds": "الحرق يتجاوز الإصدار بمقدار {amount:.2f} مليون DFI.",
   "insight_peg_dev": "انحراف الربط {peg:.2f}%.",
   "insight_chain_normal": "سلسلة الكتل تعمل بشكل طبيعي."
-
-
 }
