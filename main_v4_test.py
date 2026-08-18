@@ -76,11 +76,15 @@ def main():
     if telegram_success:
         print("Telegram erfolgreich gesendet")
 
-    # FIX: send_discord erwartet (insight, network, comparison, news)
+    # Typen-Sicherung für Discord: Versichert, dass ein Dictionary für 'comparison' übergeben wird
+    comparison_payload = market_data if isinstance(market_data, dict) else {"dfi": {}}
+    if "dfi" not in comparison_payload and isinstance(market_data, dict):
+        comparison_payload = {"dfi": market_data}
+
     discord_success = send_discord(
         daily_insight, 
         network_data, 
-        market_data, 
+        comparison_payload, 
         ""
     )
     if discord_success:
