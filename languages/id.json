@@ -3,7 +3,7 @@
 
   "header_title": "🚀 Intelijen DeFiChain",
   "header_line1": "🌍 🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 🇵🇹 🇷🇺 🇸🇦",
-  "header_line2": "Tersentralisasi. Independen. Di luar kontrol tersentralisasi.",
+  "header_line2": "Terdesentralisasi. Independen. Di luar kontrol tersentralisasi.",
 
   "intelligence": "INDEKS INTELIJEN DFI",
   "score": "Skor",
@@ -51,7 +51,7 @@
   "score_title": "Skor",
   "status": "Status",
   "insight_title": "Wawasan Harian",
-  "monitoring_active": "Pemantauan aktif"
+  "monitoring_active": "Pemantauan aktif",
 
   "status_vorsicht": "🟠 Hati-hati",
   "status_caution": "🟠 Hati-hati",
@@ -60,6 +60,4 @@
   "insight_burn_exceeds": "Pembakaran melebihi emisi sebesar {amount:.2f} M DFI.",
   "insight_peg_dev": "Deviasi pasokan {peg:.2f}%.",
   "insight_chain_normal": "Blockchain beroperasi secara normal."
-
-
 }
