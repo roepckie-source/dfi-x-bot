@@ -76,7 +76,7 @@ def main():
     if telegram_success:
         print("Telegram erfolgreich gesendet")
 
-    # Typen-Sicherung für Discord: Versichert, dass ein Dictionary für 'comparison' übergeben wird
+    # Typen-Sicherung für Discord
     comparison_payload = market_data if isinstance(market_data, dict) else {"dfi": {}}
     if "dfi" not in comparison_payload and isinstance(market_data, dict):
         comparison_payload = {"dfi": market_data}
@@ -90,7 +90,17 @@ def main():
     if discord_success:
         print("Discord erfolgreich gesendet")
 
-    x_success = send_x_thread(daily_insight)
+    # FIX: send_x_thread erwartet 8 Parameter
+    x_success = send_x_thread(
+        daily_insight,
+        tokenomics_data,
+        dusd_data,
+        network_data,
+        score_data,
+        history_chapter,
+        global_data,
+        comparison_payload
+    )
     if x_success:
         print("🎉 X Thread erfolgreich gesendet!")
 
