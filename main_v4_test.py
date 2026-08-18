@@ -141,15 +141,14 @@ def main():
         else 0.0
     )
 
-    # Geburnte DFI-Token extrahieren
+    # Geburnte DFI-Token aus tokenomics_data["burn"]["total"] extrahieren
     burned_dfi = 0.0
     if isinstance(tokenomics_data, dict):
-        burned_dfi = (
-            tokenomics_data.get("total_burned")
-            or tokenomics_data.get("burned")
-            or tokenomics_data.get("net_burn")
-            or 0.0
-        )
+        burn_entry = tokenomics_data.get("burn", {})
+        if isinstance(burn_entry, dict):
+            burned_dfi = burn_entry.get("total", 0.0)
+        elif isinstance(burn_entry, (int, float)):
+            burned_dfi = float(burn_entry)
 
     if burned_dfi >= 1_000_000:
         burned_str = f"{burned_dfi / 1_000_000:,.2f}M DFI"
