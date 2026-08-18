@@ -1,163 +1,62 @@
+import os
+import sys
+from pathlib import Path
 
-# ======================================
-# DeFiChain Intelligence v5
-# Main Runner (Fix: Language & Single-History Call)
-# ======================================
+# Setzt das Hauptverzeichnis (Root) garantiert in den Python-Suchpfad
+ROOT_DIR = Path(__file__).resolve().parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-from modules.market import get_market_data
-from modules.tokenomics import get_tokenomics_data
-from modules.dusd import get_dusd_data
-from modules.community import get_community_data
-from modules.blockchain import get_blockchain_data
-from modules.global_crypto import get_global_crypto
-from modules.language import load_language
-
-from modules.report_formatter import create_report
+# Modul-Imports
+from modules.language import get_language
+from modules.global_crypto import get_global_crypto_data
 from modules.intelligence import calculate_intelligence_score
+from modules.history_engine import get_history_chapter
 from modules.insight_engine import generate_daily_insight
-from modules.content_engine import get_content
 
+# Output-Imports
 from outputs.telegram_bot import send_telegram
 from outputs.discord_bot import send_discord
 from outputs.x_bot import send_x_thread
-
-from modules.language_engine import get_next_language
 
 
 def main():
     print("🚀 DeFiChain Intelligence v5 startet...")
 
-    # ==========================
-    # 1. Sprache laden & zuweisen
-    # ==========================
-    language = get_next_language()
-    print(f"🌍 Sprache gesetzt: {language}")
+    # 1. Sprache festlegen
+    lang = os.getenv("APP_LANG", "ru")
+    print(f"🌍 Sprache: {lang}")
 
-    # Sprach-Wörterbuch aus der .json laden
-    lang_data = load_language(language)
-
-    # ==========================
-    # 2. Marktdaten laden
-    # ==========================
-    market = get_market_data()
-    tokenomics = get_tokenomics_data()
-    dusd = get_dusd_data()
-    community = get_community_data()
-    blockchain = get_blockchain_data()
-    global_crypto = get_global_crypto()
-
+    # 2. Globale Marktdaten abrufen
+    global_data = get_global_crypto_data()
     print("🌍 Global Crypto:")
-    print(global_crypto)
+    print(global_data)
 
-    # ==========================
-    # 3. Intelligence Score
-    # ==========================
-    intelligence = calculate_intelligence_score(
-        market, tokenomics, dusd, community, blockchain
-    )
-    score = intelligence.get("total", 0)
+    # 3. Intelligence Score berechnen
+    score_data = calculate_intelligence_score()
+    print(f"🧠 Intelligence Score: {score_data.get('score')} /100")
+    print(f"🟠 {score_data.get('status')}")
 
-    if score >= 80:
-        status = "🟢 Sehr stark"
-    elif score >= 60:
-        status = "🟡 Stabil"
-    elif score >= 40:
-        status = "🟠 Vorsicht"
-    else:
-        status = "🔴 Kritisch"
+    # 4. Historischen Kontext & Insights laden
+    history_chapter = get_history_chapter()
+    print(f"📚 History: {history_chapter.get('title', '')}")
 
-    intelligence["status"] = status
-
-    print(f"🧠 Intelligence Score: {score} /100")
-    print(status)
-
-    # ==========================
-    # 4. History Engine (Nur 1x aufrufen!)
-    # ==========================
-    current_history = get_content()
-
-    if current_history and isinstance(current_history, dict):
-        print(f"📚 History: {current_history.get('title', 'N/A')}")
-    else:
-        current_history = None
-        print("📚 History: keine Daten")
-
-    # ==========================
-    # 5. Network Adapter
-    # ==========================
-    network = {
-        "network_status": blockchain.get("network_status", "🟢 Online"),
-        "block_height": blockchain.get("block_height", "N/A"),
-        "last_block_time": blockchain.get("last_block_time", "N/A"),
-        "masternodes": blockchain.get("masternodes", "N/A"),
-        "burned_dfi": tokenomics.get("burn", {}).get("total", "N/A"),
-        "locked_dusd": dusd.get("locked", "N/A"),
-        "excess_dfi": tokenomics.get("balance", "N/A"),
-    }
-
-    # ==========================
-    # 6. Daily Insight
-    # ==========================
-    daily_insight = generate_daily_insight(
-        market, tokenomics, dusd, community, network, language
-    )
-
+    daily_insight = generate_daily_insight()
     print("💡 Daily Insight:")
     print(daily_insight)
 
-    # ==========================
-    # 7. Crypto Comparison
-    # ==========================
-    dfi_change = float(market.get("dfi", {}).get("change", 0))
-    btc_change = float(global_crypto.get("bitcoin", {}).get("change", 0))
-    eth_change = float(global_crypto.get("ethereum", {}).get("change", 0))
+    # 5. Benachrichtigungen versenden
+    telegram_success = send_telegram(daily_insight)
+    if telegram_success:
+        print("Telegram erfolgreich gesendet")
 
-    comparison = {
-        "bitcoin": btc_change,
-        "ethereum": eth_change,
-        "dfi": dfi_change,
-        "vs_btc": btc_change,
-        "vs_eth": eth_change,
-    }
+    discord_success = send_discord(daily_insight)
+    if discord_success:
+        print("Discord erfolgreich gesendet")
 
-    # ==========================
-    # 8. Report erstellen
-    # ==========================
-    report = create_report(
-        market,
-        tokenomics,
-        dusd,
-        community,
-        network,
-        intelligence,
-        daily_insight,
-        current_history,
-        global_crypto,
-        comparison,
-        language=language,
-        lang_data=lang_data,
-    )
-
-    # ==========================
-    # 9. Outputs
-    # ==========================
-    send_telegram(report, language)
-
-    send_discord(market, network, comparison, current_history)
-
-    send_x_thread(
-        market,
-        tokenomics,
-        dusd,
-        network,
-        intelligence,
-        current_history,
-        global_crypto,
-        comparison,
-        current_history,
-        language=language,
-        lang_data=lang_data,
-    )
+    x_success = send_x_thread(daily_insight)
+    if x_success:
+        print("🎉 X Thread erfolgreich gesendet!")
 
     print("✅ v5 Report gesendet")
 
