@@ -7,8 +7,8 @@ ROOT_DIR = Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-# Modul-Imports
-from modules.language import get_language
+# Modul-Imports mit korrekten Funktionsnamen
+from modules.language import load_language
 from modules.global_crypto import get_global_crypto_data
 from modules.intelligence import calculate_intelligence_score
 from modules.history_engine import get_history_chapter
@@ -23,9 +23,10 @@ from outputs.x_bot import send_x_thread
 def main():
     print("🚀 DeFiChain Intelligence v5 startet...")
 
-    # 1. Sprache festlegen
-    lang = os.getenv("APP_LANG", "ru")
-    print(f"🌍 Sprache: {lang}")
+    # 1. Sprache laden
+    lang_code = os.getenv("APP_LANG", "ru")
+    lang_data = load_language(lang_code)
+    print(f"🌍 Sprache: {lang_code}")
 
     # 2. Globale Marktdaten abrufen
     global_data = get_global_crypto_data()
