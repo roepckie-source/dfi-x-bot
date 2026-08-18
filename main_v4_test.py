@@ -9,7 +9,7 @@ if str(ROOT_DIR) not in sys.path:
 
 # Modul-Imports mit korrekten Funktionsnamen
 from modules.language import load_language
-from modules.global_crypto import get_global_crypto_data
+from modules.global_crypto import get_global_crypto  # Korrigiert: get_global_crypto
 from modules.intelligence import calculate_intelligence_score
 from modules.history_engine import get_history_chapter
 from modules.insight_engine import generate_daily_insight
@@ -29,7 +29,7 @@ def main():
     print(f"🌍 Sprache: {lang_code}")
 
     # 2. Globale Marktdaten abrufen
-    global_data = get_global_crypto_data()
+    global_data = get_global_crypto()
     print("🌍 Global Crypto:")
     print(global_data)
 
