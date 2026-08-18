@@ -33,17 +33,19 @@ jobs:
       # Bot starten
       - name: Run DeFiChain Bot
         env:
+          APP_LANG: "de"
+
           # Discord
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
 
           # X / Twitter
           X_API_KEY: ${{ secrets.API_KEY }}
           X_API_SECRET: ${{ secrets.API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          X_ACCESS_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
 
           # Telegram
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
         run: |
@@ -56,8 +58,8 @@ jobs:
           git config --global user.name "DeFiChain Bot"
           git config --global user.email "dfi-bot@github.com"
 
-          # Fügt sowohl History- als auch Sprachzustand hinzu
-          git add history_state.json language_state.json
+          # Prüfen und Hinzufügen der Statusdateien
+          git add history_state.json language_state.json 2>/dev/null || true
 
-          git commit -m "Update DFI history and language state" || echo "No changes"
+          git commit -m "Update DFI history and language state" || echo "No changes to commit"
           git push
