@@ -81,3 +81,7 @@ def get_history():
     save_state(state)
 
     return current
+
+
+# Alias für abwärtskompatible Imports z. B. in main_v4_test.py
+get_history_chapter = get_history
