@@ -10,17 +10,14 @@ if str(ROOT_DIR) not in sys.path:
 # Modul-Imports
 from modules.language import load_language
 from modules.global_crypto import get_global_crypto
+from modules.market import get_market_data
+from modules.tokenomics import get_tokenomics_data
+from modules.dusd import get_dusd_data
+from modules.community import get_community_data
+from modules.network import get_network_data
 from modules.intelligence import calculate_intelligence_score
+from modules.history_engine import get_history_chapter
 from modules.insight_engine import generate_daily_insight
-
-# Prüft den exakten Funktionsnamen in modules.history_engine
-try:
-    from modules.history_engine import get_history_chapter
-except ImportError:
-    try:
-        from modules.history_engine import get_next_chapter as get_history_chapter
-    except ImportError:
-        from modules.history_engine import get_history as get_history_chapter
 
 # Output-Imports
 from outputs.telegram_bot import send_telegram
@@ -41,12 +38,29 @@ def main():
     print("🌍 Global Crypto:")
     print(global_data)
 
-    # 3. Intelligence Score berechnen
-    score_data = calculate_intelligence_score()
-    print(f"🧠 Intelligence Score: {score_data.get('score')} /100")
-    print(f"🟠 {score_data.get('status')}")
+    # 3. Teil-Metriken aus allen Modulen laden
+    market_data = get_market_data()
+    tokenomics_data = get_tokenomics_data()
+    dusd_data = get_dusd_data()
+    community_data = get_community_data()
+    network_data = get_network_data()
 
-    # 4. Historischen Kontext & Insights laden
+    # 4. Intelligence Score mit den 5 Übergabeparametern berechnen
+    score_data = calculate_intelligence_score(
+        market_data,
+        tokenomics_data,
+        dusd_data,
+        community_data,
+        network_data
+    )
+
+    if isinstance(score_data, dict):
+        print(f"🧠 Intelligence Score: {score_data.get('score', 0)} /100")
+        print(f"🟠 {score_data.get('status', '')}")
+    else:
+        print(f"🧠 Intelligence Score: {score_data} /100")
+
+    # 5. Historischen Kontext & Insights laden
     history_chapter = get_history_chapter()
     if isinstance(history_chapter, dict):
         print(f"📚 History: {history_chapter.get('title', '')}")
@@ -57,7 +71,7 @@ def main():
     print("💡 Daily Insight:")
     print(daily_insight)
 
-    # 5. Benachrichtigungen versenden
+    # 6. Benachrichtigungen versenden
     telegram_success = send_telegram(daily_insight)
     if telegram_success:
         print("Telegram erfolgreich gesendet")
