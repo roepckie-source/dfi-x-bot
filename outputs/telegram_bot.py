@@ -1,12 +1,9 @@
 import os
 import requests
-# Korrigierter Import: 'insights' statt 'insight'
-from modules.insight_engine import generate_daily_insight
 
-
-def send_telegram(message: str) -> bool:
-    """Sendet eine Nachricht an den konfigurierten Telegram-Chat."""
-    token = os.getenv("TELEGRAM_TOKEN")
+def send_telegram(text):
+    # Greift sowohl TELEGRAM_BOT_TOKEN als auch TELEGRAM_TOKEN ab
+    token = os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     if not token or not chat_id:
@@ -16,15 +13,19 @@ def send_telegram(message: str) -> bool:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id,
-        "text": message,
-        "parse_mode": "HTML"
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True
     }
 
     try:
         response = requests.post(url, json=payload, timeout=10)
-        response.raise_for_status()
-        print("Telegram erfolgreich gesendet")
-        return True
+        if response.status_code == 200:
+            print("Telegram erfolgreich gesendet")
+            return True
+        else:
+            print(f"❌ Telegram API Fehler: {response.status_code} - {response.text}")
+            return False
     except Exception as e:
-        print(f"Fehler beim Senden an Telegram: {e}")
+        print(f"❌ Ausnahmefehler bei Telegram: {e}")
         return False
