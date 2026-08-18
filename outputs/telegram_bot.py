@@ -1,7 +1,7 @@
 import os
 import requests
 # Korrigierter Import: 'insights' statt 'insight'
-from modules.insight_engine import generate_insights
+from modules.insight_engine import generate_daily_insight
 
 
 def send_telegram(message: str) -> bool:
