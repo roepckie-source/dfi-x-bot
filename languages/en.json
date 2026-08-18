@@ -31,7 +31,7 @@
   "insight": "Daily Insight",
   "history": "DeFiChain History",
   "content_update": "DeFiChain Daily Update",
-  
+
   "market_recovery": "Market recovery detected",
   "market_pressure": "Market pressure detected",
   "market_stable": "Market stable with limited movement",
@@ -43,7 +43,15 @@
   "dusd_warning": "dUSD health improving but remains under pressure",
   "dusd_stable": "dUSD health stable",
 
-  "network_health": "Network healthy"
+  "network_health": "Network healthy",
+
+  "x_title_daily": "🚀 DeFiChain Daily",
+  "x_title_tokenomics": "🔥 DFI Tokenomics & Network",
+  "x_title_history": "📰 DFI History",
+  "score_title": "Score",
+  "status": "Status",
+  "insight_title": "Daily Insight",
+  "monitoring_active": "Monitoring active",
 
   "status_vorsicht": "🟠 Caution",
   "status_caution": "🟠 Caution",
@@ -52,5 +60,4 @@
   "insight_burn_exceeds": "Burn exceeds emission by {amount:.2f} M DFI.",
   "insight_peg_dev": "Peg deviation {peg:.2f}%.",
   "insight_chain_normal": "Blockchain operating normally."
-
 }
