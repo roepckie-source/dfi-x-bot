@@ -45,7 +45,7 @@ def main():
     community_data = get_community_data()
     network_data = get_network_data()
 
-    # 4. Intelligence Score mit den 5 Übergabeparametern berechnen
+    # 4. Intelligence Score berechnen
     score_data = calculate_intelligence_score(
         market_data,
         tokenomics_data,
@@ -76,7 +76,13 @@ def main():
     if telegram_success:
         print("Telegram erfolgreich gesendet")
 
-    discord_success = send_discord(daily_insight)
+    # FIX: send_discord erwartet (insight, network, comparison, news)
+    discord_success = send_discord(
+        daily_insight, 
+        network_data, 
+        market_data, 
+        ""
+    )
     if discord_success:
         print("Discord erfolgreich gesendet")
 
