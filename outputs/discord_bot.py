@@ -1,145 +1,64 @@
+import os
 import requests
-from config import DISCORD_WEBHOOK
-from utils import format_percent, format_large_number
 
 
-# ==============================
-# DISCORD REPORT
-# ==============================
+def send_discord(insight, network, comparison, news):
+    """Versendet den Bericht an Discord via Webhook und fängt Typ-Fehler bei 'comparison' ab."""
+    
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    if not webhook_url:
+        print("⚠️ DISCORD_WEBHOOK_URL nicht gesetzt.")
+        return False
 
+    # 1. Typ-Sicherung für 'comparison' / 'market'
+    if isinstance(comparison, dict):
+        dfi_data = comparison.get("dfi", {})
+        # Falls comparison['dfi'] kein Dict ist
+        if not isinstance(dfi_data, dict):
+            dfi_data = {}
+    else:
+        # Fallback, falls ein String übergeben wurde
+        dfi_data = {}
 
-def send_discord(
-    market,
-    network,
-    comparison,
-    news
-):
+    # 2. Sichere Datenextrahierung mit Default-Werten
+    price = dfi_data.get("price", "N/A")
+    change_24h = dfi_data.get("change", "N/A")
 
-
-    if not DISCORD_WEBHOOK:
-
-        print(
-            "Kein Discord Webhook vorhanden"
-        )
-
-        return
-
-
-
-    dfi = market["dfi"]
-
-    btc = market["bitcoin"]
-
-    eth = market["ethereum"]
-
-
-
-    message = f"""
-
-🚀 **DeFiChain Daily Update**
-
-
-💰 **DFI**
-
-${dfi.get('usd',0):.8f}
-
-🇪🇺 €{dfi.get('eur',0):.8f}
-
-
-{format_percent(
-    dfi.get('usd_24h_change',0)
-)}
-
-
-📊 **Market Cap**
-
-${format_large_number(
-    dfi.get('usd_market_cap',0)
-)}
-
-
-🌍 **Market Comparison**
-
-
-₿ Bitcoin:
-
-{format_percent(
-    btc.get('usd_24h_change',0)
-)}
-
-
-Ξ Ethereum:
-
-{format_percent(
-    eth.get('usd_24h_change',0)
-)}
-
-
-{comparison['vs_btc']}
-
-{comparison['vs_eth']}
-
-
-
-🌐 **Network**
-
-
-🔥 Burned DFI:
-
-{network['burned_dfi']}
-
-
-🔒 Locked dUSD:
-
-{network['locked_dusd']}
-
-
-
-📰 **News**
-
-{news['title']}
-
-{news['text']}
-
-
-{news['hashtags']}
-
-"""
-
-
-    try:
-
-        response = requests.post(
-
-            DISCORD_WEBHOOK,
-
-            json={
-                "content": message
+    # 3. Embed / Nachricht aufbauen
+    embed_content = {
+        "title": "🚀 DeFiChain Daily Intelligence Report",
+        "description": str(insight),
+        "color": 3447003,  # Blau
+        "fields": [
+            {
+                "name": "📊 Market Info",
+                "value": f"Price: {price} | 24h Change: {change_24h}",
+                "inline": False
             },
+            {
+                "name": "⛓ Network Status",
+                "value": str(network) if network else "Normal",
+                "inline": True
+            }
+        ],
+        "footer": {
+            "text": "DeFiChain Intelligence Bot v5"
+        }
+    }
 
-            timeout=20
+    payload = {
+        "username": "DeFiChain Intelligence",
+        "embeds": [embed_content]
+    }
 
-        )
-
-
-        if response.status_code == 204:
-
-            print(
-                "Discord erfolgreich gesendet"
-            )
-
+    # 4. An Discord senden
+    try:
+        response = requests.post(webhook_url, json=payload, timeout=10)
+        if response.status_code in [200, 204]:
+            return True
         else:
-
-            print(
-                "Discord Fehler:",
-                response.text
-            )
-
-
+            print(f"❌ Discord Webhook Fehler Status: {response.status_code}, Response: {response.text}")
+            return False
     except Exception as e:
-
-        print(
-            "Discord Ausnahme:",
-            e
-        )
-
+        print(f"❌ Fehler beim Senden an Discord: {e}")
+        return False
