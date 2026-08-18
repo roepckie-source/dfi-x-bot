@@ -51,7 +51,7 @@
   "score_title": "得分",
   "status": "状态",
   "insight_title": "每日洞察",
-  "monitoring_active": "监控运行中"
+  "monitoring_active": "监控运行中",
 
   "status_vorsicht": "🟠 谨慎",
   "status_caution": "🟠 谨慎",
@@ -60,6 +60,4 @@
   "insight_burn_exceeds": "销毁量超过排放量 {amount:.2f} M DFI。",
   "insight_peg_dev": "锚定偏差 {peg:.2f}%。",
   "insight_chain_normal": "区块链运行正常。"
-
-
 }
