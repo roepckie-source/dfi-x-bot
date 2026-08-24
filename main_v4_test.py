@@ -203,6 +203,29 @@ def main():
 
 
     # ==================================
+    # NEWS
+    # ==================================
+
+    try:
+
+        news = get_dfi_news()
+
+        print(
+            "📰 News geladen:",
+            news.get("title", "N/A") if   isinstance(news, dict) else news
+        )
+
+    except Exception as e:
+
+        print(
+            "⚠️ News Fehler:",
+            e
+        )
+
+        news = None
+
+
+    # ==================================
     # DAILY INSIGHT
     # ==================================
 
