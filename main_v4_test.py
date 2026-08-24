@@ -31,7 +31,10 @@ from modules.language_engine import get_next_language
 from modules.market import get_market_data
 from modules.network import get_network_data
 from modules.tokenomics import get_tokenomics_data
+
 from news import get_dfi_news
+
+
 # ======================================
 # OUTPUTS
 # ======================================
@@ -47,10 +50,7 @@ from outputs.x_bot import send_x_thread
 
 def main():
 
-    print(
-        "🚀 DeFiChain Intelligence v5 startet..."
-    )
-
+    print("🚀 DeFiChain Intelligence v5 startet...")
 
     # ==================================
     # SPRACHE DES TAGES
@@ -58,12 +58,9 @@ def main():
 
     language = get_next_language()
 
-    print(
-        f"🌍 Sprache: {language}"
-    )
+    print(f"🌍 Sprache: {language}")
 
     load_language(language)
-
 
     # ==================================
     # MARKT
@@ -71,13 +68,11 @@ def main():
 
     market = get_market_data()
 
-
     # ==================================
     # TOKENOMICS
     # ==================================
 
     tokenomics = get_tokenomics_data()
-
 
     # ==================================
     # dUSD
@@ -85,13 +80,11 @@ def main():
 
     dusd = get_dusd_data()
 
-
     # ==================================
     # COMMUNITY
     # ==================================
 
     community = get_community_data()
-
 
     # ==================================
     # NETWORK
@@ -99,21 +92,14 @@ def main():
 
     network = get_network_data()
 
-
     # ==================================
     # GLOBAL CRYPTO
     # ==================================
 
     global_crypto = get_global_crypto()
 
-    print(
-        "🌍 Global Crypto:"
-    )
-
-    print(
-        global_crypto
-    )
-
+    print("🌍 Global Crypto:")
+    print(global_crypto)
 
     # ==================================
     # INTELLIGENCE SCORE
@@ -127,45 +113,25 @@ def main():
         network
     )
 
-
-    score = intelligence.get(
-        "total",
-        0
-    )
-
+    score = intelligence.get("total", 0)
 
     # ==================================
     # STATUS
     # ==================================
 
     if score >= 80:
-
         status = "🟢 Sehr stark"
-
     elif score >= 60:
-
         status = "🟡 Stabil"
-
     elif score >= 40:
-
         status = "🟠 Vorsicht"
-
     else:
-
         status = "🔴 Kritisch"
-
 
     intelligence["status"] = status
 
-
-    print(
-        f"🧠 Intelligence Score: {score} /100"
-    )
-
-    print(
-        status
-    )
-
+    print(f"🧠 Intelligence Score: {score} /100")
+    print(status)
 
     # ==================================
     # HISTORY
@@ -177,30 +143,19 @@ def main():
 
     except Exception as e:
 
-        print(
-            "⚠️ History Fehler:",
-            e
-        )
-
+        print("⚠️ History Fehler:", e)
         current_history = None
-
 
     if current_history:
 
         print(
             "📚 History:",
-            current_history.get(
-                "title",
-                "N/A"
-            )
+            current_history.get("title", "N/A")
         )
 
     else:
 
-        print(
-            "📚 History: keine Daten"
-        )
-
+        print("📚 History: keine Daten")
 
     # ==================================
     # NEWS
@@ -210,46 +165,44 @@ def main():
 
         news = get_dfi_news()
 
-        print(
-            "📰 News geladen:",
-            news.get("title", "N/A") if   isinstance(news, dict) else news
-        )
+        if isinstance(news, dict):
+
+            print(
+                "📰 News geladen:",
+                news.get("title", "N/A")
+            )
+
+        else:
+
+            print("📰 News geladen:", news)
 
     except Exception as e:
 
-        print(
-            "⚠️ News Fehler:",
-            e
-        )
-
+        print("⚠️ News Fehler:", e)
         news = None
-
 
     # ==================================
     # DAILY INSIGHT
     # ==================================
 
-    daily_insight = generate_daily_insight(
-    language
-    )
+    try:
 
+        daily_insight = generate_daily_insight(language)
 
-    print(
-        "💡 Daily Insight:"
-    )
+    except Exception as e:
 
-    print(
-        daily_insight
-    )
+        print("⚠️ Daily Insight Fehler:", e)
+        daily_insight = ""
 
+    print("💡 Daily Insight:")
+    print(daily_insight)
 
     # ==================================
     # INTELLIGENCE DAILY INSIGHT
-    # Für Kompatibilität mit x_bot
+    # Für X-Bot Kompatibilität
     # ==================================
 
     intelligence["daily_insight"] = daily_insight
-
 
     # ==================================
     # VERGLEICH BTC / ETH / DFI
@@ -267,7 +220,6 @@ def main():
 
         dfi_change = 0
 
-
     try:
 
         btc_change = float(
@@ -279,7 +231,6 @@ def main():
     except Exception:
 
         btc_change = 0
-
 
     try:
 
@@ -293,21 +244,17 @@ def main():
 
         eth_change = 0
 
-
     comparison = {
 
         "bitcoin": btc_change,
-
         "ethereum": eth_change,
-
         "dfi": dfi_change,
 
+        # alte Kompatibilität
         "vs_btc": btc_change,
-
         "vs_eth": eth_change
 
     }
-
 
     # ==================================
     # REPORT
@@ -320,24 +267,19 @@ def main():
         report = create_report(
 
             market,
-
             tokenomics,
-
             dusd,
-
             community,
-
             network,
-
             intelligence,
-
             daily_insight,
-
             current_history,
-
             global_crypto,
-
             comparison,
+
+            # WICHTIG:
+            # NEWS WIEDER AN DEN REPORT ÜBERGEBEN
+            news=news,
 
             language=language
 
@@ -345,13 +287,8 @@ def main():
 
     except Exception as e:
 
-        print(
-            "⚠️ Report Fehler:",
-            e
-        )
-
+        print("⚠️ Report Fehler:", e)
         report = None
-
 
     # ==================================
     # TELEGRAM
@@ -361,17 +298,17 @@ def main():
 
         if report:
 
-            send_telegram(
-                report
-            )
+            send_telegram(report)
+
+            print("📨 Telegram erfolgreich gesendet")
+
+        else:
+
+            print("⚠️ Kein Report für Telegram")
 
     except Exception as e:
 
-        print(
-            "⚠️ Telegram Fehler:",
-            e
-        )
-
+        print("⚠️ Telegram Fehler:", e)
 
     # ==================================
     # DISCORD
@@ -382,22 +319,17 @@ def main():
         send_discord(
 
             market,
-
             network,
-
             comparison,
-
-            current_history
+            news
 
         )
+
+        print("💬 Discord erfolgreich gesendet")
 
     except Exception as e:
 
-        print(
-            "⚠️ Discord Fehler:",
-            e
-        )
-
+        print("⚠️ Discord Fehler:", e)
 
     # ==================================
     # X THREAD
@@ -406,31 +338,28 @@ def main():
     try:
 
         send_x_thread(
-    report,
-    tokenomics,
-    dusd,
-    network,
-    intelligence,
-    current_history,
-    global_crypto,
-    market
-    )
+
+            report,
+
+            tokenomics,
+            dusd,
+            network,
+            intelligence,
+            current_history,
+            global_crypto,
+            market
+
+        )
 
     except Exception as e:
 
-        print(
-            "⚠️ X Fehler:",
-            e
-        )
-
+        print("⚠️ X Fehler:", e)
 
     # ==================================
     # FERTIG
     # ==================================
 
-    print(
-        "✅ v5 Report gesendet"
-    )
+    print("✅ v5 Report gesendet")
 
 
 # ======================================
