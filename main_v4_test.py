@@ -208,19 +208,7 @@ def main():
     # ==================================
 
     daily_insight = generate_daily_insight(
-
-        market,
-
-        tokenomics,
-
-        dusd,
-
-        community,
-
-        network,
-
-        language
-
+    language
     )
 
 
