@@ -384,28 +384,15 @@ def main():
     try:
 
         send_x_thread(
-
-            market,
-
-            tokenomics,
-
-            dusd,
-
-            network,
-
-            intelligence,
-
-            current_history,
-
-            global_crypto,
-
-            comparison,
-
-            current_history,
-
-            language
-
-        )
+    report,
+    tokenomics,
+    dusd,
+    network,
+    intelligence,
+    current_history,
+    global_crypto,
+    market
+    )
 
     except Exception as e:
 
