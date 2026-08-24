@@ -60,6 +60,13 @@ def create_report(
     if daily_insight:
         report += f"💡 Insight:\n{daily_insight}\n\n"
 
+
+    # ==============================
+    # NEWS
+    # ==============================
+
+    if news:
+        report += f"📰 News:\n{news}\n\n"
     if hist_title != "N/A":
         report += f"📚 History: {hist_title}\n{hist_content}\n"
 
