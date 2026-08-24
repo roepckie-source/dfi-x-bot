@@ -17,9 +17,13 @@ def create_report(
     current_history,
     global_crypto,
     comparison,
+    news=None,
     language="de",
     lang_data=None,
-):
+    ):
+
+
+
     # Falls lang_data nicht aus main übergeben wurde, selbst laden
     if not lang_data:
         lang_data = load_language(language)
