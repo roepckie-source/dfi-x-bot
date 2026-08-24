@@ -31,8 +31,7 @@ from modules.language_engine import get_next_language
 from modules.market import get_market_data
 from modules.network import get_network_data
 from modules.tokenomics import get_tokenomics_data
-
-
+from news import get_dfi_news
 # ======================================
 # OUTPUTS
 # ======================================
