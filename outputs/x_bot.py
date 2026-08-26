@@ -1,97 +1,733 @@
+# ======================================
+# DeFiChain Intelligence v5
+# X Thread Bot
+# ======================================
+
 import os
+import re
 import tweepy
 
-def chunk_text(text, max_len=260):
-    """Sucht saubere Umbrüche oder spaltet Text hart ab, wenn ein Block zu lang ist."""
+from modules.language import load_language
+
+
+# ======================================
+# FORMAT HELFER
+# ======================================
+
+def safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def safe_change(value):
+    try:
+        return f"{float(value):.2f}"
+    except (TypeError, ValueError):
+        return "0.00"
+
+
+def format_price(value):
+    try:
+        value = float(value)
+
+        if value < 0.01:
+            return f"{value:.8f}"
+
+        if value < 1:
+            return f"{value:.6f}"
+
+        if value < 100:
+            return f"{value:.2f}"
+
+        return f"{value:,.2f}"
+
+    except (TypeError, ValueError):
+        return "N/A"
+
+
+def change_emoji(value):
+    try:
+        return "🟢" if float(value) >= 0 else "🔴"
+    except (TypeError, ValueError):
+        return "⚪"
+
+
+# ======================================
+# TEXT CHUNKING
+# ======================================
+
+def chunk_text(text, max_len=250):
+    """
+    Teilt längere Texte sauber an Zeilenumbrüchen
+    oder Leerzeichen auf.
+    """
+
     chunks = []
+
+    if not text:
+        return chunks
+
+    text = str(text).strip()
+
     while len(text) > max_len:
-        # Versuche bei einem Zeilenumbruch oder Leerzeichen zu trennen
-        split_at = text.rfind("\n", 0, max_len)
+
+        split_at = text.rfind(
+            "\n",
+            0,
+            max_len
+        )
+
         if split_at == -1:
-            split_at = text.rfind(" ", 0, max_len)
+            split_at = text.rfind(
+                " ",
+                0,
+                max_len
+            )
+
         if split_at == -1:
             split_at = max_len
 
-        chunks.append(text[:split_at].strip())
+        part = text[:split_at].strip()
+
+        if part:
+            chunks.append(part)
+
         text = text[split_at:].strip()
 
     if text:
         chunks.append(text)
+
     return chunks
 
-def send_x_thread(insight, tokenomics=None, dusd=None, network=None, intelligence=None, current_history=None, global_crypto=None, market=None):
-    """Sendet den vollständigen Bericht als zusammenhängenden Thread auf X."""
 
-    api_key = os.getenv("X_API_KEY")
-    api_secret = os.getenv("X_API_SECRET")
-    access_token = os.getenv("X_ACCESS_TOKEN")
-    access_token_secret = os.getenv("X_ACCESS_TOKEN_SECRET")
+# ======================================
+# SPRACHE AUS REPORT ERKENNEN
+# ======================================
 
-    if not all([api_key, api_secret, access_token, access_token_secret]):
-        print("⚠️ X (Twitter) API Keys fehlen. Überspringe X-Versand.")
-        return False
+def detect_language(insight):
+    """
+    Erkennt die Sprache aus dem Report.
 
-    try:
-        client = tweepy.Client(
-            consumer_key=api_key,
-            consumer_secret=api_secret,
-            access_token=access_token,
-            access_token_secret=access_token_secret
+    Beispiel:
+    🚀 DeFiChain Intelligence (FR)
+    """
+
+    if isinstance(insight, str):
+
+        match = re.search(
+            r"\(([A-Z]{2})\)",
+            insight
         )
 
-        # Falls insight ein Gesamtbericht-String ist, nutze ihn direkt;
-        # andernfalls kombiniere alle übergebenen Komponenten:
-        if isinstance(insight, str) and len(insight) > 100:
-            full_text = insight
+        if match:
+
+            return match.group(1).lower()
+
+    # Fallback
+    return os.getenv(
+        "APP_LANG",
+        "de"
+    )
+
+
+# ======================================
+# CLIENT
+# ======================================
+
+def get_client():
+
+    api_key = os.getenv(
+        "X_API_KEY"
+    )
+
+    api_secret = os.getenv(
+        "X_API_SECRET"
+    )
+
+    access_token = os.getenv(
+        "X_ACCESS_TOKEN"
+    )
+
+    access_token_secret = os.getenv(
+        "X_ACCESS_TOKEN_SECRET"
+    )
+
+    if not all([
+        api_key,
+        api_secret,
+        access_token,
+        access_token_secret
+    ]):
+
+        return None
+
+    return tweepy.Client(
+
+        consumer_key=api_key,
+
+        consumer_secret=api_secret,
+
+        access_token=access_token,
+
+        access_token_secret=access_token_secret
+
+    )
+
+
+# ======================================
+# X THREAD
+# ======================================
+
+def send_x_thread(
+    insight,
+    tokenomics=None,
+    dusd=None,
+    network=None,
+    intelligence=None,
+    current_history=None,
+    global_crypto=None,
+    market=None
+):
+
+    try:
+
+        # ==================================
+        # CLIENT
+        # ==================================
+
+        client = get_client()
+
+        if client is None:
+
+            print(
+                "⚠️ X (Twitter) API Keys fehlen."
+            )
+
+            return False
+
+
+        # ==================================
+        # SPRACHE
+        # ==================================
+
+        language = detect_language(
+            insight
+        )
+
+        lang = load_language(
+            language
+        )
+
+
+        # ==================================
+        # FALLBACKS
+        # ==================================
+
+        if not isinstance(
+            intelligence,
+            dict
+        ):
+
+            intelligence = {}
+
+
+        if not isinstance(
+            global_crypto,
+            dict
+        ):
+
+            global_crypto = {}
+
+
+        if not isinstance(
+            market,
+            dict
+        ):
+
+            market = {}
+
+
+        if not isinstance(
+            network,
+            dict
+        ):
+
+            network = {}
+
+
+        # ==================================
+        # MARKTDATEN
+        # ==================================
+
+        btc = global_crypto.get(
+            "bitcoin",
+            {}
+        )
+
+        eth = global_crypto.get(
+            "ethereum",
+            {}
+        )
+
+        dfi = market.get(
+            "dfi",
+            {}
+        )
+
+
+        # ==================================
+        # BTC
+        # ==================================
+
+        btc_price = btc.get(
+            "price",
+            "N/A"
+        )
+
+        btc_change = safe_float(
+            btc.get(
+                "change",
+                0
+            )
+        )
+
+
+        # ==================================
+        # ETH
+        # ==================================
+
+        eth_price = eth.get(
+            "price",
+            "N/A"
+        )
+
+        eth_change = safe_float(
+            eth.get(
+                "change",
+                0
+            )
+        )
+
+
+        # ==================================
+        # DFI
+        # ==================================
+
+        dfi_price = dfi.get(
+            "price",
+            dfi.get(
+                "usd",
+                "N/A"
+            )
+        )
+
+        dfi_change = safe_float(
+            dfi.get(
+                "change",
+                0
+            )
+        )
+
+
+        # ==================================
+        # INTELLIGENCE
+        # ==================================
+
+        score = intelligence.get(
+            "total",
+            "N/A"
+        )
+
+        status = intelligence.get(
+            "status",
+            "N/A"
+        )
+
+        daily_insight = intelligence.get(
+            "daily_insight",
+            ""
+        )
+
+
+        # ==================================
+        # FLAGGENKETTE
+        # ==================================
+
+        flags = (
+            "🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 "
+            "🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 "
+            "🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 "
+            "🇵🇹 🇷🇺 🇸🇦"
+        )
+
+
+        # ==================================
+        # SPRACH-TEXTE
+        # ==================================
+
+        header_title = lang.get(
+            "header_title",
+            "🚀 DeFiChain Daily Intelligence"
+        )
+
+        global_crypto_title = lang.get(
+            "global_crypto",
+            "Global Crypto"
+        )
+
+        intelligence_title = lang.get(
+            "intelligence",
+            "🧠 Intelligence Score"
+        )
+
+        market_title = lang.get(
+            "market",
+            "Market"
+        )
+
+        price_title = lang.get(
+            "price",
+            "Price"
+        )
+
+        change_title = lang.get(
+            "change_24h",
+            "24h"
+        )
+
+        network_title = lang.get(
+            "network",
+            "Network"
+        )
+
+        news_title = lang.get(
+            "news",
+            "News"
+        )
+
+        history_title = lang.get(
+            "history",
+            "History"
+        )
+
+
+        # ==================================
+        # TWEET 1
+        # GLOBAL CRYPTO + DFI
+        # ==================================
+
+        post1 = f"""
+{header_title} ({language.upper()})
+
+🌍 {flags}
+
+🌍 {global_crypto_title}
+
+₿ Bitcoin:
+${format_price(btc_price)}
+{change_emoji(btc_change)} {safe_change(btc_change)}%
+
+Ξ Ethereum:
+${format_price(eth_price)}
+{change_emoji(eth_change)} {safe_change(eth_change)}%
+
+💎 DeFiChain DFI
+
+{price_title}:
+${format_price(dfi_price)}
+
+{change_title}:
+{change_emoji(dfi_change)} {safe_change(dfi_change)}%
+
+#DeFiChain #DFI
+""".strip()
+
+
+        # ==================================
+        # TWEET 1 LIMIT
+        # ==================================
+
+        if len(post1) > 280:
+
+            post1 = post1[:277] + "..."
+
+
+        print(
+            "DEBUG Tweet 1:"
+        )
+
+        print(
+            post1
+        )
+
+
+        # ==================================
+        # TWEET 1 SENDEN
+        # ==================================
+
+        result1 = client.create_tweet(
+            text=post1
+        )
+
+        tweet1_id = result1.data["id"]
+
+        print(
+            "X Tweet 1 gesendet:",
+            tweet1_id
+        )
+
+
+        # ==================================
+        # TWEET 2
+        # INTELLIGENCE + INSIGHT
+        # ==================================
+
+        post2 = f"""
+🧠 {intelligence_title}
+
+⭐ {score}/100
+{status}
+
+💡 Insight:
+
+{daily_insight}
+""".strip()
+
+
+        if len(post2) > 280:
+
+            post2 = post2[:277] + "..."
+
+
+        print(
+            "DEBUG Tweet 2:"
+        )
+
+        print(
+            post2
+        )
+
+
+        # ==================================
+        # TWEET 2 SENDEN
+        # ==================================
+
+        result2 = client.create_tweet(
+
+            text=post2,
+
+            in_reply_to_tweet_id=tweet1_id
+
+        )
+
+        tweet2_id = result2.data["id"]
+
+        print(
+            "X Tweet 2 gesendet:",
+            tweet2_id
+        )
+
+
+        # ==================================
+        # TWEET 3
+        # NETWORK + NEWS
+        # ==================================
+
+        network_status = network.get(
+            "network_status",
+            "🟢 Online"
+        )
+
+
+        post3 = f"""
+⛓ {network_title}
+
+{network_status}
+
+📰 {news_title}
+""".strip()
+
+
+        # ==================================
+        # NEWS AUS REPORT ERMITTELN
+        # ==================================
+
+        if isinstance(
+            insight,
+            str
+        ):
+
+            # Suche nach News-Zeile im Report
+
+            news_match = re.search(
+
+                r"📰\s*News:\s*(.+?)(?:\n\n|📚|$)",
+
+                insight,
+
+                re.DOTALL
+
+            )
+
+            if news_match:
+
+                extracted_news = (
+                    news_match
+                    .group(1)
+                    .strip()
+                )
+
+                if extracted_news:
+
+                    post3 += (
+                        "\n\n"
+                        + extracted_news
+                    )
+
+
+        if len(post3) > 280:
+
+            post3 = post3[:277] + "..."
+
+
+        print(
+            "DEBUG Tweet 3:"
+        )
+
+        print(
+            post3
+        )
+
+
+        # ==================================
+        # TWEET 3 SENDEN
+        # ==================================
+
+        result3 = client.create_tweet(
+
+            text=post3,
+
+            in_reply_to_tweet_id=tweet2_id
+
+        )
+
+        tweet3_id = result3.data["id"]
+
+        print(
+            "X Tweet 3 gesendet:",
+            tweet3_id
+        )
+
+
+        # ==================================
+        # TWEET 4
+        # HISTORY
+        # ==================================
+
+        post4 = f"""
+📚 {history_title}
+""".strip()
+
+
+        if current_history:
+
+            history_id = current_history.get(
+                "id",
+                "N/A"
+            )
+
+            history_name = current_history.get(
+                "title",
+                "DeFiChain Update"
+            )
+
+            history_text = current_history.get(
+                "text",
+                current_history.get(
+                    "content",
+                    ""
+                )
+            )
+
+
+            post4 += (
+
+                f"\n\n"
+                f"Chapter {history_id}\n"
+                f"{history_name}\n\n"
+                f"{history_text[:140]}"
+
+            )
+
+
         else:
-            components = [insight, tokenomics, dusd, network, intelligence, current_history, global_crypto, market]
-            full_text = "\n\n".join([str(c) for c in components if c])
 
-        # Vorab-Absätze trennen
-        raw_paragraphs = full_text.split("\n\n")
-        paragraphs = []
-        
-        # Stelle sicher, dass kein einzelner Absatz das Limit von ~250 Zeichen überschreitet
-        for p in raw_paragraphs:
-            if len(p) > 250:
-                paragraphs.extend(chunk_text(p, max_len=250))
-            else:
-                paragraphs.append(p)
+            post4 += (
+                "\n\n"
+                "DeFiChain ecosystem update."
+            )
 
-        # Blöcke bauen (Sicherheits-Puffer von 250 Zeichen für "(X/Y)\n" Präfixe)
-        tweets = []
-        current_tweet = ""
 
-        for p in paragraphs:
-            if len(current_tweet) + len(p) + 2 <= 250:
-                current_tweet += (p + "\n\n")
-            else:
-                if current_tweet.strip():
-                    tweets.append(current_tweet.strip())
-                current_tweet = p + "\n\n"
+        post4 += (
+            "\n\n"
+            "#DeFiChain #DFI"
+        )
 
-        if current_tweet.strip():
-            tweets.append(current_tweet.strip())
 
-        # Thread versenden
-        last_tweet_id = None
-        for i, tweet_text in enumerate(tweets):
-            formatted_text = f"({i+1}/{len(tweets)})\n{tweet_text}" if len(tweets) > 1 else tweet_text
-            
-            # Sicherheitscheck
-            if len(formatted_text) > 280:
-                formatted_text = formatted_text[:277] + "..."
+        if len(post4) > 280:
 
-            if last_tweet_id is None:
-                response = client.create_tweet(text=formatted_text)
-            else:
-                response = client.create_tweet(text=formatted_text, in_reply_to_tweet_id=last_tweet_id)
+            post4 = post4[:277] + "..."
 
-            last_tweet_id = response.data['id']
 
-        print("🎉 X Thread erfolgreich gesendet!")
+        print(
+            "DEBUG Tweet 4:"
+        )
+
+        print(
+            post4
+        )
+
+
+        # ==================================
+        # TWEET 4 SENDEN
+        # ==================================
+
+        result4 = client.create_tweet(
+
+            text=post4,
+
+            in_reply_to_tweet_id=tweet3_id
+
+        )
+
+
+        print(
+            "X Tweet 4 gesendet:",
+            result4.data["id"]
+        )
+
+
+        # ==================================
+        # ERFOLG
+        # ==================================
+
+        print(
+            "🎉 X Thread erfolgreich gesendet!"
+        )
+
         return True
 
+
     except Exception as e:
-        print(f"❌ Fehler beim Senden an X: {e}")
+
+        print(
+            "❌ Fehler beim Senden an X:"
+        )
+
+        print(
+            e
+        )
+
         return False
