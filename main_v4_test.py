@@ -33,6 +33,7 @@ from modules.network import get_network_data
 from modules.tokenomics import get_tokenomics_data
 
 from news import get_dfi_news
+from charts import generate_all_charts  # <--- NEU IMPORTIERT
 
 
 # ======================================
@@ -138,23 +139,17 @@ def main():
     # ==================================
 
     try:
-
         current_history = get_history_chapter()
-
     except Exception as e:
-
         print("⚠️ History Fehler:", e)
         current_history = None
 
     if current_history:
-
         print(
             "📚 History:",
             current_history.get("title", "N/A")
         )
-
     else:
-
         print("📚 History: keine Daten")
 
     # ==================================
@@ -162,22 +157,15 @@ def main():
     # ==================================
 
     try:
-
         news = get_dfi_news()
-
         if isinstance(news, dict):
-
             print(
                 "📰 News geladen:",
                 news.get("title", "N/A")
             )
-
         else:
-
             print("📰 News geladen:", news)
-
     except Exception as e:
-
         print("⚠️ News Fehler:", e)
         news = None
 
@@ -186,11 +174,8 @@ def main():
     # ==================================
 
     try:
-
         daily_insight = generate_daily_insight(language)
-
     except Exception as e:
-
         print("⚠️ Daily Insight Fehler:", e)
         daily_insight = ""
 
@@ -209,63 +194,59 @@ def main():
     # ==================================
 
     try:
-
         dfi_change = float(
-            market
-            .get("dfi", {})
-            .get("change", 0)
+            market.get("dfi", {}).get("change", 0)
         )
-
     except Exception:
-
         dfi_change = 0
 
     try:
-
         btc_change = float(
-            global_crypto
-            .get("bitcoin", {})
-            .get("change", 0)
+            global_crypto.get("bitcoin", {}).get("change", 0)
         )
-
     except Exception:
-
         btc_change = 0
 
     try:
-
         eth_change = float(
-            global_crypto
-            .get("ethereum", {})
-            .get("change", 0)
+            global_crypto.get("ethereum", {}).get("change", 0)
         )
-
     except Exception:
-
         eth_change = 0
 
     comparison = {
-
         "bitcoin": btc_change,
         "ethereum": eth_change,
         "dfi": dfi_change,
-
-        # alte Kompatibilität
         "vs_btc": btc_change,
         "vs_eth": eth_change
-
     }
+
+    # ==================================
+    # CHARTS & GRAFIKEN GENERIEREN (NEU)
+    # ==================================
+
+    try:
+        print("📊 Generiere Charts für Bot-Outputs...")
+        generate_all_charts(
+            market=market,
+            tokenomics=tokenomics,
+            dusd=dusd,
+            intelligence=intelligence,
+            global_crypto=global_crypto
+        )
+        print("✅ Charts erfolgreich im Ordner outputs/ erstellt.")
+    except Exception as e:
+        print("⚠️ Fehler beim Generieren der Charts:", e)
 
     # ==================================
     # REPORT
     # ==================================
 
     try:
-
         from modules.report_formatter import create_report
 
         report = create_report(
-
             market,
             tokenomics,
             dusd,
@@ -276,17 +257,10 @@ def main():
             current_history,
             global_crypto,
             comparison,
-
-            # WICHTIG:
-            # NEWS WIEDER AN DEN REPORT ÜBERGEBEN
             news=news,
-
             language=language
-
         )
-
     except Exception as e:
-
         print("⚠️ Report Fehler:", e)
         report = None
 
@@ -295,19 +269,12 @@ def main():
     # ==================================
 
     try:
-
         if report:
-
             send_telegram(report)
-
             print("📨 Telegram erfolgreich gesendet")
-
         else:
-
             print("⚠️ Kein Report für Telegram")
-
     except Exception as e:
-
         print("⚠️ Telegram Fehler:", e)
 
     # ==================================
@@ -315,20 +282,14 @@ def main():
     # ==================================
 
     try:
-
         send_discord(
-
             market,
             network,
             comparison,
             news
-
         )
-
         print("💬 Discord erfolgreich gesendet")
-
     except Exception as e:
-
         print("⚠️ Discord Fehler:", e)
 
     # ==================================
@@ -336,11 +297,8 @@ def main():
     # ==================================
 
     try:
-
         send_x_thread(
-
             report,
-
             tokenomics,
             dusd,
             network,
@@ -348,11 +306,8 @@ def main():
             current_history,
             global_crypto,
             market
-
         )
-
     except Exception as e:
-
         print("⚠️ X Fehler:", e)
 
     # ==================================
@@ -367,5 +322,4 @@ def main():
 # ======================================
 
 if __name__ == "__main__":
-
     main()
