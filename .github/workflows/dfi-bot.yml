@@ -6,7 +6,6 @@ on:
     # täglich 23:00 Uhr deutscher Zeit (UTC+2 Sommerzeit)
     - cron: "0 21 * * *"
 
-# Erlaubt dem Bot, Dateien zurückzuschreiben
 permissions:
   contents: write
 
@@ -15,24 +14,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Repository laden (aktualisiert auf v7)
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      # Python installieren (aktualisiert auf v7 mit Pip-Caching)
       - name: Setup Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
-      # Abhängigkeiten installieren
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
 
-      # Bot starten
       - name: Run DeFiChain Bot
         env:
           APP_LANG: "de"
@@ -53,15 +48,12 @@ jobs:
         run: |
           python main_v4_test.py
 
-      # Status-Dateien speichern (History & Sprache)
       - name: Save states (History & Language)
         if: always()
         run: |
           git config --global user.name "DeFiChain Bot"
           git config --global user.email "dfi-bot@github.com"
 
-          # Prüfen und Hinzufügen der Statusdateien
           git add history_state.json language_state.json 2>/dev/null || true
-
           git commit -m "Update DFI history and language state" || echo "No changes to commit"
           git push
