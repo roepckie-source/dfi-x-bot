@@ -26,13 +26,13 @@ def safe_load_image(file_path):
     return np.array(fallback)
 
 
-def create_smooth_fade_gif(image_files, output_gif_path="outputs/daily_update.gif", fps=30, display_duration=2.5, fade_duration=0.8):
+def create_smooth_fade_gif(image_files, output_gif_path="outputs/daily_update.gif", fps=15, display_duration=2.5, fade_duration=0.8):
     """
     Erstellt ein flüssiges GIF aus mehreren Bildern mit sanftem Cross-Fade Übergang.
     
     :param image_files: Liste von Pfaden zu den PNG/JPG-Dateien
     :param output_gif_path: Ausgabepfad für das GIF
-    :param fps: Bilder pro Sekunde (Frames Per Second)
+    :param fps: Bilder pro Sekunde (Frames Per Second) - optimiert auf 15 fps
     :param display_duration: Wie lange jedes Hauptbild stehen bleibt (in Sekunden)
     :param fade_duration: Dauer der Überblendung zwischen zwei Bildern (in Sekunden)
     """
@@ -84,7 +84,7 @@ def create_smooth_fade_gif(image_files, output_gif_path="outputs/daily_update.gi
 
         # Als GIF speichern
         imageio.mimsave(output_gif_path, all_frames, fps=fps)
-        print(f"✅ GIF erfolgreich erstellt: {output_gif_path}")
+        print(f"✅ GIF erfolgreich erstellt ({fps} FPS): {output_gif_path}")
         return True
 
     except Exception as e:
@@ -92,6 +92,6 @@ def create_smooth_fade_gif(image_files, output_gif_path="outputs/daily_update.gi
         return False
 
 
-# Alias-Funktion bereitstellen, um Kompatibilität mit allen Import-Namen zu garantieren
-def create_animated_summary_gif(image_files, output_gif_path="outputs/daily_update.gif", fps=30, display_duration=2.5, fade_duration=0.8):
+# Alias-Funktion bereitstellen
+def create_animated_summary_gif(image_files, output_gif_path="outputs/daily_update.gif", fps=15, display_duration=2.5, fade_duration=0.8):
     return create_smooth_fade_gif(image_files, output_gif_path, fps, display_duration, fade_duration)
