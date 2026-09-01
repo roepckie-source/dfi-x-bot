@@ -8,7 +8,6 @@ import re
 import tweepy
 
 from modules.language import load_language
-from charts import create_animated_summary_gif
 
 
 # ======================================
@@ -60,29 +59,20 @@ def change_emoji(value):
 # ======================================
 
 def chunk_text(text, max_len=250):
-    """
-    Teilt längere Texte sauber an Zeilenumbrüchen
-    oder Leerzeichen auf.
-    """
     chunks = []
-
     if not text:
         return chunks
 
     text = str(text).strip()
 
     while len(text) > max_len:
-
         split_at = text.rfind("\n", 0, max_len)
-
         if split_at == -1:
             split_at = text.rfind(" ", 0, max_len)
-
         if split_at == -1:
             split_at = max_len
 
         part = text[:split_at].strip()
-
         if part:
             chunks.append(part)
 
@@ -99,18 +89,11 @@ def chunk_text(text, max_len=250):
 # ======================================
 
 def detect_language(insight):
-    """
-    Erkennt die Sprache aus dem Report.
-
-    Beispiel:
-    🚀 DeFiChain Intelligence (FR)
-    """
     if isinstance(insight, str):
         match = re.search(r"\(([A-Z]{2})\)", insight)
         if match:
             return match.group(1).lower()
 
-    # Fallback
     return os.getenv("APP_LANG", "de")
 
 
@@ -119,10 +102,6 @@ def detect_language(insight):
 # ======================================
 
 def get_clients():
-    """
-    Erstellt sowohl den Tweepy Client (v2) als auch 
-    die Tweepy API (v1.1) für den Media Upload.
-    """
     api_key = os.getenv("X_API_KEY")
     api_secret = os.getenv("X_API_SECRET")
     access_token = os.getenv("X_ACCESS_TOKEN")
@@ -131,7 +110,6 @@ def get_clients():
     if not all([api_key, api_secret, access_token, access_token_secret]):
         return None, None
 
-    # Client für Twitter API v2 (Tweets erstellen)
     client_v2 = tweepy.Client(
         consumer_key=api_key,
         consumer_secret=api_secret,
@@ -139,7 +117,6 @@ def get_clients():
         access_token_secret=access_token_secret
     )
 
-    # API für Twitter API v1.1 (Media-Upload für GIFs/Bilder)
     auth = tweepy.OAuth1UserHandler(
         api_key, 
         api_secret, 
@@ -167,66 +144,41 @@ def send_x_thread(
 ):
 
     try:
-
-        # ==================================
-        # CLIENTS INITIALISIEREN
-        # ==================================
-
         client, api_v1 = get_clients()
 
         if client is None or api_v1 is None:
             print("⚠️ X (Twitter) API Keys fehlen.")
             return False
 
-        # ==================================
-        # SPRACHE
-        # ==================================
-
         language = detect_language(insight)
         lang = load_language(language)
 
-        # ==================================
-        # FALLBACKS
-        # ==================================
-
         if not isinstance(intelligence, dict):
             intelligence = {}
-
         if not isinstance(global_crypto, dict):
             global_crypto = {}
-
         if not isinstance(market, dict):
             market = {}
-
         if not isinstance(network, dict):
             network = {}
-
-        # ==================================
-        # MARKTDATEN
-        # ==================================
 
         btc = global_crypto.get("bitcoin", {})
         eth = global_crypto.get("ethereum", {})
         dfi = market.get("dfi", {})
 
-        # BTC
         btc_price = btc.get("price", "N/A")
         btc_change = safe_float(btc.get("change", 0))
 
-        # ETH
         eth_price = eth.get("price", "N/A")
         eth_change = safe_float(eth.get("change", 0))
 
-        # DFI
         dfi_price = dfi.get("price", dfi.get("usd", "N/A"))
         dfi_change = safe_float(dfi.get("change", 0))
 
-        # INTELLIGENCE
         score = intelligence.get("total", "N/A")
         status = intelligence.get("status", "N/A")
         daily_insight = intelligence.get("daily_insight", "")
 
-        # FLAGGENKETTE
         flags = (
             "🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 "
             "🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 "
@@ -234,7 +186,6 @@ def send_x_thread(
             "🇵🇹 🇷🇺 🇸🇦"
         )
 
-        # SPRACH-TEXTE
         header_title = lang.get("header_title", "🚀 DeFiChain Daily Intelligence")
         global_crypto_title = lang.get("global_crypto", "Global Crypto")
         intelligence_title = lang.get("intelligence", "🧠 Intelligence Score")
@@ -245,9 +196,8 @@ def send_x_thread(
         history_title = lang.get("history", "History")
 
         # ==================================
-        # TWEET 1: GLOBAL CRYPTO + DFI
+        # TWEET 1
         # ==================================
-
         post1 = f"""
 {header_title} ({language.upper()})
 
@@ -277,16 +227,12 @@ ${format_price(dfi_price)}
         if len(post1) > 280:
             post1 = post1[:277] + "..."
 
-        print("DEBUG Tweet 1:\n", post1)
-
         result1 = client.create_tweet(text=post1)
         tweet1_id = result1.data["id"]
-        print("X Tweet 1 gesendet:", tweet1_id)
 
         # ==================================
-        # TWEET 2: INTELLIGENCE + INSIGHT
+        # TWEET 2
         # ==================================
-
         post2 = f"""
 🧠 {intelligence_title}
 
@@ -301,19 +247,15 @@ ${format_price(dfi_price)}
         if len(post2) > 280:
             post2 = post2[:277] + "..."
 
-        print("DEBUG Tweet 2:\n", post2)
-
         result2 = client.create_tweet(
             text=post2,
             in_reply_to_tweet_id=tweet1_id
         )
         tweet2_id = result2.data["id"]
-        print("X Tweet 2 gesendet:", tweet2_id)
 
         # ==================================
-        # TWEET 3: NETWORK + NEWS
+        # TWEET 3
         # ==================================
-
         network_status = network.get("network_status", "🟢 Online")
 
         post3 = f"""
@@ -338,19 +280,15 @@ ${format_price(dfi_price)}
         if len(post3) > 280:
             post3 = post3[:277] + "..."
 
-        print("DEBUG Tweet 3:\n", post3)
-
         result3 = client.create_tweet(
             text=post3,
             in_reply_to_tweet_id=tweet2_id
         )
         tweet3_id = result3.data["id"]
-        print("X Tweet 3 gesendet:", tweet3_id)
 
         # ==================================
-        # TWEET 4: HISTORY
+        # TWEET 4
         # ==================================
-
         post4 = f"📚 {history_title}".strip()
 
         if current_history:
@@ -374,56 +312,41 @@ ${format_price(dfi_price)}
         if len(post4) > 280:
             post4 = post4[:277] + "..."
 
-        print("DEBUG Tweet 4:\n", post4)
-
         result4 = client.create_tweet(
             text=post4,
             in_reply_to_tweet_id=tweet3_id
         )
         tweet4_id = result4.data["id"]
-        print("X Tweet 4 gesendet:", tweet4_id)
 
         # ==================================
-        # TWEET 5: GIF UPDATE (VISUAL)
+        # TWEET 5: GIF VIA CHUNKED UPLOAD
         # ==================================
-
         try:
             gif_output_path = "outputs/daily_update.gif"
 
-            # 1. Animiertes GIF mit 15 FPS erstellen (über generate_all_charts aus charts.py)
-            generate_all_charts(
-                market=market,
-                tokenomics=tokenomics,
-                dusd=dusd,
-                intelligence=intelligence,
-                global_crypto=global_crypto
-            )
+            if os.path.exists(gif_output_path):
+                # Chunked Upload zwingend erforderlich für animierte GIFs
+                media = api_v1.chunked_upload(
+                    filename=gif_output_path,
+                    media_category="tweet_gif"
+                )
 
-            # 2. GIF über Twitter API v1.1 hochladen mit "tweet_gif" Kategorie
-            media = api_v1.media_upload(
-                filename=gif_output_path,
-                media_category="tweet_gif"  # <--- WICHTIG: Teilt Twitter mit, dass es ein animiertes GIF ist
-            )
-
-            # 3. Als Tweet 5 (Antwort auf Tweet 4) senden
-            post5 = "🎬 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
-            result5 = client.create_tweet(
-                text=post5,
-                media_ids=[media.media_id],
-                in_reply_to_tweet_id=tweet4_id
-            )
-            print("X Tweet 5 (GIF) gesendet:", result5.data["id"])
+                post5 = "🎬 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
+                result5 = client.create_tweet(
+                    text=post5,
+                    media_ids=[media.media_id],
+                    in_reply_to_tweet_id=tweet4_id
+                )
+                print("X Tweet 5 (GIF) gesendet:", result5.data["id"])
+            else:
+                print(f"⚠️ GIF-Datei nicht gefunden: {gif_output_path}")
 
         except Exception as gif_error:
             print("⚠️ Fehler beim GIF-Upload:", gif_error)
-        # ==================================
-        # ERFOLG
-        # ==================================
 
         print("🎉 X Thread erfolgreich gesendet!")
         return True
 
     except Exception as e:
-        print("❌ Fehler beim Senden an X:")
-        print(e)
+        print("❌ Fehler beim Senden an X:", e)
         return False
