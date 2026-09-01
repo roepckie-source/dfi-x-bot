@@ -2,3 +2,7 @@ python-dotenv
 requests
 schedule
 tweepy>=4.14.0
+numpy
+pillow
+imageio
+tweepy
