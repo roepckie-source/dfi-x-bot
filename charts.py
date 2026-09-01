@@ -95,3 +95,13 @@ def create_smooth_fade_gif(image_files, output_gif_path="outputs/daily_update.gi
 # Alias-Funktion bereitstellen
 def create_animated_summary_gif(image_files, output_gif_path="outputs/daily_update.gif", fps=15, display_duration=2.5, fade_duration=0.8):
     return create_smooth_fade_gif(image_files, output_gif_path, fps, display_duration, fade_duration)
+def generate_all_charts(market=None, tokenomics=None, dusd=None, intelligence=None, global_crypto=None):
+    """Fallback-Wrapper zum Generieren aller Grafiken."""
+    os.makedirs("outputs", exist_ok=True)
+    
+    # Standard Einzelbilder erzeugen
+    generate_summary_chart()
+    
+    # GIF direkt vorab erstellen
+    chart_files = ["outputs/summary.png"]
+    create_animated_summary_gif(chart_files, output_gif_path="outputs/daily_update.gif", fps=15)
