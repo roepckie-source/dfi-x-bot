@@ -1,3 +1,21 @@
+# ganz oben in main_v4_test.py
+import sys
+
+print("🚀 STARTE MAIN_V4_TEST.PY...", flush=True)
+
+try:
+    # Hier steht dein bisheriger Bot-Code / Hauptaufruf
+    # z. B. run_bot() oder main()
+    pass
+
+except Exception as e:
+    print(f"❌ KRITISCHER FEHLER IM BOT-SKRIPT: {e}", flush=True)
+    import traceback
+
+    traceback.print_exc()
+    sys.exit(1)  # Lässt den GitHub Run bei Fehler fehlschlagen!
+
+
 # ======================================
 # DeFiChain Intelligence v5
 # X Thread Bot (inkl. GIF Support)
