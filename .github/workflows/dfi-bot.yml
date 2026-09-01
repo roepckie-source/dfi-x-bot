@@ -1,35 +1,7 @@
-name: DeFiChain Bot
-
-on:
-  workflow_dispatch:
-  schedule:
-    # täglich 23:00 Uhr deutscher Zeit (UTC+2 Sommerzeit)
-    - cron: "0 21 * * *"
-
-permissions:
-  contents: write
-
-jobs:
-  run-bot:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
-
+# Bot starten
       - name: Run DeFiChain Bot
         env:
+          PYTHONUNBUFFERED: "1" # <--- Verhindert das Puffern von print() Ausgaben
           APP_LANG: "de"
 
           # Discord
@@ -47,13 +19,3 @@ jobs:
 
         run: |
           python main_v4_test.py
-
-      - name: Save states (History & Language)
-        if: always()
-        run: |
-          git config --global user.name "DeFiChain Bot"
-          git config --global user.email "dfi-bot@github.com"
-
-          git add history_state.json language_state.json 2>/dev/null || true
-          git commit -m "Update DFI history and language state" || echo "No changes to commit"
-          git push
