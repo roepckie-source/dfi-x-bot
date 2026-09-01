@@ -389,32 +389,21 @@ ${format_price(dfi_price)}
 
         try:
             gif_output_path = "outputs/daily_update.gif"
-            
-            # Prüfe Standard- und Wurzelpfade
-            candidate_files = [
-                ["outputs/chart1.png", "outputs/chart2.png", "outputs/summary.png"],
-                ["chart1.png", "chart2.png", "summary.png"]
-            ]
-            
-            chart_files = []
-            for candidate in candidate_files:
-                if all(os.path.exists(f) for f in candidate):
-                    chart_files = candidate
-                    break
-            
-            if not chart_files:
-                # Fallback auf Standardpfad
-                chart_files = ["outputs/chart1.png", "outputs/chart2.png", "outputs/summary.png"]
 
-            # 1. Animiertes GIF mit 15 FPS erstellen
-            create_animated_summary_gif(
-                chart_files, 
-                output_gif_path=gif_output_path, 
-                fps=15
+            # 1. Animiertes GIF mit 15 FPS erstellen (über generate_all_charts aus charts.py)
+            generate_all_charts(
+                market=market,
+                tokenomics=tokenomics,
+                dusd=dusd,
+                intelligence=intelligence,
+                global_crypto=global_crypto
             )
 
-            # 2. GIF über Twitter API v1.1 hochladen
-            media = api_v1.media_upload(filename=gif_output_path)
+            # 2. GIF über Twitter API v1.1 hochladen mit "tweet_gif" Kategorie
+            media = api_v1.media_upload(
+                filename=gif_output_path,
+                media_category="tweet_gif"  # <--- WICHTIG: Teilt Twitter mit, dass es ein animiertes GIF ist
+            )
 
             # 3. Als Tweet 5 (Antwort auf Tweet 4) senden
             post5 = "🎬 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
@@ -427,7 +416,6 @@ ${format_price(dfi_price)}
 
         except Exception as gif_error:
             print("⚠️ Fehler beim GIF-Upload:", gif_error)
-
         # ==================================
         # ERFOLG
         # ==================================
