@@ -15,16 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Repository laden (aktualisiert auf v4)
+      # Repository laden (aktualisiert auf v7)
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      # Python installieren (aktualisiert auf v5 mit pip-Caching)
+      # Python installieren (aktualisiert auf v7 mit Pip-Caching)
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-          cache: "pip" # Beschleunigt die Installation von Abhängigkeiten
+          cache: "pip"
 
       # Abhängigkeiten installieren
       - name: Install dependencies
