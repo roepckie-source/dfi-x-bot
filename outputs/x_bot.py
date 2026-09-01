@@ -8,7 +8,7 @@ import re
 import tweepy
 
 from modules.language import load_language
-from charts import create_smooth_fade_gif
+from charts import create_animated_summary_gif
 
 
 # ======================================
@@ -396,9 +396,9 @@ ${format_price(dfi_price)}
             ]
 
             # 1. Animiertes GIF mit Transitions erstellen
-            create_smooth_fade_gif(chart_files, output_gif_path=gif_output_path)
+            create_animated_summary_gif(chart_files, output_gif_path=gif_output_path)
 
-            # 2. GIF über Twitter v1.1 hochladen
+            # 2. GIF über Twitter API v1.1 hochladen
             media = api_v1.media_upload(filename=gif_output_path)
 
             # 3. Als Tweet 5 (Antwort auf Tweet 4) senden
