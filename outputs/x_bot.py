@@ -389,14 +389,29 @@ ${format_price(dfi_price)}
 
         try:
             gif_output_path = "outputs/daily_update.gif"
-            chart_files = [
-                "outputs/chart1.png", 
-                "outputs/chart2.png", 
-                "outputs/summary.png"
+            
+            # Prüfe Standard- und Wurzelpfade
+            candidate_files = [
+                ["outputs/chart1.png", "outputs/chart2.png", "outputs/summary.png"],
+                ["chart1.png", "chart2.png", "summary.png"]
             ]
+            
+            chart_files = []
+            for candidate in candidate_files:
+                if all(os.path.exists(f) for f in candidate):
+                    chart_files = candidate
+                    break
+            
+            if not chart_files:
+                # Fallback auf Standardpfad
+                chart_files = ["outputs/chart1.png", "outputs/chart2.png", "outputs/summary.png"]
 
-            # 1. Animiertes GIF mit Transitions erstellen
-            create_animated_summary_gif(chart_files, output_gif_path=gif_output_path)
+            # 1. Animiertes GIF mit 15 FPS erstellen
+            create_animated_summary_gif(
+                chart_files, 
+                output_gif_path=gif_output_path, 
+                fps=15
+            )
 
             # 2. GIF über Twitter API v1.1 hochladen
             media = api_v1.media_upload(filename=gif_output_path)
