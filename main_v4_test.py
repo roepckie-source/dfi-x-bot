@@ -1,379 +1,198 @@
-# ganz oben in main_v4_test.py
-import sys
-
-print("🚀 STARTE MAIN_V4_TEST.PY...", flush=True)
-
-try:
-    # Hier steht dein bisheriger Bot-Code / Hauptaufruf
-    # z. B. run_bot() oder main()
-    pass
-
-except Exception as e:
-    print(f"❌ KRITISCHER FEHLER IM BOT-SKRIPT: {e}", flush=True)
-    import traceback
-
-    traceback.print_exc()
-    sys.exit(1)  # Lässt den GitHub Run bei Fehler fehlschlagen!
-
-
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (inkl. GIF Support)
+# Main Test Runner
 # ======================================
 
-import os
-import re
-import tweepy
+import sys
+import traceback
+from pathlib import Path
 
+# ======================================
+# ROOT VERZEICHNIS
+# ======================================
+
+ROOT_DIR = Path(__file__).resolve().parent
+
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+
+# ======================================
+# MODULE
+# ======================================
+
+from modules.community import get_community_data
+from modules.dusd import get_dusd_data
+from modules.global_crypto import get_global_crypto
+from modules.history_engine import get_history_chapter
+from modules.insight_engine import generate_daily_insight
+from modules.intelligence import calculate_intelligence_score
 from modules.language import load_language
+from modules.language_engine import get_next_language
+from modules.market import get_market_data
+from modules.network import get_network_data
+from modules.tokenomics import get_tokenomics_data
+
+from news import get_dfi_news
+from charts import generate_all_charts
 
 
 # ======================================
-# FORMAT HELFER
+# OUTPUTS
 # ======================================
 
-def safe_float(value, default=0.0):
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def safe_change(value):
-    try:
-        return f"{float(value):.2f}"
-    except (TypeError, ValueError):
-        return "0.00"
-
-
-def format_price(value):
-    try:
-        value = float(value)
-
-        if value < 0.01:
-            return f"{value:.8f}"
-
-        if value < 1:
-            return f"{value:.6f}"
-
-        if value < 100:
-            return f"{value:.2f}"
-
-        return f"{value:,.2f}"
-
-    except (TypeError, ValueError):
-        return "N/A"
-
-
-def change_emoji(value):
-    try:
-        return "🟢" if float(value) >= 0 else "🔴"
-    except (TypeError, ValueError):
-        return "⚪"
+from outputs.discord_bot import send_discord
+from outputs.telegram_bot import send_telegram
+from outputs.x_bot import send_x_thread
 
 
 # ======================================
-# TEXT CHUNKING
+# MAIN LOGIK
 # ======================================
 
-def chunk_text(text, max_len=250):
-    chunks = []
-    if not text:
-        return chunks
+def main():
+    print("🚀 DeFiChain Intelligence v5 startet...", flush=True)
 
-    text = str(text).strip()
+    # 1. Sprache
+    language = get_next_language()
+    print(f"🌍 Sprache: {language}", flush=True)
+    load_language(language)
 
-    while len(text) > max_len:
-        split_at = text.rfind("\n", 0, max_len)
-        if split_at == -1:
-            split_at = text.rfind(" ", 0, max_len)
-        if split_at == -1:
-            split_at = max_len
+    # 2. Daten abrufen
+    market = get_market_data()
+    tokenomics = get_tokenomics_data()
+    dusd = get_dusd_data()
+    community = get_community_data()
+    network = get_network_data()
+    global_crypto = get_global_crypto()
 
-        part = text[:split_at].strip()
-        if part:
-            chunks.append(part)
-
-        text = text[split_at:].strip()
-
-    if text:
-        chunks.append(text)
-
-    return chunks
-
-
-# ======================================
-# SPRACHE AUS REPORT ERKENNEN
-# ======================================
-
-def detect_language(insight):
-    if isinstance(insight, str):
-        match = re.search(r"\(([A-Z]{2})\)", insight)
-        if match:
-            return match.group(1).lower()
-
-    return os.getenv("APP_LANG", "de")
-
-
-# ======================================
-# CLIENTS (v2 & v1.1)
-# ======================================
-
-def get_clients():
-    api_key = os.getenv("X_API_KEY")
-    api_secret = os.getenv("X_API_SECRET")
-    access_token = os.getenv("X_ACCESS_TOKEN")
-    access_token_secret = os.getenv("X_ACCESS_TOKEN_SECRET")
-
-    if not all([api_key, api_secret, access_token, access_token_secret]):
-        return None, None
-
-    client_v2 = tweepy.Client(
-        consumer_key=api_key,
-        consumer_secret=api_secret,
-        access_token=access_token,
-        access_token_secret=access_token_secret
+    # 3. Intelligence Score
+    intelligence = calculate_intelligence_score(
+        market, tokenomics, dusd, community, network
     )
+    score = intelligence.get("total", 0)
 
-    auth = tweepy.OAuth1UserHandler(
-        api_key, 
-        api_secret, 
-        access_token, 
-        access_token_secret
-    )
-    api_v1 = tweepy.API(auth)
+    if score >= 80:
+        status = "🟢 Sehr stark"
+    elif score >= 60:
+        status = "🟡 Stabil"
+    elif score >= 40:
+        status = "🟠 Vorsicht"
+    else:
+        status = "🔴 Kritisch"
 
-    return client_v2, api_v1
+    intelligence["status"] = status
+    print(f"🧠 Intelligence Score: {score} /100 -> {status}", flush=True)
 
-
-# ======================================
-# X THREAD
-# ======================================
-
-def send_x_thread(
-    insight,
-    tokenomics=None,
-    dusd=None,
-    network=None,
-    intelligence=None,
-    current_history=None,
-    global_crypto=None,
-    market=None
-):
-
+    # 4. History & News
     try:
-        client, api_v1 = get_clients()
-
-        if client is None or api_v1 is None:
-            print("⚠️ X (Twitter) API Keys fehlen.")
-            return False
-
-        language = detect_language(insight)
-        lang = load_language(language)
-
-        if not isinstance(intelligence, dict):
-            intelligence = {}
-        if not isinstance(global_crypto, dict):
-            global_crypto = {}
-        if not isinstance(market, dict):
-            market = {}
-        if not isinstance(network, dict):
-            network = {}
-
-        btc = global_crypto.get("bitcoin", {})
-        eth = global_crypto.get("ethereum", {})
-        dfi = market.get("dfi", {})
-
-        btc_price = btc.get("price", "N/A")
-        btc_change = safe_float(btc.get("change", 0))
-
-        eth_price = eth.get("price", "N/A")
-        eth_change = safe_float(eth.get("change", 0))
-
-        dfi_price = dfi.get("price", dfi.get("usd", "N/A"))
-        dfi_change = safe_float(dfi.get("change", 0))
-
-        score = intelligence.get("total", "N/A")
-        status = intelligence.get("status", "N/A")
-        daily_insight = intelligence.get("daily_insight", "")
-
-        flags = (
-            "🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 "
-            "🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 "
-            "🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 "
-            "🇵🇹 🇷🇺 🇸🇦"
-        )
-
-        header_title = lang.get("header_title", "🚀 DeFiChain Daily Intelligence")
-        global_crypto_title = lang.get("global_crypto", "Global Crypto")
-        intelligence_title = lang.get("intelligence", "🧠 Intelligence Score")
-        price_title = lang.get("price", "Price")
-        change_title = lang.get("change_24h", "24h")
-        network_title = lang.get("network", "Network")
-        news_title = lang.get("news", "News")
-        history_title = lang.get("history", "History")
-
-        # ==================================
-        # TWEET 1: GLOBAL CRYPTO + DFI
-        # ==================================
-
-        post1 = f"""
-{header_title} ({language.upper()})
-
-🌍 {flags}
-
-🌍 {global_crypto_title}
-
-₿ Bitcoin:
-${format_price(btc_price)}
-{change_emoji(btc_change)} {safe_change(btc_change)}%
-
-Ξ Ethereum:
-${format_price(eth_price)}
-{change_emoji(eth_change)} {safe_change(eth_change)}%
-
-💎 DeFiChain DFI
-
-{price_title}:
-${format_price(dfi_price)}
-
-{change_title}:
-{change_emoji(dfi_change)} {safe_change(dfi_change)}%
-
-#DeFiChain #DFI
-""".strip()
-
-        if len(post1) > 280:
-            post1 = post1[:277] + "..."
-
-        result1 = client.create_tweet(text=post1)
-        tweet1_id = result1.data["id"]
-        print("X Tweet 1 gesendet:", tweet1_id)
-
-        # ==================================
-        # TWEET 2: INTELLIGENCE + INSIGHT
-        # ==================================
-
-        post2 = f"""
-🧠 {intelligence_title}
-
-⭐ {score}/100
-{status}
-
-💡 Insight:
-
-{daily_insight}
-""".strip()
-
-        if len(post2) > 280:
-            post2 = post2[:277] + "..."
-
-        result2 = client.create_tweet(
-            text=post2,
-            in_reply_to_tweet_id=tweet1_id
-        )
-        tweet2_id = result2.data["id"]
-        print("X Tweet 2 gesendet:", tweet2_id)
-
-        # ==================================
-        # TWEET 3: NETWORK + NEWS
-        # ==================================
-
-        network_status = network.get("network_status", "🟢 Online")
-
-        post3 = f"""
-⛓ {network_title}
-
-{network_status}
-
-📰 {news_title}
-""".strip()
-
-        if isinstance(insight, str):
-            news_match = re.search(
-                r"📰\s*News:\s*(.+?)(?:\n\n|📚|$)",
-                insight,
-                re.DOTALL
-            )
-            if news_match:
-                extracted_news = news_match.group(1).strip()
-                if extracted_news:
-                    post3 += "\n\n" + extracted_news
-
-        if len(post3) > 280:
-            post3 = post3[:277] + "..."
-
-        result3 = client.create_tweet(
-            text=post3,
-            in_reply_to_tweet_id=tweet2_id
-        )
-        tweet3_id = result3.data["id"]
-        print("X Tweet 3 gesendet:", tweet3_id)
-
-        # ==================================
-        # TWEET 4: HISTORY
-        # ==================================
-
-        post4 = f"📚 {history_title}".strip()
-
-        if current_history:
-            history_id = current_history.get("id", "N/A")
-            history_name = current_history.get("title", "DeFiChain Update")
-            history_text = current_history.get(
-                "text", 
-                current_history.get("content", "")
-            )
-
-            post4 += (
-                f"\n\nChapter {history_id}\n"
-                f"{history_name}\n\n"
-                f"{history_text[:140]}"
-            )
-        else:
-            post4 += "\n\nDeFiChain ecosystem update."
-
-        post4 += "\n\n#DeFiChain #DFI"
-
-        if len(post4) > 280:
-            post4 = post4[:277] + "..."
-
-        result4 = client.create_tweet(
-            text=post4,
-            in_reply_to_tweet_id=tweet3_id
-        )
-        tweet4_id = result4.data["id"]
-        print("X Tweet 4 gesendet:", tweet4_id)
-
-        # ==================================
-        # TWEET 5: GIF VIA CHUNKED UPLOAD
-        # ==================================
-
-        try:
-            gif_output_path = "outputs/daily_update.gif"
-
-            if os.path.exists(gif_output_path):
-                # Verwende chunked_upload für animierte GIFs, damit Twitter die Einzelbilder verarbeitet
-                media = api_v1.chunked_upload(
-                    filename=gif_output_path,
-                    media_category="tweet_gif"
-                )
-
-                post5 = "🎬 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
-                result5 = client.create_tweet(
-                    text=post5,
-                    media_ids=[media.media_id],
-                    in_reply_to_tweet_id=tweet4_id
-                )
-                print("X Tweet 5 (GIF) gesendet:", result5.data["id"])
-            else:
-                print(f"⚠️ GIF nicht gefunden unter: {gif_output_path}")
-
-        except Exception as gif_error:
-            print("⚠️ Fehler beim GIF-Upload:", gif_error)
-
-        print("🎉 X Thread erfolgreich gesendet!")
-        return True
-
+        current_history = get_history_chapter()
     except Exception as e:
-        print("❌ Fehler beim Senden an X:", e)
-        return False
+        print(f"⚠️ History Fehler: {e}", flush=True)
+        current_history = None
+
+    try:
+        news = get_dfi_news()
+    except Exception as e:
+        print(f"⚠️ News Fehler: {e}", flush=True)
+        news = None
+
+    # 5. Daily Insight
+    try:
+        daily_insight = generate_daily_insight(language)
+    except Exception as e:
+        print(f"⚠️ Daily Insight Fehler: {e}", flush=True)
+        daily_insight = ""
+
+    intelligence["daily_insight"] = daily_insight
+
+    # 6. Vergleich
+    try:
+        dfi_change = float(market.get("dfi", {}).get("change", 0))
+    except Exception:
+        dfi_change = 0
+
+    try:
+        btc_change = float(global_crypto.get("bitcoin", {}).get("change", 0))
+    except Exception:
+        btc_change = 0
+
+    try:
+        eth_change = float(global_crypto.get("ethereum", {}).get("change", 0))
+    except Exception:
+        eth_change = 0
+
+    comparison = {
+        "bitcoin": btc_change,
+        "ethereum": eth_change,
+        "dfi": dfi_change,
+        "vs_btc": btc_change,
+        "vs_eth": eth_change
+    }
+
+    # 7. Charts & GIF generieren
+    try:
+        print("📊 Generiere Charts für Bot-Outputs...", flush=True)
+        generate_all_charts(
+            market=market,
+            tokenomics=tokenomics,
+            dusd=dusd,
+            intelligence=intelligence,
+            global_crypto=global_crypto
+        )
+        print("✅ Charts erfolgreich im Ordner outputs/ erstellt.", flush=True)
+    except Exception as e:
+        print(f"⚠️ Fehler beim Generieren der Charts: {e}", flush=True)
+
+    # 8. Report Formatter
+    try:
+        from modules.report_formatter import create_report
+        report = create_report(
+            market, tokenomics, dusd, community, network,
+            intelligence, daily_insight, current_history,
+            global_crypto, comparison, news=news, language=language
+        )
+    except Exception as e:
+        print(f"⚠️ Report Fehler: {e}", flush=True)
+        report = None
+
+    # 9. Outputs versenden
+    # Telegram
+    try:
+        if report:
+            send_telegram(report)
+            print("📨 Telegram erfolgreich gesendet", flush=True)
+    except Exception as e:
+        print(f"⚠️ Telegram Fehler: {e}", flush=True)
+
+    # Discord
+    try:
+        send_discord(market, network, comparison, news)
+        print("💬 Discord erfolgreich gesendet", flush=True)
+    except Exception as e:
+        print(f"⚠️ Discord Fehler: {e}", flush=True)
+
+    # X (Twitter) Thread
+    try:
+        send_x_thread(
+            report, tokenomics, dusd, network,
+            intelligence, current_history, global_crypto, market
+        )
+        print("🐦 X Thread erfolgreich ausgeführt", flush=True)
+    except Exception as e:
+        print(f"⚠️ X Fehler: {e}", flush=True)
+
+    print("✅ v5 Report vollständig gesendet!", flush=True)
+
+
+# ======================================
+# EINSTIEGSPUNKT MIT FEHLER-CATCHER
+# ======================================
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as err:
+        print(f"❌ KRITISCHER FEHLER IM BOT-SKRIPT: {err}", flush=True)
+        traceback.print_exc()
+        sys.exit(1)
