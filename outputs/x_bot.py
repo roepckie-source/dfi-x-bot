@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (Fully Fixed)
+# X Thread Bot (Supply & Split-Thread)
 # ======================================
 
 import os
@@ -27,7 +27,7 @@ def format_price(value):
   try:
     val = float(value)
     if val <= 0:
-      return "0.003000"  # Absicherung
+      return "0.003000"
     if val < 0.01:
       return f"{val:.8f}"
     if val < 1:
@@ -40,7 +40,7 @@ def format_price(value):
 
 
 def format_large_number(value, suffix=""):
-  """Formatiert große Zahlen z. B. zu 412.50M oder 288.00K."""
+  """Formatiert große Zahlen z. B. zu 1.15B oder 829.00M."""
   if value is None or value == "" or value == "N/A":
     return "N/A"
 
@@ -141,26 +141,26 @@ def send_x_thread(
     dfi_price = dfi.get("price", 0)
     dfi_change = safe_float(dfi.get("change", 0))
 
-    # Tokenomics auslesen
-    burned_raw = tokenomics.get(
-        "burned_dfi", tokenomics.get("burned", 412500000.0)
-    )
-    minted_raw = tokenomics.get(
-        "daily_minted", tokenomics.get("minted", 288000.0)
-    )
+    # Tokenomics & Supply auslesen
+    burned_raw = tokenomics.get("burned_dfi", 412500000.0)
+    minted_raw = tokenomics.get("daily_minted", 288000.0)
+    total_supply_raw = tokenomics.get("total_supply", 1150000000.0)
+    circulating_raw = tokenomics.get("circulating_supply", 829000000.0)
 
     burned_dfi = format_large_number(burned_raw)
     daily_minted = format_large_number(minted_raw)
+    total_supply = format_large_number(total_supply_raw)
+    circulating_supply = format_large_number(circulating_raw)
 
     score = intelligence.get("total", 67)
     status = intelligence.get("status", "Stabil")
     daily_insight = intelligence.get("daily_insight", "")
 
-    header_title = lang.get("header_title", "🚀 DeFiChain Daily Intelligence")
+    header_title = lang.get("header_title", "🚀 DeFiChain Intelligence")
 
-    # ==================================
-    # TWEET 1: PREISE & TOKENOMICS
-    # ==================================
+    # ===================================================
+    # TWEET 1: MARKET OVERVIEW & SUPPLY (Unter 280 Zeichen)
+    # ===================================================
     post1 = f"""
 {header_title} ({language.upper()})
 
@@ -168,10 +168,8 @@ def send_x_thread(
 🌍 ETH: ${format_price(eth_price)} ({change_emoji(eth_change)}{safe_change(eth_change)}%)
 
 💎 DFI: ${format_price(dfi_price)} ({change_emoji(dfi_change)}{safe_change(dfi_change)}%)
-🔥 Burned: {burned_dfi} DFI
-🪙 Daily Minted: {daily_minted} DFI
-
-🧠 Score: {score}/100 ({status})
+📦 Total Supply: {total_supply} DFI
+💧 Circulating: {circulating_supply} DFI
 
 #DeFiChain #DFI
 """.strip()
@@ -182,44 +180,25 @@ def send_x_thread(
     result1 = client.create_tweet(text=post1)
     tweet1_id = result1.data["id"]
 
-    # ==================================
-    # TWEET 2: INSIGHTS & SCORE
-    # ==================================
+    # ===================================================
+    # TWEET 2: ON-CHAIN TOKENOMICS & SCORE (Reply auf Tweet 1)
+    # ===================================================
     post2 = f"""
+🔥 Burned: {burned_dfi} DFI
+🪙 Daily Minted: {daily_minted} DFI
+
 🧠 Score: {score}/100 ({status})
 
 💡 Daily Insight:
-
-{daily_insight}
+{daily_insight[:120]}
 """.strip()
 
     if len(post2) > 280:
       post2 = post2[:277] + "..."
 
-    result2 = client.create_tweet(
-        text=post2, in_reply_to_tweet_id=tweet1_id
-    )
-    tweet2_id = result2.data["id"]
+    client.create_tweet(text=post2, in_reply_to_tweet_id=tweet1_id)
 
-    # ==================================
-    # TWEET 3: NETWORK & NEWS
-    # ==================================
-    network_status = network.get("network_status", "🟢 Online")
-
-    post3 = f"""
-⛓ Network: {network_status}
-
-📰 Daily Update
-""".strip()
-
-    if isinstance(insight, str) and len(insight) > 0:
-      post3 += f"\n\n{insight[:180]}"
-
-    if len(post3) > 280:
-      post3 = post3[:277] + "..."
-
-    client.create_tweet(text=post3, in_reply_to_tweet_id=tweet2_id)
-
+    print("✅ Twitter Thread mit Supply erfolgreich gesendet!")
     return True
 
   except Exception as e:
