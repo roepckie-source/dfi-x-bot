@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (inkl. GIF Support)
+# X Thread Bot (inkl. PNG Image Support)
 # ======================================
 
 import os
@@ -147,7 +147,7 @@ def send_x_thread(
         client, api_v1 = get_clients()
 
         if client is None or api_v1 is None:
-            print("⚠️ X (Twitter) API Keys fehlen.")
+            print("⚠️ X (Twitter) API Keys fehlen.", flush=True)
             return False
 
         language = detect_language(insight)
@@ -319,24 +319,30 @@ ${format_price(dfi_price)}
         tweet4_id = result4.data["id"]
 
         # ==================================
-        # TWEET 5: GIF VIA CHUNKED UPLOAD
+        # TWEET 5: BILD UPLOAD (PNG)
         # ==================================
-       try:
-    image_path = "outputs/daily_update.png"
+        try:
+            image_path = "outputs/daily_update.png"
 
-    if os.path.exists(image_path):
-        # Statisches PNG-Bild für Twitter hochladen
-        media = api_v1.media_upload(filename=image_path)
+            if os.path.exists(image_path):
+                # Statisches PNG-Bild für Twitter hochladen
+                media = api_v1.media_upload(filename=image_path)
 
-        post5 = "📊 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
-        result5 = client.create_tweet(
-            text=post5,
-            media_ids=[media.media_id],
-            in_reply_to_tweet_id=tweet4_id
-        )
-        print("X Tweet 5 (Bild) gesendet:", result5.data["id"], flush=True)
-    else:
-        print(f"⚠️ Bild nicht gefunden unter: {image_path}", flush=True)
+                post5 = "📊 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
+                result5 = client.create_tweet(
+                    text=post5,
+                    media_ids=[media.media_id],
+                    in_reply_to_tweet_id=tweet4_id
+                )
+                print("X Tweet 5 (Bild) gesendet:", result5.data["id"], flush=True)
+            else:
+                print(f"⚠️ Bild nicht gefunden unter: {image_path}", flush=True)
 
-except Exception as img_error:
-    print("⚠️ Fehler beim Bild-Upload auf X:", img_error, flush=True)
+        except Exception as img_error:
+            print("⚠️ Fehler beim Bild-Upload auf X:", img_error, flush=True)
+
+        return True
+
+    except Exception as e:
+        print(f"❌ Fehler bei send_x_thread: {e}", flush=True)
+        return False
