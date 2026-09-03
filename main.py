@@ -13,13 +13,15 @@ from news import get_dfi_news
 
 
 def get_robust_dfi_data():
-  """Holt DFI-Preis und Tokenomics mit automatischer Fallback-Kaskade."""
+  """Holt DFI-Preis, Tokenomics und Supply-Metriken mit automatischer Fallback-Kaskade."""
   headers = {"User-Agent": "Mozilla/5.0"}
   data = {
       "price_usd": None,
       "price_change_24h": 0.0,
       "burned_dfi": 0.0,
       "daily_minted": 0.0,
+      "total_supply": 0.0,
+      "circulating_supply": 0.0,
   }
 
   # 1. Primary: Ocean API Stats
@@ -31,9 +33,11 @@ def get_robust_dfi_data():
     ).json()
     stats_data = stats_res.get("data", {})
 
-    data["burned_dfi"] = float(
-        stats_data.get("tokens", {}).get("supply", {}).get("burned", 0)
-    )
+    supply_data = stats_data.get("tokens", {}).get("supply", {})
+    data["burned_dfi"] = float(supply_data.get("burned", 0))
+    data["total_supply"] = float(supply_data.get("total", 0))
+    data["circulating_supply"] = float(supply_data.get("circulating", 0))
+
     data["daily_minted"] = float(
         stats_data.get("emission", {}).get("total", 0)
     )
@@ -97,6 +101,10 @@ def get_robust_dfi_data():
     data["burned_dfi"] = 412500000.0  # Aktueller ca. Burn-Stand
   if data["daily_minted"] <= 0:
     data["daily_minted"] = 288000.0  # Tägliche Block-Rewards
+  if data["total_supply"] <= 0:
+    data["total_supply"] = 1150000000.0  # Ca. 1.15B DFI Total Supply
+  if data["circulating_supply"] <= 0:
+    data["circulating_supply"] = 829000000.0  # Ca. 829M DFI Circulating
 
   return data
 
@@ -140,6 +148,8 @@ def main():
   tokenomics_data = {
       "burned_dfi": robust_dfi["burned_dfi"],
       "daily_minted": robust_dfi["daily_minted"],
+      "total_supply": robust_dfi["total_supply"],
+      "circulating_supply": robust_dfi["circulating_supply"],
   }
 
   # ==========================
@@ -175,6 +185,8 @@ def main():
 💎 Price: ${dfi_price:.6f}
 📊 24h Change: {dfi_signal} {dfi_change:.2f}%
 
+📦 Total Supply: {robust_dfi['total_supply']:,.0f} DFI
+💧 Circulating: {robust_dfi['circulating_supply']:,.0f} DFI
 🔥 Burned: {robust_dfi['burned_dfi']:,.0f} DFI
 🪙 Minted: {robust_dfi['daily_minted']:,.0f} DFI
 
