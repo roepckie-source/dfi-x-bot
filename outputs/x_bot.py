@@ -1,169 +1,627 @@
+# ======================================
+# DeFiChain Intelligence v5
+# X Thread Bot
+# ======================================
+
 import os
+import re
 import tweepy
 
+from modules.language import load_language
 
-def get_twitter_client():
-    """Initialisiert den Twitter API v2 Client über Environment Variables."""
+
+# ======================================
+# FORMAT HELFER
+# ======================================
+
+def safe_float(value, default=0.0):
     try:
-        client = tweepy.Client(
-            bearer_token=os.getenv("TWITTER_BEARER_TOKEN"),
-            consumer_key=os.getenv("TWITTER_API_KEY"),
-            consumer_secret=os.getenv("TWITTER_API_SECRET"),
-            access_token=os.getenv("TWITTER_ACCESS_TOKEN"),
-            access_token_secret=os.getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-        )
-        return client
-    except Exception as e:
-        print(f"⚠️ Fehler beim Initialisieren des Twitter Clients: {e}")
-        return None
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 
-def format_large_number(num):
-    """Formatiert große Zahlen in kompakte Strings (z.B. 1.15B, 829.00M, 288.0K)."""
-    if not isinstance(num, (int, float)):
-        return "0"
-    if num >= 1_000_000_000:
-        return f"{num / 1_000_000_000:.2f}B"
-    elif num >= 1_000_000:
-        return f"{num / 1_000_000:.2f}M"
-    elif num >= 1_000:
-        return f"{num / 1_000:.1f}K"
-    return f"{num:.2f}"
+def safe_change(value):
+    try:
+        return f"{float(value):.2f}"
+    except (TypeError, ValueError):
+        return "0.00"
 
 
-def safe_truncate(text: str, max_chars: int) -> str:
-    """Kürzt einen Text auf max_chars an der letzten Wortgrenze und fügt '...' an."""
-    if not isinstance(text, str) or len(text) <= max_chars:
-        return text or ""
+def format_price(value):
+    try:
+        value = float(value)
 
-    truncated = text[: max_chars - 3]
+        if value < 0.01:
+            return f"{value:.8f}"
+
+        if value < 1:
+            return f"{value:.6f}"
+
+        return f"{value:,.2f}"
+
+    except (TypeError, ValueError):
+        return "N/A"
+
+
+def change_emoji(value):
+    return "🟢" if safe_float(value) >= 0 else "🔴"
+
+
+def safe_truncate(text, max_chars=280):
+    if not isinstance(text, str):
+        return ""
+
+    text = text.strip()
+
+    if len(text) <= max_chars:
+        return text
+
+    truncated = text[:max_chars - 3]
+
     if " " in truncated:
         truncated = truncated.rsplit(" ", 1)[0]
+
     return truncated + "..."
 
 
+# ======================================
+# X CLIENT
+# ======================================
+
+def get_twitter_client():
+
+    try:
+
+        api_key = os.getenv("X_API_KEY")
+        api_secret = os.getenv("X_API_SECRET")
+        access_token = os.getenv("X_ACCESS_TOKEN")
+        access_token_secret = os.getenv(
+            "X_ACCESS_TOKEN_SECRET"
+        )
+
+        if not all([
+            api_key,
+            api_secret,
+            access_token,
+            access_token_secret
+        ]):
+
+            print(
+                "⚠️ X API Zugangsdaten fehlen."
+            )
+
+            return None
+
+        return tweepy.Client(
+
+            consumer_key=api_key,
+
+            consumer_secret=api_secret,
+
+            access_token=access_token,
+
+            access_token_secret=access_token_secret
+
+        )
+
+    except Exception as e:
+
+        print(
+            "⚠️ Fehler beim Initialisieren "
+            f"des X Clients: {e}"
+        )
+
+        return None
+
+
+# ======================================
+# SPRACHE ERKENNEN
+# ======================================
+
+def detect_language(report):
+
+    if isinstance(report, str):
+
+        match = re.search(
+            r"\(([A-Z]{2})\)",
+            report
+        )
+
+        if match:
+
+            return match.group(1).lower()
+
+    return os.getenv(
+        "APP_LANG",
+        "de"
+    )
+
+
+# ======================================
+# X THREAD
+# ======================================
+
 def send_x_thread(
-    insight="",
+    report="",
     tokenomics=None,
     dusd=None,
     network=None,
     intelligence=None,
+    current_history=None,
     global_crypto=None,
-    market=None,
+    market=None
 ):
-    """Erstellt und sendet einen sauberen 3-Tweet Thread an Twitter/X."""
-    client = get_twitter_client()
-    if not client:
-        print("❌ Twitter Client nicht verfügbar. Abbruch.")
-        return
 
-    tokenomics = tokenomics or {}
-    network = network or {}
-    intelligence = intelligence or {}
-    market = market or {}
+    try:
 
-    # ===================================================
-    # METRIKEN AUFBEREITEN
-    # ===================================================
-    btc_price = market.get("btc_price", 0)
-    btc_change = market.get("btc_change", 0)
-    btc_signal = "🟢" if btc_change >= 0 else "🔴"
+        # ==================================
+        # CLIENT
+        # ==================================
 
-    eth_price = market.get("eth_price", 0)
-    eth_change = market.get("eth_change", 0)
-    eth_signal = "🟢" if eth_change >= 0 else "🔴"
+        client = get_twitter_client()
 
-    dfi_price = market.get("dfi_price", 0)
-    dfi_change = market.get("dfi_change", 0)
-    dfi_signal = "🟢" if dfi_change >= 0 else "🔴"
+        if client is None:
 
-    total_sup = format_large_number(tokenomics.get("total_supply", 0))
-    circ_sup = format_large_number(tokenomics.get("circulating_supply", 0))
-    burned_dfi = format_large_number(tokenomics.get("burned_dfi", 0))
-    daily_minted = format_large_number(tokenomics.get("daily_minted", 0))
+            return False
 
-    score = intelligence.get("score", 50)
-    status = intelligence.get("status", "Neutral")
-    daily_insight = intelligence.get(
-        "insight", "Netzwerkdaten werden überwacht."
-    )
 
-    # ===================================================
-    # TWEET 1: MAIN MARKET OVERVIEW
-    # ===================================================
-    post1 = f"""
-🚀 DeFiChain Intelligence (EN)
+        # ==================================
+        # FALLBACKS
+        # ==================================
 
-🌍 BTC: ${btc_price:,.2f} ({btc_signal}{btc_change:.2f}%)
-🌍 ETH: ${eth_price:,.2f} ({eth_signal}{eth_change:.2f}%)
+        tokenomics = (
+            tokenomics
+            if isinstance(tokenomics, dict)
+            else {}
+        )
 
-💎 DFI: ${dfi_price:.6f} ({dfi_signal}{dfi_change:.2f}%)
-📦 Total Supply: {total_sup} DFI
-💧 Circulating: {circ_sup} DFI
+        network = (
+            network
+            if isinstance(network, dict)
+            else {}
+        )
+
+        intelligence = (
+            intelligence
+            if isinstance(intelligence, dict)
+            else {}
+        )
+
+        global_crypto = (
+            global_crypto
+            if isinstance(global_crypto, dict)
+            else {}
+        )
+
+        market = (
+            market
+            if isinstance(market, dict)
+            else {}
+        )
+
+
+        # ==================================
+        # SPRACHE
+        # ==================================
+
+        language = detect_language(
+            report
+        )
+
+        lang = load_language(
+            language
+        )
+
+
+        # ==================================
+        # FLAGGENKETTE
+        # ==================================
+
+        flags = (
+            "🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 "
+            "🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 "
+            "🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 "
+            "🇵🇹 🇷🇺 🇸🇦"
+        )
+
+
+        # ==================================
+        # MARKTDATEN
+        # ==================================
+
+        btc = global_crypto.get(
+            "bitcoin",
+            {}
+        )
+
+        eth = global_crypto.get(
+            "ethereum",
+            {}
+        )
+
+        dfi = market.get(
+            "dfi",
+            {}
+        )
+
+
+        btc_price = btc.get(
+            "price",
+            "N/A"
+        )
+
+        btc_change = safe_float(
+            btc.get(
+                "change",
+                0
+            )
+        )
+
+
+        eth_price = eth.get(
+            "price",
+            "N/A"
+        )
+
+        eth_change = safe_float(
+            eth.get(
+                "change",
+                0
+            )
+        )
+
+
+        dfi_price = dfi.get(
+            "price",
+            dfi.get(
+                "usd",
+                "N/A"
+            )
+        )
+
+        dfi_change = safe_float(
+            dfi.get(
+                "change",
+                0
+            )
+        )
+
+
+        # ==================================
+        # INTELLIGENCE
+        # ==================================
+
+        score = intelligence.get(
+            "total",
+            intelligence.get(
+                "score",
+                0
+            )
+        )
+
+        status = intelligence.get(
+            "status",
+            "N/A"
+        )
+
+        daily_insight = intelligence.get(
+            "daily_insight",
+            ""
+        )
+
+
+        # ==================================
+        # SPRACH-TEXTE
+        # ==================================
+
+        header_title = lang.get(
+            "header_title",
+            "🚀 DeFiChain Intelligence"
+        )
+
+        global_title = lang.get(
+            "global_crypto",
+            "Global Crypto"
+        )
+
+        intelligence_title = lang.get(
+            "intelligence",
+            "Intelligence Score"
+        )
+
+        network_title = lang.get(
+            "network",
+            "Network"
+        )
+
+        news_title = lang.get(
+            "news",
+            "News"
+        )
+
+        history_title = lang.get(
+            "history",
+            "History"
+        )
+
+
+        # ==================================
+        # TWEET 1
+        # GLOBAL CRYPTO + DFI
+        # ==================================
+
+        post1 = f"""
+{header_title} ({language.upper()})
+
+🌍 {flags}
+
+🌍 {global_title}
+
+₿ Bitcoin:
+${format_price(btc_price)}
+{change_emoji(btc_change)} {safe_change(btc_change)}%
+
+Ξ Ethereum:
+${format_price(eth_price)}
+{change_emoji(eth_change)} {safe_change(eth_change)}%
+
+💎 DeFiChain DFI
+
+Price:
+${format_price(dfi_price)}
+
+24h:
+{change_emoji(dfi_change)} {safe_change(dfi_change)}%
 
 #DeFiChain #DFI
 """.strip()
 
-    if len(post1) > 280:
-        post1 = safe_truncate(post1, 280)
 
-    try:
-        result1 = client.create_tweet(text=post1)
+        post1 = safe_truncate(
+            post1,
+            280
+        )
+
+
+        print(
+            "DEBUG Tweet 1:"
+        )
+
+        print(post1)
+
+
+        # ==================================
+        # SEND TWEET 1
+        # ==================================
+
+        result1 = client.create_tweet(
+            text=post1
+        )
+
         tweet1_id = result1.data["id"]
-        print(f"✅ Tweet 1 erfolgreich gesendet! (ID: {tweet1_id})")
-    except Exception as e:
-        print(f"❌ Fehler beim Senden von Tweet 1: {e}")
-        return
 
-    # ===================================================
-    # TWEET 2: ON-CHAIN TOKENOMICS & SHORT INSIGHT
-    # ===================================================
-    insight_snippet = safe_truncate(daily_insight, 90)
+        print(
+            "✅ X Tweet 1 gesendet:",
+            tweet1_id
+        )
 
-    post2 = f"""
-🔥 Burned: {burned_dfi} DFI
-🪙 Daily Minted: {daily_minted} DFI
 
-🧠 Score: {score}/100 ({status})
+        # ==================================
+        # TWEET 2
+        # INTELLIGENCE
+        # ==================================
+
+        post2 = f"""
+🧠 {intelligence_title}
+
+⭐ {score}/100
+{status}
 
 💡 Daily Insight:
-{insight_snippet}
+
+{daily_insight}
+
+#DeFiChain #DFI
 """.strip()
 
-    if len(post2) > 280:
-        post2 = safe_truncate(post2, 280)
 
-    try:
-        result2 = client.create_tweet(
-            text=post2, in_reply_to_tweet_id=tweet1_id
+        post2 = safe_truncate(
+            post2,
+            280
         )
+
+
+        print(
+            "DEBUG Tweet 2:"
+        )
+
+        print(post2)
+
+
+        # ==================================
+        # SEND TWEET 2
+        # ==================================
+
+        result2 = client.create_tweet(
+
+            text=post2,
+
+            in_reply_to_tweet_id=tweet1_id
+
+        )
+
         tweet2_id = result2.data["id"]
-        print(f"✅ Tweet 2 erfolgreich gesendet! (ID: {tweet2_id})")
-    except Exception as e:
-        print(f"❌ Fehler beim Senden von Tweet 2: {e}")
-        return
 
-    # ===================================================
-    # TWEET 3: NETWORK STATUS & FULL DAILY NEWS
-    # ===================================================
-    network_status = network.get("network_status", "🟢 Online")
-    news_text = insight if isinstance(insight, str) else ""
-    news_snippet = safe_truncate(news_text, 130)
+        print(
+            "✅ X Tweet 2 gesendet:",
+            tweet2_id
+        )
 
-    post3 = f"""
-⛓ Network: {network_status}
 
-📰 Daily Update:
-{news_snippet}
+        # ==================================
+        # TWEET 3
+        # NETWORK + NEWS
+        # ==================================
 
-#DeFiChain
+        network_status = network.get(
+            "network_status",
+            "🟢 Online"
+        )
+
+
+        # News aus dem Report extrahieren
+        news_text = ""
+
+        if isinstance(report, str):
+
+            match = re.search(
+                r"📰\s*News:\s*(.+?)(?:\n\n|📚|$)",
+                report,
+                re.DOTALL
+            )
+
+            if match:
+
+                news_text = (
+                    match.group(1)
+                    .strip()
+                )
+
+
+        post3 = f"""
+⛓ {network_title}
+
+{network_status}
+
+📰 {news_title}
+
+{news_text if news_text else "DeFiChain Daily Update"}
+
+#DeFiChain #DFI
 """.strip()
 
-    if len(post3) > 280:
-        post3 = safe_truncate(post3, 280)
 
-    try:
-        client.create_tweet(text=post3, in_reply_to_tweet_id=tweet2_id)
-        print("✅ Tweet 3 erfolgreich gesendet! Thread komplett.")
+        post3 = safe_truncate(
+            post3,
+            280
+        )
+
+
+        print(
+            "DEBUG Tweet 3:"
+        )
+
+        print(post3)
+
+
+        # ==================================
+        # SEND TWEET 3
+        # ==================================
+
+        result3 = client.create_tweet(
+
+            text=post3,
+
+            in_reply_to_tweet_id=tweet2_id
+
+        )
+
+        tweet3_id = result3.data["id"]
+
+        print(
+            "✅ X Tweet 3 gesendet:",
+            tweet3_id
+        )
+
+
+        # ==================================
+        # TWEET 4
+        # HISTORY
+        # ==================================
+
+        history_name = "DeFiChain Update"
+        history_text = ""
+
+        if isinstance(
+            current_history,
+            dict
+        ):
+
+            history_name = current_history.get(
+                "title",
+                "DeFiChain Update"
+            )
+
+            history_text = current_history.get(
+                "text",
+                current_history.get(
+                    "content",
+                    ""
+                )
+            )
+
+
+        post4 = f"""
+📚 {history_title}
+
+{history_name}
+
+{history_text}
+
+#DeFiChain #DFI
+""".strip()
+
+
+        post4 = safe_truncate(
+            post4,
+            280
+        )
+
+
+        print(
+            "DEBUG Tweet 4:"
+        )
+
+        print(post4)
+
+
+        # ==================================
+        # SEND TWEET 4
+        # ==================================
+
+        result4 = client.create_tweet(
+
+            text=post4,
+
+            in_reply_to_tweet_id=tweet3_id
+
+        )
+
+
+        print(
+            "✅ X Tweet 4 gesendet:",
+            result4.data["id"]
+        )
+
+
+        # ==================================
+        # ERFOLG
+        # ==================================
+
+        print(
+            "🎉 X Thread erfolgreich gesendet!"
+        )
+
+        return True
+
+
     except Exception as e:
-        print(f"❌ Fehler beim Senden von Tweet 3: {e}")
+
+        print(
+            "❌ X Fehler:"
+        )
+
+        print(e)
+
+        return False
