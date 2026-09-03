@@ -22,9 +22,6 @@ def main():
     network = get_network_data()
     news = get_dfi_news()
 
-    print("DEBUG market data:", market)
-    print("DEBUG network data:", network)
-
     # ==========================
     # Vergleich & Discord
     # ==========================
@@ -38,6 +35,11 @@ def main():
     btc = market.get("bitcoin", market.get("btc", {}))
     eth = market.get("ethereum", market.get("eth", {}))
 
+    # Robuste Preiserfassung
+    dfi_price = dfi.get("usd", dfi.get("price", dfi.get("usd_price", 0)))
+    btc_price = btc.get("usd", btc.get("price", 0))
+    eth_price = eth.get("usd", eth.get("price", 0))
+
     dfi_change = dfi.get("usd_24h_change", dfi.get("change", 0))
     btc_change = btc.get("usd_24h_change", btc.get("change", 0))
     eth_change = eth.get("usd_24h_change", eth.get("change", 0))
@@ -46,18 +48,18 @@ def main():
     btc_signal = "🟢" if btc_change >= 0 else "🔴"
     eth_signal = "🟢" if eth_change >= 0 else "🔴"
 
-    # Standardisiertes Market-Dict für den X-Bot aufbauen
+    # Standardisiertes Dict für den X-Bot
     formatted_market_data = {
         "bitcoin": {
-            "price": btc.get("usd", btc.get("price", 0)),
+            "price": btc_price,
             "change": btc_change
         },
         "ethereum": {
-            "price": eth.get("usd", eth.get("price", 0)),
+            "price": eth_price,
             "change": eth_change
         },
         "dfi": {
-            "price": dfi.get("usd", dfi.get("price", 0)),
+            "price": dfi_price,
             "change": dfi_change
         }
     }
@@ -71,12 +73,14 @@ def main():
         for k, v in data.items():
             if str(k).lower() in keys:
                 try:
-                    return float(v)
+                    val = float(v)
+                    if val > 0:
+                        return val
                 except (ValueError, TypeError):
                     pass
             if isinstance(v, dict):
                 res = extract_val(v, keys, None)
-                if res is not None:
+                if res is not None and res > 0:
                     return res
         return default
 
@@ -90,7 +94,7 @@ def main():
     total_burned = extract_val(
         network, ["total", "burned", "total_burned", "burned_dfi", "amount"]
     )
-    if total_burned == 0:
+    if total_burned <= 0:
         total_burned = address_burn + fee_burn + auction_burn + payback_burn
 
     # Daily Emission
@@ -98,11 +102,11 @@ def main():
         network, ["emission", "daily_minted", "minted", "daily_emission", "block_reward"]
     )
 
-    # Hard-Fallbacks, falls Network-API 0 oder None schickt
-    if total_burned == 0:
-        total_burned = 412500000.0
-    if emission == 0:
-        emission = 288000.0
+    # Garantierte Netzwerk-Fallbacks, falls die Ocean-API leere Werte schickt
+    if total_burned <= 0:
+        total_burned = 412500000.0  # Ca. DFI Burn-Stand
+    if emission <= 0:
+        emission = 288000.0        # Ca. tägliche Emission
 
     net_change = emission - total_burned
     token_status = f"🔴 Inflationär\n+{net_change:,.2f} DFI" if net_change > 0 else f"🟢 Deflationär\n{net_change:,.2f} DFI"
@@ -124,7 +128,7 @@ def main():
     }
 
     # ==========================
-    # Network Report (Telegram Text)
+    # Network Report
     # ==========================
     network_message = f"""
 🌐 <b>Network & Tokenomics</b>
@@ -205,7 +209,7 @@ ${dusd.get('price', 'N/A')}
 💰 <b>DFI Market</b>
 
 💎 Price
-🇺🇸 ${dfi.get('usd', 0):.8f}
+🇺🇸 ${dfi_price:.8f}
 🇪🇺 €{dfi.get('eur', 0):.8f}
 
 📊 24h Change
