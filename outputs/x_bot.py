@@ -31,6 +31,17 @@ def format_large_number(num):
     return f"{num:.2f}"
 
 
+def safe_truncate(text: str, max_chars: int) -> str:
+    """Kürzt einen Text auf max_chars an der letzten Wortgrenze und fügt '...' an."""
+    if not isinstance(text, str) or len(text) <= max_chars:
+        return text or ""
+
+    truncated = text[: max_chars - 3]
+    if " " in truncated:
+        truncated = truncated.rsplit(" ", 1)[0]
+    return truncated + "..."
+
+
 def send_x_thread(
     insight="",
     tokenomics=None,
@@ -93,9 +104,8 @@ def send_x_thread(
 #DeFiChain #DFI
 """.strip()
 
-    # Safety-Cutoff für Tweet 1
     if len(post1) > 280:
-        post1 = post1[:277] + "..."
+        post1 = safe_truncate(post1, 280)
 
     try:
         result1 = client.create_tweet(text=post1)
@@ -108,12 +118,7 @@ def send_x_thread(
     # ===================================================
     # TWEET 2: ON-CHAIN TOKENOMICS & SHORT INSIGHT
     # ===================================================
-    # Insight dynamisch kürzen, damit Tweet 2 nie > 280 Zeichen wird
-    insight_snippet = (
-        daily_insight
-        if len(daily_insight) <= 100
-        else daily_insight[:97] + "..."
-    )
+    insight_snippet = safe_truncate(daily_insight, 90)
 
     post2 = f"""
 🔥 Burned: {burned_dfi} DFI
@@ -126,7 +131,7 @@ def send_x_thread(
 """.strip()
 
     if len(post2) > 280:
-        post2 = post2[:277] + "..."
+        post2 = safe_truncate(post2, 280)
 
     try:
         result2 = client.create_tweet(
@@ -143,11 +148,7 @@ def send_x_thread(
     # ===================================================
     network_status = network.get("network_status", "🟢 Online")
     news_text = insight if isinstance(insight, str) else ""
-
-    # News dynamisch kürzen, um Platz für Header und Hashtag zu garantieren
-    news_snippet = (
-        news_text if len(news_text) <= 140 else news_text[:137] + "..."
-    )
+    news_snippet = safe_truncate(news_text, 130)
 
     post3 = f"""
 ⛓ Network: {network_status}
@@ -159,7 +160,7 @@ def send_x_thread(
 """.strip()
 
     if len(post3) > 280:
-        post3 = post3[:277] + "..."
+        post3 = safe_truncate(post3, 280)
 
     try:
         client.create_tweet(text=post3, in_reply_to_tweet_id=tweet2_id)
