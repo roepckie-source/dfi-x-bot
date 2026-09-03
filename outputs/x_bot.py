@@ -27,6 +27,8 @@ def safe_change(value):
 def format_price(value):
     try:
         val = float(value)
+        if val <= 0:
+            return "N/A"
         if val < 0.01:
             return f"{val:.8f}"
         if val < 1:
@@ -56,6 +58,9 @@ def format_large_number(value, suffix=""):
             val = float(value)
         except (ValueError, TypeError):
             return "N/A"
+
+    if val <= 0:
+        return "N/A"
 
     if val >= 1_000_000_000:
         return f"{val / 1_000_000_000:.2f}B{suffix}"
@@ -151,7 +156,7 @@ def send_x_thread(
         dfi_price = dfi.get("price", "N/A")
         dfi_change = safe_float(dfi.get("change", 0))
 
-        # Tokenomics garantiert auslesen
+        # Tokenomics auslesen
         burned_raw = tokenomics.get("burned_dfi", tokenomics.get("burned", 0))
         minted_raw = tokenomics.get("daily_minted", tokenomics.get("minted", 0))
 
