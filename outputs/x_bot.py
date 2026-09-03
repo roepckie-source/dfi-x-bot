@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (Optimiert & Ohne Bild)
+# X Thread Bot (Optimiert)
 # ======================================
 
 import os
@@ -9,10 +9,6 @@ import tweepy
 
 from modules.language import load_language
 
-
-# ======================================
-# FORMAT HELFER
-# ======================================
 
 def safe_float(value, default=0.0):
     try:
@@ -30,36 +26,30 @@ def safe_change(value):
 
 def format_price(value):
     try:
-        value = float(value)
-        if value < 0.01:
-            return f"{value:.8f}"
-        if value < 1:
-            return f"{value:.6f}"
-        if value < 100:
-            return f"{value:.2f}"
-        return f"{value:,.2f}"
+        val = float(value)
+        if val < 0.01:
+            return f"{val:.8f}"
+        if val < 1:
+            return f"{val:.6f}"
+        if val < 100:
+            return f"{val:.2f}"
+        return f"{val:,.2f}"
     except (TypeError, ValueError):
         return "N/A"
 
 
 def format_large_number(value, suffix=""):
-    """
-    Robustes Formatieren von Zahlen.
-    Verarbeitet Int, Float sowie formatierte Strings mit Kommas/Punkten.
-    """
+    """Formatierte Zahlen wie 412.50M oder 288.00K ausgeben."""
     if value is None or value == "":
         return "N/A"
 
-    # Falls der Wert schon als fertiger String vorformatiert ist (z.B. "N/A" oder bereits "1.2M")
     if isinstance(value, str):
         if value.strip().upper() == "N/A":
             return "N/A"
-        # Säubere Zeichen wie Kommas und 'DFI' für die Float-Konvertierung
-        cleaned_val = value.replace(",", "").replace("DFI", "").strip()
+        cleaned = value.replace(",", "").replace("DFI", "").strip()
         try:
-            val = float(cleaned_val)
+            val = float(cleaned)
         except ValueError:
-            # Falls es ein Reinstext-String ist, gib ihn einfach so zurück
             return value
     else:
         try:
@@ -67,14 +57,13 @@ def format_large_number(value, suffix=""):
         except (ValueError, TypeError):
             return "N/A"
 
-    # Zahlen abkürzen (B / M / K)
     if val >= 1_000_000_000:
         return f"{val / 1_000_000_000:.2f}B{suffix}"
     if val >= 1_000_000:
         return f"{val / 1_000_000:.2f}M{suffix}"
     if val >= 1_000:
         return f"{val / 1_000:.1f}K{suffix}"
-    
+
     return f"{val:,.2f}{suffix}"
 
 
@@ -85,10 +74,6 @@ def change_emoji(value):
         return "⚪"
 
 
-# ======================================
-# SPRACHE ERKENNEN
-# ======================================
-
 def detect_language(insight):
     if isinstance(insight, str):
         match = re.search(r"\(([A-Z]{2})\)", insight)
@@ -96,10 +81,6 @@ def detect_language(insight):
             return match.group(1).lower()
     return os.getenv("APP_LANG", "de")
 
-
-# ======================================
-# CLIENTS (v2 & v1.1)
-# ======================================
 
 def get_clients():
     api_key = os.getenv("X_API_KEY")
@@ -118,19 +99,12 @@ def get_clients():
     )
 
     auth = tweepy.OAuth1UserHandler(
-        api_key, 
-        api_secret, 
-        access_token, 
-        access_token_secret
+        api_key, api_secret, access_token, access_token_secret
     )
     api_v1 = tweepy.API(auth)
 
     return client_v2, api_v1
 
-
-# ======================================
-# X THREAD MAIN FUNCTION
-# ======================================
 
 def send_x_thread(
     insight,
@@ -142,7 +116,6 @@ def send_x_thread(
     global_crypto=None,
     market=None
 ):
-
     try:
         client, api_v1 = get_clients()
 
@@ -164,7 +137,7 @@ def send_x_thread(
         if not isinstance(tokenomics, dict):
             tokenomics = {}
 
-        # Markt-Daten
+        # Markt-Daten extrahieren
         btc = global_crypto.get("bitcoin", {})
         eth = global_crypto.get("ethereum", {})
         dfi = market.get("dfi", {})
@@ -175,31 +148,20 @@ def send_x_thread(
         eth_price = eth.get("price", "N/A")
         eth_change = safe_float(eth.get("change", 0))
 
-        dfi_price = dfi.get("price", dfi.get("usd", "N/A"))
+        dfi_price = dfi.get("price", "N/A")
         dfi_change = safe_float(dfi.get("change", 0))
 
-        # Flexible Tokenomics Key-Erkennung
-        burned_dfi_raw = (
-            tokenomics.get("burned_dfi") 
-            or tokenomics.get("burned") 
-            or tokenomics.get("total_burned") 
-            or tokenomics.get("dfi_burned")
-        )
-        daily_minted_raw = (
-            tokenomics.get("daily_minted") 
-            or tokenomics.get("minted_24h") 
-            or tokenomics.get("minted") 
-            or tokenomics.get("daily_emission")
-        )
+        # Tokenomics garantiert auslesen
+        burned_raw = tokenomics.get("burned_dfi", tokenomics.get("burned", 0))
+        minted_raw = tokenomics.get("daily_minted", tokenomics.get("minted", 0))
 
-        burned_dfi = format_large_number(burned_dfi_raw)
-        daily_minted = format_large_number(daily_minted_raw)
+        burned_dfi = format_large_number(burned_raw)
+        daily_minted = format_large_number(minted_raw)
 
         score = intelligence.get("total", "N/A")
         status = intelligence.get("status", "N/A")
         daily_insight = intelligence.get("daily_insight", "")
 
-        # Übersetzungen / Beschriftungen
         header_title = lang.get("header_title", "🚀 DeFiChain Daily Intelligence")
         intelligence_title = lang.get("intelligence", "🧠 Intelligence Score")
         network_title = lang.get("network", "Network")
@@ -207,7 +169,7 @@ def send_x_thread(
         history_title = lang.get("history", "History")
 
         # ==================================
-        # TWEET 1: PREISE & TOKENOMICS (~210 Zeichen)
+        # TWEET 1: PREISE & TOKENOMICS
         # ==================================
         post1 = f"""
 {header_title} ({language.upper()})
@@ -293,16 +255,9 @@ def send_x_thread(
         if current_history:
             history_id = current_history.get("id", "N/A")
             history_name = current_history.get("title", "DeFiChain Update")
-            history_text = current_history.get(
-                "text", 
-                current_history.get("content", "")
-            )
+            history_text = current_history.get("text", current_history.get("content", ""))
 
-            post4 += (
-                f"\n\nChapter {history_id}\n"
-                f"{history_name}\n\n"
-                f"{history_text[:140]}"
-            )
+            post4 += f"\n\nChapter {history_id}\n{history_name}\n\n{history_text[:140]}"
         else:
             post4 += "\n\nDeFiChain ecosystem update."
 
@@ -311,7 +266,7 @@ def send_x_thread(
         if len(post4) > 280:
             post4 = post4[:277] + "..."
 
-        result4 = client.create_tweet(
+        client.create_tweet(
             text=post4,
             in_reply_to_tweet_id=tweet3_id
         )
