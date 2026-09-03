@@ -43,17 +43,39 @@ def format_price(value):
 
 
 def format_large_number(value, suffix=""):
-    try:
-        val = float(value)
-        if val >= 1_000_000_000:
-            return f"{val / 1_000_000_000:.2f}B{suffix}"
-        if val >= 1_000_000:
-            return f"{val / 1_000_000:.2f}M{suffix}"
-        if val >= 1_000:
-            return f"{val / 1_000:.1f}K{suffix}"
-        return f"{val:,.2f}{suffix}"
-    except (ValueError, TypeError):
-        return str(value) if value else "N/A"
+    """
+    Robustes Formatieren von Zahlen.
+    Verarbeitet Int, Float sowie formatierte Strings mit Kommas/Punkten.
+    """
+    if value is None or value == "":
+        return "N/A"
+
+    # Falls der Wert schon als fertiger String vorformatiert ist (z.B. "N/A" oder bereits "1.2M")
+    if isinstance(value, str):
+        if value.strip().upper() == "N/A":
+            return "N/A"
+        # Säubere Zeichen wie Kommas und 'DFI' für die Float-Konvertierung
+        cleaned_val = value.replace(",", "").replace("DFI", "").strip()
+        try:
+            val = float(cleaned_val)
+        except ValueError:
+            # Falls es ein Reinstext-String ist, gib ihn einfach so zurück
+            return value
+    else:
+        try:
+            val = float(value)
+        except (ValueError, TypeError):
+            return "N/A"
+
+    # Zahlen abkürzen (B / M / K)
+    if val >= 1_000_000_000:
+        return f"{val / 1_000_000_000:.2f}B{suffix}"
+    if val >= 1_000_000:
+        return f"{val / 1_000_000:.2f}M{suffix}"
+    if val >= 1_000:
+        return f"{val / 1_000:.1f}K{suffix}"
+    
+    return f"{val:,.2f}{suffix}"
 
 
 def change_emoji(value):
@@ -170,8 +192,8 @@ def send_x_thread(
             or tokenomics.get("daily_emission")
         )
 
-        burned_dfi = format_large_number(burned_dfi_raw) if burned_dfi_raw else "N/A"
-        daily_minted = format_large_number(daily_minted_raw) if daily_minted_raw else "N/A"
+        burned_dfi = format_large_number(burned_dfi_raw)
+        daily_minted = format_large_number(daily_minted_raw)
 
         score = intelligence.get("total", "N/A")
         status = intelligence.get("status", "N/A")
