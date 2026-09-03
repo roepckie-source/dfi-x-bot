@@ -321,32 +321,22 @@ ${format_price(dfi_price)}
         # ==================================
         # TWEET 5: GIF VIA CHUNKED UPLOAD
         # ==================================
-        try:
-            gif_output_path = "outputs/daily_update.gif"
+       try:
+    image_path = "outputs/daily_update.png"
 
-            if os.path.exists(gif_output_path):
-                # Chunked Upload zwingend erforderlich für animierte GIFs
-                media = api_v1.chunked_upload(
-                    filename=gif_output_path,
-                    media_category="tweet_gif"
-                )
+    if os.path.exists(image_path):
+        # Statisches PNG-Bild für Twitter hochladen
+        media = api_v1.media_upload(filename=image_path)
 
-                post5 = "🎬 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
-                result5 = client.create_tweet(
-                    text=post5,
-                    media_ids=[media.media_id],
-                    in_reply_to_tweet_id=tweet4_id
-                )
-                print("X Tweet 5 (GIF) gesendet:", result5.data["id"])
-            else:
-                print(f"⚠️ GIF-Datei nicht gefunden: {gif_output_path}")
+        post5 = "📊 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
+        result5 = client.create_tweet(
+            text=post5,
+            media_ids=[media.media_id],
+            in_reply_to_tweet_id=tweet4_id
+        )
+        print("X Tweet 5 (Bild) gesendet:", result5.data["id"], flush=True)
+    else:
+        print(f"⚠️ Bild nicht gefunden unter: {image_path}", flush=True)
 
-        except Exception as gif_error:
-            print("⚠️ Fehler beim GIF-Upload:", gif_error)
-
-        print("🎉 X Thread erfolgreich gesendet!")
-        return True
-
-    except Exception as e:
-        print("❌ Fehler beim Senden an X:", e)
-        return False
+except Exception as img_error:
+    print("⚠️ Fehler beim Bild-Upload auf X:", img_error, flush=True)
