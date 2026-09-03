@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (Optimiert auf 280 Zeichen)
+# X Thread Bot (Optimiert & Ohne Bild)
 # ======================================
 
 import os
@@ -9,6 +9,10 @@ import tweepy
 
 from modules.language import load_language
 
+
+# ======================================
+# FORMAT HELFER
+# ======================================
 
 def safe_float(value, default=0.0):
     try:
@@ -59,6 +63,10 @@ def change_emoji(value):
         return "⚪"
 
 
+# ======================================
+# SPRACHE ERKENNEN
+# ======================================
+
 def detect_language(insight):
     if isinstance(insight, str):
         match = re.search(r"\(([A-Z]{2})\)", insight)
@@ -66,6 +74,10 @@ def detect_language(insight):
             return match.group(1).lower()
     return os.getenv("APP_LANG", "de")
 
+
+# ======================================
+# CLIENTS (v2 & v1.1)
+# ======================================
 
 def get_clients():
     api_key = os.getenv("X_API_KEY")
@@ -93,6 +105,10 @@ def get_clients():
 
     return client_v2, api_v1
 
+
+# ======================================
+# X THREAD MAIN FUNCTION
+# ======================================
 
 def send_x_thread(
     insight,
@@ -126,6 +142,7 @@ def send_x_thread(
         if not isinstance(tokenomics, dict):
             tokenomics = {}
 
+        # Markt-Daten
         btc = global_crypto.get("bitcoin", {})
         eth = global_crypto.get("ethereum", {})
         dfi = market.get("dfi", {})
@@ -139,16 +156,28 @@ def send_x_thread(
         dfi_price = dfi.get("price", dfi.get("usd", "N/A"))
         dfi_change = safe_float(dfi.get("change", 0))
 
-        burned_dfi_raw = tokenomics.get("burned_dfi", tokenomics.get("burned", "N/A"))
-        daily_minted_raw = tokenomics.get("daily_minted", tokenomics.get("minted_24h", "N/A"))
+        # Flexible Tokenomics Key-Erkennung
+        burned_dfi_raw = (
+            tokenomics.get("burned_dfi") 
+            or tokenomics.get("burned") 
+            or tokenomics.get("total_burned") 
+            or tokenomics.get("dfi_burned")
+        )
+        daily_minted_raw = (
+            tokenomics.get("daily_minted") 
+            or tokenomics.get("minted_24h") 
+            or tokenomics.get("minted") 
+            or tokenomics.get("daily_emission")
+        )
 
-        burned_dfi = format_large_number(burned_dfi_raw)
-        daily_minted = format_large_number(daily_minted_raw)
+        burned_dfi = format_large_number(burned_dfi_raw) if burned_dfi_raw else "N/A"
+        daily_minted = format_large_number(daily_minted_raw) if daily_minted_raw else "N/A"
 
         score = intelligence.get("total", "N/A")
         status = intelligence.get("status", "N/A")
         daily_insight = intelligence.get("daily_insight", "")
 
+        # Übersetzungen / Beschriftungen
         header_title = lang.get("header_title", "🚀 DeFiChain Daily Intelligence")
         intelligence_title = lang.get("intelligence", "🧠 Intelligence Score")
         network_title = lang.get("network", "Network")
