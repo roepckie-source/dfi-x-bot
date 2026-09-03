@@ -11,7 +11,7 @@ from modules.language import load_language
 
 
 # ======================================
-# FORMAT HELFER
+# HELFER
 # ======================================
 
 def safe_float(value, default=0.0):
@@ -44,11 +44,31 @@ def format_price(value):
         return "N/A"
 
 
+def format_large_number(value):
+    try:
+        value = float(value)
+
+        if value >= 1_000_000_000:
+            return f"{value / 1_000_000_000:.2f}B"
+
+        if value >= 1_000_000:
+            return f"{value / 1_000_000:.2f}M"
+
+        if value >= 1_000:
+            return f"{value / 1_000:.1f}K"
+
+        return f"{value:.2f}"
+
+    except (TypeError, ValueError):
+        return "N/A"
+
+
 def change_emoji(value):
     return "🟢" if safe_float(value) >= 0 else "🔴"
 
 
 def safe_truncate(text, max_chars=280):
+
     if not isinstance(text, str):
         return ""
 
@@ -87,22 +107,15 @@ def get_twitter_client():
             access_token_secret
         ]):
 
-            print(
-                "⚠️ X API Zugangsdaten fehlen."
-            )
+            print("⚠️ X API Zugangsdaten fehlen.")
 
             return None
 
         return tweepy.Client(
-
             consumer_key=api_key,
-
             consumer_secret=api_secret,
-
             access_token=access_token,
-
             access_token_secret=access_token_secret
-
         )
 
     except Exception as e:
@@ -116,7 +129,7 @@ def get_twitter_client():
 
 
 # ======================================
-# SPRACHE ERKENNEN
+# SPRACHE
 # ======================================
 
 def detect_language(report):
@@ -129,7 +142,6 @@ def detect_language(report):
         )
 
         if match:
-
             return match.group(1).lower()
 
     return os.getenv(
@@ -162,17 +174,22 @@ def send_x_thread(
         client = get_twitter_client()
 
         if client is None:
-
             return False
 
 
         # ==================================
-        # FALLBACKS
+        # DATEN ABSICHERN
         # ==================================
 
         tokenomics = (
             tokenomics
             if isinstance(tokenomics, dict)
+            else {}
+        )
+
+        dusd = (
+            dusd
+            if isinstance(dusd, dict)
             else {}
         )
 
@@ -205,13 +222,9 @@ def send_x_thread(
         # SPRACHE
         # ==================================
 
-        language = detect_language(
-            report
-        )
+        language = detect_language(report)
 
-        lang = load_language(
-            language
-        )
+        lang = load_language(language)
 
 
         # ==================================
@@ -252,10 +265,7 @@ def send_x_thread(
         )
 
         btc_change = safe_float(
-            btc.get(
-                "change",
-                0
-            )
+            btc.get("change", 0)
         )
 
 
@@ -265,10 +275,7 @@ def send_x_thread(
         )
 
         eth_change = safe_float(
-            eth.get(
-                "change",
-                0
-            )
+            eth.get("change", 0)
         )
 
 
@@ -281,10 +288,37 @@ def send_x_thread(
         )
 
         dfi_change = safe_float(
-            dfi.get(
-                "change",
-                0
-            )
+            dfi.get("change", 0)
+        )
+
+
+        # ==================================
+        # TOKENOMICS
+        # ==================================
+
+        total_supply = tokenomics.get(
+            "total_supply",
+            0
+        )
+
+        circulating_supply = tokenomics.get(
+            "circulating_supply",
+            0
+        )
+
+        burned_dfi = tokenomics.get(
+            "burned_dfi",
+            0
+        )
+
+        daily_minted = tokenomics.get(
+            "daily_minted",
+            0
+        )
+
+        net_burn = tokenomics.get(
+            "net_burn",
+            0
         )
 
 
@@ -307,7 +341,28 @@ def send_x_thread(
 
         daily_insight = intelligence.get(
             "daily_insight",
-            ""
+            intelligence.get(
+                "insight",
+                ""
+            )
+        )
+
+
+        # ==================================
+        # DUSD
+        # ==================================
+
+        dusd_price = dusd.get(
+            "price",
+            dusd.get(
+                "usd",
+                None
+            )
+        )
+
+        peg_deviation = dusd.get(
+            "peg_deviation",
+            None
         )
 
 
@@ -330,6 +385,11 @@ def send_x_thread(
             "Intelligence Score"
         )
 
+        tokenomics_title = lang.get(
+            "tokenomics",
+            "Tokenomics"
+        )
+
         network_title = lang.get(
             "network",
             "Network"
@@ -348,7 +408,7 @@ def send_x_thread(
 
         # ==================================
         # TWEET 1
-        # GLOBAL CRYPTO + DFI
+        # MARKET
         # ==================================
 
         post1 = f"""
@@ -366,12 +426,8 @@ ${format_price(btc_price)}
 ${format_price(eth_price)}
 {change_emoji(eth_change)} {safe_change(eth_change)}%
 
-💎 DeFiChain DFI
-
-Price:
+💎 DeFiChain DFI:
 ${format_price(dfi_price)}
-
-24h:
 {change_emoji(dfi_change)} {safe_change(dfi_change)}%
 
 #DeFiChain #DFI
@@ -384,10 +440,7 @@ ${format_price(dfi_price)}
         )
 
 
-        print(
-            "DEBUG Tweet 1:"
-        )
-
+        print("DEBUG-Tweet 1:")
         print(post1)
 
 
@@ -409,20 +462,21 @@ ${format_price(dfi_price)}
 
         # ==================================
         # TWEET 2
-        # INTELLIGENCE
+        # TOKENOMICS
         # ==================================
 
         post2 = f"""
-🧠 {intelligence_title}
+🔥 {tokenomics_title}
 
-⭐ {score}/100
+📦 Total Supply: {format_large_number(total_supply)} DFI
+💧 Circulating: {format_large_number(circulating_supply)} DFI
+
+🔥 Burned: {format_large_number(burned_dfi)} DFI
+🪙 Daily Minted: {format_large_number(daily_minted)} DFI
+🔥 Net Burn: {format_large_number(net_burn)} DFI
+
+🧠 {intelligence_title}: {score}/100
 {status}
-
-💡 Daily Insight:
-
-{daily_insight}
-
-#DeFiChain #DFI
 """.strip()
 
 
@@ -432,10 +486,7 @@ ${format_price(dfi_price)}
         )
 
 
-        print(
-            "DEBUG Tweet 2:"
-        )
-
+        print("DEBUG-Tweet 2:")
         print(post2)
 
 
@@ -444,11 +495,8 @@ ${format_price(dfi_price)}
         # ==================================
 
         result2 = client.create_tweet(
-
             text=post2,
-
             in_reply_to_tweet_id=tweet1_id
-
         )
 
         tweet2_id = result2.data["id"]
@@ -461,7 +509,7 @@ ${format_price(dfi_price)}
 
         # ==================================
         # TWEET 3
-        # NETWORK + NEWS
+        # DUSD + NETWORK + NEWS
         # ==================================
 
         network_status = network.get(
@@ -470,7 +518,30 @@ ${format_price(dfi_price)}
         )
 
 
-        # News aus dem Report extrahieren
+        dusd_line = ""
+
+        if dusd_price is not None:
+
+            dusd_line += (
+                f"💵 dUSD: "
+                f"${format_price(dusd_price)}"
+            )
+
+        if peg_deviation is not None:
+
+            if dusd_line:
+                dusd_line += "\n"
+
+            dusd_line += (
+                f"📉 Peg deviation: "
+                f"{safe_float(peg_deviation):.2f}%"
+            )
+
+
+        # ==================================
+        # NEWS AUS REPORT
+        # ==================================
+
         news_text = ""
 
         if isinstance(report, str):
@@ -483,16 +554,15 @@ ${format_price(dfi_price)}
 
             if match:
 
-                news_text = (
-                    match.group(1)
-                    .strip()
-                )
+                news_text = match.group(1).strip()
 
 
         post3 = f"""
 ⛓ {network_title}
 
 {network_status}
+
+{dusd_line}
 
 📰 {news_title}
 
@@ -508,10 +578,7 @@ ${format_price(dfi_price)}
         )
 
 
-        print(
-            "DEBUG Tweet 3:"
-        )
-
+        print("DEBUG-Tweet 3:")
         print(post3)
 
 
@@ -520,11 +587,8 @@ ${format_price(dfi_price)}
         # ==================================
 
         result3 = client.create_tweet(
-
             text=post3,
-
             in_reply_to_tweet_id=tweet2_id
-
         )
 
         tweet3_id = result3.data["id"]
@@ -541,6 +605,7 @@ ${format_price(dfi_price)}
         # ==================================
 
         history_name = "DeFiChain Update"
+
         history_text = ""
 
         if isinstance(
@@ -579,10 +644,7 @@ ${format_price(dfi_price)}
         )
 
 
-        print(
-            "DEBUG Tweet 4:"
-        )
-
+        print("DEBUG-Tweet 4:")
         print(post4)
 
 
@@ -591,11 +653,8 @@ ${format_price(dfi_price)}
         # ==================================
 
         result4 = client.create_tweet(
-
             text=post4,
-
             in_reply_to_tweet_id=tweet3_id
-
         )
 
 
@@ -603,11 +662,6 @@ ${format_price(dfi_price)}
             "✅ X Tweet 4 gesendet:",
             result4.data["id"]
         )
-
-
-        # ==================================
-        # ERFOLG
-        # ==================================
 
         print(
             "🎉 X Thread erfolgreich gesendet!"
@@ -618,10 +672,7 @@ ${format_price(dfi_price)}
 
     except Exception as e:
 
-        print(
-            "❌ X Fehler:"
-        )
-
+        print("❌ X Fehler:")
         print(e)
 
         return False
