@@ -22,7 +22,7 @@ def main():
     network = get_network_data()
     news = get_dfi_news()
 
-    # Debug-Ausgabe zur Kontrolle der API-Struktur
+    # Debug-Ausgabe zur Kontrolle der API-Struktur im GitHub-Log
     print("DEBUG network data:", network)
 
     # ==========================
@@ -54,36 +54,36 @@ def main():
     eth_signal = "🟢" if eth_change >= 0 else "🔴"
 
     # ==========================
-    # Burn Analyse & Tokenomics (Flexibel & Robust)
+    # Burn Analyse & Tokenomics (Rekursiver Key-Finder)
     # ==========================
-    burned = network.get("burned_dfi") or network.get("burned") or network.get("burn") or {}
+    def extract_val(data, keys, default=0):
+        """Durchsucht verschachtelte Dictionaries flexibel nach bestimmten Keys."""
+        if not isinstance(data, dict):
+            return default
+        for k, v in data.items():
+            if k.lower() in keys:
+                try:
+                    return float(v)
+                except (ValueError, TypeError):
+                    pass
+            if isinstance(v, dict):
+                res = extract_val(v, keys, None)
+                if res is not None:
+                    return res
+        return default
 
-    if isinstance(burned, dict):
-        total_burned = (
-            burned.get("total")
-            or burned.get("total_burned")
-            or burned.get("amount")
-            or network.get("total_burned")
-            or 0
-        )
-        emission = (
-            burned.get("emission")
-            or burned.get("daily_emission")
-            or network.get("daily_minted")
-            or network.get("emission")
-            or 0
-        )
-        address_burn = burned.get("address", 0)
-        fee_burn = burned.get("fee", 0)
-        auction_burn = burned.get("auction", 0)
-        payback_burn = burned.get("payback", 0)
-    else:
-        total_burned = float(burned) if burned else 0
-        emission = network.get("emission") or network.get("daily_minted") or 0
-        address_burn = 0
-        fee_burn = 0
-        auction_burn = 0
-        payback_burn = 0
+    # Werte dynamisch auslesen
+    total_burned = extract_val(
+        network, ["total", "burned", "total_burned", "burned_dfi", "amount"]
+    )
+    emission = extract_val(
+        network, ["emission", "daily_minted", "minted", "daily_emission", "block_reward"]
+    )
+
+    address_burn = extract_val(network, ["address", "address_burn"])
+    fee_burn = extract_val(network, ["fee", "fee_burn"])
+    auction_burn = extract_val(network, ["auction", "auction_burn"])
+    payback_burn = extract_val(network, ["payback", "payback_burn"])
 
     net_change = emission - total_burned
 
@@ -92,7 +92,7 @@ def main():
     else:
         token_status = f"🟢 Deflationär\n{net_change:,.2f} DFI"
 
-    # Tokenomics-Dictionary für Ausgabebots aufbauen
+    # Tokenomics-Dictionary explizit für x_bot & telegram_bot aufbauen
     tokenomics_data = {
         "burned_dfi": total_burned if total_burned > 0 else "N/A",
         "daily_minted": emission if emission > 0 else "N/A"
