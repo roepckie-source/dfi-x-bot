@@ -22,6 +22,9 @@ def main():
     network = get_network_data()
     news = get_dfi_news()
 
+    # Debug-Ausgabe zur Kontrolle der API-Struktur
+    print("DEBUG network data:", network)
+
     # ==========================
     # Vergleich
     # ==========================
@@ -51,11 +54,37 @@ def main():
     eth_signal = "🟢" if eth_change >= 0 else "🔴"
 
     # ==========================
-    # Burn Analyse & Tokenomics
+    # Burn Analyse & Tokenomics (Flexibel & Robust)
     # ==========================
-    burned = network.get("burned_dfi", {})
-    total_burned = burned.get("total", 0)
-    emission = burned.get("emission", 0)
+    burned = network.get("burned_dfi") or network.get("burned") or network.get("burn") or {}
+
+    if isinstance(burned, dict):
+        total_burned = (
+            burned.get("total")
+            or burned.get("total_burned")
+            or burned.get("amount")
+            or network.get("total_burned")
+            or 0
+        )
+        emission = (
+            burned.get("emission")
+            or burned.get("daily_emission")
+            or network.get("daily_minted")
+            or network.get("emission")
+            or 0
+        )
+        address_burn = burned.get("address", 0)
+        fee_burn = burned.get("fee", 0)
+        auction_burn = burned.get("auction", 0)
+        payback_burn = burned.get("payback", 0)
+    else:
+        total_burned = float(burned) if burned else 0
+        emission = network.get("emission") or network.get("daily_minted") or 0
+        address_burn = 0
+        fee_burn = 0
+        auction_burn = 0
+        payback_burn = 0
+
     net_change = emission - total_burned
 
     if net_change > 0:
@@ -63,10 +92,10 @@ def main():
     else:
         token_status = f"🟢 Deflationär\n{net_change:,.2f} DFI"
 
-    # Tokenomics-Dictionary explizit für x_bot & telegram aufbauen
+    # Tokenomics-Dictionary für Ausgabebots aufbauen
     tokenomics_data = {
-        "burned_dfi": total_burned,
-        "daily_minted": emission
+        "burned_dfi": total_burned if total_burned > 0 else "N/A",
+        "daily_minted": emission if emission > 0 else "N/A"
     }
 
     # ==========================
@@ -94,16 +123,16 @@ def main():
 🔥 <b>DFI Burn</b>
 
 🏠 Address Burn
-{burned.get('address', 0):,.2f} DFI
+{address_burn:,.2f} DFI
 
 💸 Fee Burn
-{burned.get('fee', 0):,.2f} DFI
+{fee_burn:,.2f} DFI
 
 🔨 Auction Burn
-{burned.get('auction', 0):,.2f} DFI
+{auction_burn:,.2f} DFI
 
 ↩️ Payback
-{burned.get('payback', 0):,.2f} DFI
+{payback_burn:,.2f} DFI
 
 🔥 Total Burned
 {total_burned:,.2f} DFI
