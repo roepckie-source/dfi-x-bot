@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# X Thread Bot (inkl. PNG Image Support)
+# X Thread Bot (Optimiert auf 280 Zeichen)
 # ======================================
 
 import os
@@ -9,10 +9,6 @@ import tweepy
 
 from modules.language import load_language
 
-
-# ======================================
-# FORMAT HELFER
-# ======================================
 
 def safe_float(value, default=0.0):
     try:
@@ -31,20 +27,29 @@ def safe_change(value):
 def format_price(value):
     try:
         value = float(value)
-
         if value < 0.01:
             return f"{value:.8f}"
-
         if value < 1:
             return f"{value:.6f}"
-
         if value < 100:
             return f"{value:.2f}"
-
         return f"{value:,.2f}"
-
     except (TypeError, ValueError):
         return "N/A"
+
+
+def format_large_number(value, suffix=""):
+    try:
+        val = float(value)
+        if val >= 1_000_000_000:
+            return f"{val / 1_000_000_000:.2f}B{suffix}"
+        if val >= 1_000_000:
+            return f"{val / 1_000_000:.2f}M{suffix}"
+        if val >= 1_000:
+            return f"{val / 1_000:.1f}K{suffix}"
+        return f"{val:,.2f}{suffix}"
+    except (ValueError, TypeError):
+        return str(value) if value else "N/A"
 
 
 def change_emoji(value):
@@ -54,52 +59,13 @@ def change_emoji(value):
         return "⚪"
 
 
-# ======================================
-# TEXT CHUNKING
-# ======================================
-
-def chunk_text(text, max_len=250):
-    chunks = []
-    if not text:
-        return chunks
-
-    text = str(text).strip()
-
-    while len(text) > max_len:
-        split_at = text.rfind("\n", 0, max_len)
-        if split_at == -1:
-            split_at = text.rfind(" ", 0, max_len)
-        if split_at == -1:
-            split_at = max_len
-
-        part = text[:split_at].strip()
-        if part:
-            chunks.append(part)
-
-        text = text[split_at:].strip()
-
-    if text:
-        chunks.append(text)
-
-    return chunks
-
-
-# ======================================
-# SPRACHE AUS REPORT ERKENNEN
-# ======================================
-
 def detect_language(insight):
     if isinstance(insight, str):
         match = re.search(r"\(([A-Z]{2})\)", insight)
         if match:
             return match.group(1).lower()
-
     return os.getenv("APP_LANG", "de")
 
-
-# ======================================
-# CLIENTS (v2 & v1.1)
-# ======================================
 
 def get_clients():
     api_key = os.getenv("X_API_KEY")
@@ -128,10 +94,6 @@ def get_clients():
     return client_v2, api_v1
 
 
-# ======================================
-# X THREAD
-# ======================================
-
 def send_x_thread(
     insight,
     tokenomics=None,
@@ -146,7 +108,7 @@ def send_x_thread(
     try:
         client, api_v1 = get_clients()
 
-        if client is None or api_v1 is None:
+        if client is None:
             print("⚠️ X (Twitter) API Keys fehlen.", flush=True)
             return False
 
@@ -161,6 +123,8 @@ def send_x_thread(
             market = {}
         if not isinstance(network, dict):
             network = {}
+        if not isinstance(tokenomics, dict):
+            tokenomics = {}
 
         btc = global_crypto.get("bitcoin", {})
         eth = global_crypto.get("ethereum", {})
@@ -175,51 +139,36 @@ def send_x_thread(
         dfi_price = dfi.get("price", dfi.get("usd", "N/A"))
         dfi_change = safe_float(dfi.get("change", 0))
 
+        burned_dfi_raw = tokenomics.get("burned_dfi", tokenomics.get("burned", "N/A"))
+        daily_minted_raw = tokenomics.get("daily_minted", tokenomics.get("minted_24h", "N/A"))
+
+        burned_dfi = format_large_number(burned_dfi_raw)
+        daily_minted = format_large_number(daily_minted_raw)
+
         score = intelligence.get("total", "N/A")
         status = intelligence.get("status", "N/A")
         daily_insight = intelligence.get("daily_insight", "")
 
-        flags = (
-            "🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 "
-            "🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 "
-            "🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 "
-            "🇵🇹 🇷🇺 🇸🇦"
-        )
-
         header_title = lang.get("header_title", "🚀 DeFiChain Daily Intelligence")
-        global_crypto_title = lang.get("global_crypto", "Global Crypto")
         intelligence_title = lang.get("intelligence", "🧠 Intelligence Score")
-        price_title = lang.get("price", "Price")
-        change_title = lang.get("change_24h", "24h")
         network_title = lang.get("network", "Network")
         news_title = lang.get("news", "News")
         history_title = lang.get("history", "History")
 
         # ==================================
-        # TWEET 1
+        # TWEET 1: PREISE & TOKENOMICS (~210 Zeichen)
         # ==================================
         post1 = f"""
 {header_title} ({language.upper()})
 
-🌍 {flags}
+🌍 BTC: ${format_price(btc_price)} ({change_emoji(btc_change)}{safe_change(btc_change)}%)
+🌍 ETH: ${format_price(eth_price)} ({change_emoji(eth_change)}{safe_change(eth_change)}%)
 
-🌍 {global_crypto_title}
+💎 DFI: ${format_price(dfi_price)} ({change_emoji(dfi_change)}{safe_change(dfi_change)}%)
+🔥 Burned: {burned_dfi} DFI
+🪙 Daily Minted: {daily_minted} DFI
 
-₿ Bitcoin:
-${format_price(btc_price)}
-{change_emoji(btc_change)} {safe_change(btc_change)}%
-
-Ξ Ethereum:
-${format_price(eth_price)}
-{change_emoji(eth_change)} {safe_change(eth_change)}%
-
-💎 DeFiChain DFI
-
-{price_title}:
-${format_price(dfi_price)}
-
-{change_title}:
-{change_emoji(dfi_change)} {safe_change(dfi_change)}%
+🧠 Score: {score}/100 ({status})
 
 #DeFiChain #DFI
 """.strip()
@@ -231,15 +180,14 @@ ${format_price(dfi_price)}
         tweet1_id = result1.data["id"]
 
         # ==================================
-        # TWEET 2
+        # TWEET 2: INSIGHTS & SCORE
         # ==================================
         post2 = f"""
 🧠 {intelligence_title}
 
-⭐ {score}/100
-{status}
+⭐ {score}/100 - {status}
 
-💡 Insight:
+💡 Daily Insight:
 
 {daily_insight}
 """.strip()
@@ -254,7 +202,7 @@ ${format_price(dfi_price)}
         tweet2_id = result2.data["id"]
 
         # ==================================
-        # TWEET 3
+        # TWEET 3: NETWORK & NEWS
         # ==================================
         network_status = network.get("network_status", "🟢 Online")
 
@@ -287,7 +235,7 @@ ${format_price(dfi_price)}
         tweet3_id = result3.data["id"]
 
         # ==================================
-        # TWEET 4
+        # TWEET 4: HISTORY / CHAPTER
         # ==================================
         post4 = f"📚 {history_title}".strip()
 
@@ -316,30 +264,6 @@ ${format_price(dfi_price)}
             text=post4,
             in_reply_to_tweet_id=tweet3_id
         )
-        tweet4_id = result4.data["id"]
-
-        # ==================================
-        # TWEET 5: BILD UPLOAD (PNG)
-        # ==================================
-        try:
-            image_path = "outputs/daily_update.png"
-
-            if os.path.exists(image_path):
-                # Statisches PNG-Bild für Twitter hochladen
-                media = api_v1.media_upload(filename=image_path)
-
-                post5 = "📊 Daily DeFiChain Update Visualized 🌐\n\n#DeFiChain #DFI"
-                result5 = client.create_tweet(
-                    text=post5,
-                    media_ids=[media.media_id],
-                    in_reply_to_tweet_id=tweet4_id
-                )
-                print("X Tweet 5 (Bild) gesendet:", result5.data["id"], flush=True)
-            else:
-                print(f"⚠️ Bild nicht gefunden unter: {image_path}", flush=True)
-
-        except Exception as img_error:
-            print("⚠️ Fehler beim Bild-Upload auf X:", img_error, flush=True)
 
         return True
 
