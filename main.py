@@ -22,46 +22,54 @@ def main():
     network = get_network_data()
     news = get_dfi_news()
 
-    # Debug-Ausgabe zur Kontrolle der API-Struktur im GitHub-Log
+    print("DEBUG market data:", market)
     print("DEBUG network data:", network)
 
     # ==========================
-    # Vergleich
+    # Vergleich & Discord
     # ==========================
     comparison = get_comparison(market)
-
-    # ==========================
-    # Discord
-    # ==========================
     send_discord(market, network, comparison, news)
 
     # ==========================
-    # Market Daten
+    # Market Daten Extraktion
     # ==========================
     dfi = market.get("dfi", {})
-    btc = market.get("bitcoin", {})
-    eth = market.get("ethereum", {})
+    btc = market.get("bitcoin", market.get("btc", {}))
+    eth = market.get("ethereum", market.get("eth", {}))
 
-    # ==========================
-    # Veränderungen
-    # ==========================
-    dfi_change = dfi.get("usd_24h_change", 0)
-    btc_change = btc.get("usd_24h_change", 0)
-    eth_change = eth.get("usd_24h_change", 0)
+    dfi_change = dfi.get("usd_24h_change", dfi.get("change", 0))
+    btc_change = btc.get("usd_24h_change", btc.get("change", 0))
+    eth_change = eth.get("usd_24h_change", eth.get("change", 0))
 
     dfi_signal = "🟢" if dfi_change >= 0 else "🔴"
     btc_signal = "🟢" if btc_change >= 0 else "🔴"
     eth_signal = "🟢" if eth_change >= 0 else "🔴"
 
+    # Standardisiertes Market-Dict für den X-Bot aufbauen
+    formatted_market_data = {
+        "bitcoin": {
+            "price": btc.get("usd", btc.get("price", 0)),
+            "change": btc_change
+        },
+        "ethereum": {
+            "price": eth.get("usd", eth.get("price", 0)),
+            "change": eth_change
+        },
+        "dfi": {
+            "price": dfi.get("usd", dfi.get("price", 0)),
+            "change": dfi_change
+        }
+    }
+
     # ==========================
     # Burn Analyse & Tokenomics (Ausfallsicher)
     # ==========================
     def extract_val(data, keys, default=0.0):
-        """Durchsucht verschachtelte Dictionaries flexibel nach bestimmten Keys."""
         if not isinstance(data, dict):
             return default
         for k, v in data.items():
-            if k.lower() in keys:
+            if str(k).lower() in keys:
                 try:
                     return float(v)
                 except (ValueError, TypeError):
@@ -72,45 +80,36 @@ def main():
                     return res
         return default
 
-    # 1. Einzelne Burn-Posten extrahieren
+    # Einzelne Burn-Posten
     address_burn = extract_val(network, ["address", "address_burn"])
     fee_burn = extract_val(network, ["fee", "fee_burn"])
     auction_burn = extract_val(network, ["auction", "auction_burn"])
     payback_burn = extract_val(network, ["payback", "payback_burn"])
 
-    # 2. Total Burn ermitteln (Fallback auf Summe der Einzelposten)
+    # Total Burn
     total_burned = extract_val(
         network, ["total", "burned", "total_burned", "burned_dfi", "amount"]
     )
     if total_burned == 0:
         total_burned = address_burn + fee_burn + auction_burn + payback_burn
 
-    # 3. Daily Emission ermitteln
+    # Daily Emission
     emission = extract_val(
         network, ["emission", "daily_minted", "minted", "daily_emission", "block_reward"]
     )
 
-    # 4. Absicherung: Falls API-Endpunkte temporär leere/0-Werte liefern
+    # Hard-Fallbacks, falls Network-API 0 oder None schickt
     if total_burned == 0:
-        total_burned = 412500000.0  # Aktueller ca. DFI Burn Stand als Richtwert
+        total_burned = 412500000.0
     if emission == 0:
-        emission = 288000.0        # Ca. tägliche DFI Block Rewards
+        emission = 288000.0
 
     net_change = emission - total_burned
+    token_status = f"🔴 Inflationär\n+{net_change:,.2f} DFI" if net_change > 0 else f"🟢 Deflationär\n{net_change:,.2f} DFI"
 
-    if net_change > 0:
-        token_status = f"🔴 Inflationär\n+{net_change:,.2f} DFI"
-    else:
-        token_status = f"🟢 Deflationär\n{net_change:,.2f} DFI"
-
-    # Tokenomics-Dictionary für Ausgabebots aufbauen (Bietet Zahlen und Strings)
     tokenomics_data = {
         "burned_dfi": total_burned,
-        "burned": total_burned,
-        "total_burned": total_burned,
-        "daily_minted": emission,
-        "minted": emission,
-        "daily_emission": emission
+        "daily_minted": emission
     }
 
     # ==========================
@@ -125,7 +124,7 @@ def main():
     }
 
     # ==========================
-    # Network Report
+    # Network Report (Telegram Text)
     # ==========================
     network_message = f"""
 🌐 <b>Network & Tokenomics</b>
@@ -253,8 +252,8 @@ ${dfi.get('usd_market_cap', 0):,.0f}
         dusd=dusd,
         network=network,
         intelligence=intelligence_data,
-        global_crypto=market,
-        market=market
+        global_crypto=formatted_market_data,
+        market=formatted_market_data
     )
 
     print("✅ Bot fertig")
