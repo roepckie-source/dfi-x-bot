@@ -82,6 +82,14 @@ def send_x_thread(
     lang_code="DE",
 ):
     """Erstellt und sendet einen 3-Tweet Thread an Twitter/X."""
+    # Absicherung: Falls lang_code versehentlich als dict übergeben wurde
+    if isinstance(lang_code, dict):
+        lang_str = str(lang_code.get("code", "DE")).upper()
+    elif isinstance(lang_code, str):
+        lang_str = lang_code.upper()
+    else:
+        lang_str = "DE"
+
     client = get_twitter_client()
     if not client:
         print("❌ Twitter Client nicht erreichbar oder Keys fehlen. Abbruch.")
@@ -122,7 +130,7 @@ def send_x_thread(
     # TWEET 1: MARKET OVERVIEW & SUPPLY (Kompakt zeilenbasiert)
     # ===================================================
     post1 = f"""
-Crypto ({lang_code.upper()})
+Crypto ({lang_str})
 
 ₿ Bitcoin:
 ${btc_price:,.2f}
@@ -148,7 +156,7 @@ ${dfi_price:.8f}
     try:
         result1 = client.create_tweet(text=post1)
         tweet1_id = result1.data["id"]
-        print(f"✅ Tweet 1 ({lang_code.upper()}) erfolgreich gesendet!")
+        print(f"✅ Tweet 1 ({lang_str}) erfolgreich gesendet!")
     except Exception as e:
         print(f"❌ Fehler beim Senden von Tweet 1: {e}")
         return
@@ -202,6 +210,6 @@ ${dfi_price:.8f}
 
     try:
         client.create_tweet(text=post3, in_reply_to_tweet_id=tweet2_id)
-        print(f"✅ Tweet 3 erfolgreich gesendet! Thread ({lang_code.upper()}) komplett.")
+        print(f"✅ Tweet 3 erfolgreich gesendet! Thread ({lang_str}) komplett.")
     except Exception as e:
         print(f"❌ Fehler beim Senden von Tweet 3: {e}")
