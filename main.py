@@ -85,9 +85,11 @@ def get_robust_dfi_data():
 def main():
     print("🚀 DeFiChain Bot startet...")
 
-    # 1. Sprache per Rotation oder Environment wählen
+    # 1. Sprache per Rotation oder Environment wählen (Ergebnis ist ein String z.B. "de")
     app_lang = os.getenv("APP_LANG", get_daily_language())
     print(f"🌐 Aktive Tages-Sprache: {app_lang.upper()}")
+    
+    # Translation Dictionary laden
     lang = load_language(app_lang)
 
     # 2. Daten abrufen
@@ -184,7 +186,7 @@ def main():
 """
     send_telegram(telegram_message)
 
-    # 5. X Thread ausführen
+    # 5. X Thread ausführen (Uebergabe von app_lang als String)
     send_x_thread(
         insight=news.get("text", ""),
         tokenomics=tokenomics_data,
@@ -193,7 +195,7 @@ def main():
         intelligence=intelligence_data,
         global_crypto=x_market_data,
         market=x_market_data,
-        lang_code=app_lang.upper(),
+        lang_code=app_lang,
     )
 
     print("✅ Bot erfolgreich ausgeführt.")
