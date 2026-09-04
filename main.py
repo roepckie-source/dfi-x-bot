@@ -51,25 +51,31 @@ def fetch_market_data():
         .json()
         .get("data", {})
     )
-    dfi_data["total_supply"] = float(
-        stats_res.get("count", {}).get("tokens", {}).get("total", 1150000000)
-    )
-    dfi_data["burned_dfi"] = float(
-        stats_res.get("burned", {}).get("total", 412500000)
-    )
 
-    # DFI Preis aus Ocean API Token-Pair holen (Pool 0 = DFI-USDT)
-    tokens_res = (
+    # Sicheres Parsing der Ocean API Datenstrukturen
+    count_data = stats_res.get("count", {})
+    if isinstance(count_data, dict):
+      dfi_data["total_supply"] = float(count_data.get("tokens", 1150000000))
+    elif isinstance(count_data, (int, float)):
+      dfi_data["total_supply"] = float(count_data)
+
+    burned_data = stats_res.get("burned", {})
+    if isinstance(burned_data, dict):
+      dfi_data["burned_dfi"] = float(burned_data.get("total", 412500000))
+
+    # DFI Preis aus Ocean API Token-Pair holen
+    prices_res = (
         requests.get(f"{OCEAN_API_URL}/prices", timeout=10)
         .json()
         .get("data", [])
     )
-    for t in tokens_res:
+    for t in prices_res:
       if t.get("currency") == "USDT":
         dfi_data["price_usd"] = float(
             t.get("price", {}).get("aggregated", 0.00278)
         )
         break
+
     logging.info("✅ Ocean API Daten erfolgreich erfasst.")
   except Exception as e:
     logging.error(f"⚠️ Fehler bei Ocean API (Standardwerte genutzt): {e}")
