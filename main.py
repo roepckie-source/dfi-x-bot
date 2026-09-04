@@ -22,12 +22,11 @@ def get_daily_language() -> str:
 
 
 def safe_float(val, default=0.0):
-    """Konvertiert Werte sicher in Float und fängt 0/None/ungültige Strings ab."""
+    """Konvertiert Werte sicher in Float und fängt None/ungültige Strings ab (erlaubt auch 0 und negative Zahlen)."""
     if val is None:
         return default
     try:
-        res = float(val)
-        return res if res > 0 else default
+        return float(val)
     except (ValueError, TypeError):
         return default
 
@@ -101,7 +100,7 @@ def get_robust_dfi_data():
         
         stats = defilive_res.get("data", defilive_res) if isinstance(defilive_res, dict) else {}
 
-        # Abfragen aller gängigen Key-Varianten von DeFiLiveScan (CamelCase vs SnakeCase)
+        # Abfragen aller gängigen Key-Varianten von DeFiLiveScan
         price = stats.get("dfiPrice") or stats.get("priceUsd") or stats.get("dfi_price") or stats.get("price")
         change = stats.get("priceChange24h") or stats.get("price_change_24h") or stats.get("change24h")
         burned = stats.get("burnedDfi") or stats.get("burned_dfi") or stats.get("burned")
@@ -109,7 +108,7 @@ def get_robust_dfi_data():
         circ = stats.get("circulatingSupply") or stats.get("circulating_supply")
         minted = stats.get("dailyMinted") or stats.get("daily_minted")
 
-        if price is not None:
+        if price is not None and safe_float(price) > 0:
             data["price_usd"] = safe_float(price)
             data["price_change_24h"] = safe_float(change)
             data["burned_dfi"] = safe_float(burned)
@@ -175,6 +174,11 @@ def fetch_crypto_market_data():
         btc_c = safe_float(res.get("bitcoin", {}).get("usd_24h_change"), 0.0)
         eth_p = safe_float(res.get("ethereum", {}).get("usd"), 2495.0)
         eth_c = safe_float(res.get("ethereum", {}).get("usd_24h_change"), 0.0)
+        
+        # Sicherstellen, dass nicht 0 zurückgegeben wird
+        if btc_p <= 0: btc_p = 81145.0
+        if eth_p <= 0: eth_p = 2495.0
+
         return btc_p, btc_c, eth_p, eth_c
     except Exception as e:
         logging.warning(f"⚠️ CoinGecko API Fehler: {e}. Nutze Standardwerte.")
