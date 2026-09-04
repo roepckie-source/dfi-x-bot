@@ -1,191 +1,106 @@
+# ==============================================================
+# DeFiChain Bot News & History Module - news.py
+# ==============================================================
+
+from datetime import datetime
 import json
 import os
-from datetime import datetime
 
-
-HISTORY_FILE = "dfi_history.json"
-STATE_FILE = "news_state.json"
+# Pfade relativ zum Verzeichnis dieser Datei bestimmen (verhindert Pfadfehler auf GitHub Actions)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HISTORY_FILE = os.path.join(BASE_DIR, "dfi_history.json")
+STATE_FILE = os.path.join(BASE_DIR, "news_state.json")
 
 
 # ==============================
-# DFI HISTORY LADEN
+# 1. DFI HISTORY LADEN
 # ==============================
-
 def load_history():
-
-    try:
-
-        with open(
-            HISTORY_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            return json.load(file)
-
-
-    except Exception as e:
-
-        print(
-            "History Fehler:",
-            e
-        )
-
-        return []
-
+  """Lädt die Liste der historischen Ereignisse aus der JSON-Datei."""
+  try:
+    if not os.path.exists(HISTORY_FILE):
+      return []
+    with open(HISTORY_FILE, "r", encoding="utf-8") as file:
+      return json.load(file)
+  except Exception as e:
+    print("History Fehler:", e)
+    return []
 
 
 # ==============================
-# STATUS LADEN
+# 2. STATUS LADEN & SPEICHERN
 # ==============================
-
 def load_state():
+  """Lädt den aktuellen Zeiger-Status (last_history_id)."""
+  try:
+    if not os.path.exists(STATE_FILE):
+      return {"last_history_id": 0}
+    with open(STATE_FILE, "r", encoding="utf-8") as file:
+      return json.load(file)
+  except Exception:
+    return {"last_history_id": 0}
 
-    try:
-
-        with open(
-            STATE_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            return json.load(file)
-
-
-    except:
-
-        return {
-            "last_history_id": 0
-        }
-
-
-
-# ==============================
-# STATUS SPEICHERN
-# ==============================
 
 def save_state(state):
-
-    with open(
-        STATE_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            state,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
-
+  """Speichert den aktualisierten Zeiger-Status ab."""
+  try:
+    with open(STATE_FILE, "w", encoding="utf-8") as file:
+      json.dump(state, file, indent=4, ensure_ascii=False)
+  except Exception as e:
+    print("State Speicher-Fehler:", e)
 
 
 # ==============================
-# NÄCHSTE GESCHICHTE
+# 3. NÄCHSTE GESCHICHTE HOLEN
 # ==============================
+def get_history_story(lang="de"):
+  """Sucht die nächste Story basierend auf der last_history_id und gibt den Text zurück."""
+  history = load_history()
+  state = load_state()
 
-def get_history_story():
+  if not history:
+    return "Keine besonderen Ereignisse im Ökosystem."
 
-    history = load_history()
+  last_id = state.get("last_history_id", 0)
+  next_story = None
 
-    state = load_state()
+  # Nächste Story mit höherer ID als der letzten finden
+  for story in history:
+    if isinstance(story, dict) and story.get("id", 0) > last_id:
+      next_story = story
+      break
 
+  # Wenn das Ende der Liste erreicht ist -> wieder von vorne beginnen
+  if next_story is None and len(history) > 0:
+    next_story = history[0]
 
-    if not history:
-
-        return {
-
-            "id": 0,
-
-            "title": "DeFiChain Update",
-
-            "text": "No history available.",
-
-            "hashtags": "#DeFiChain #DFI",
-
-            "date": datetime.now().strftime(
-                "%d.%m.%Y %H:%M"
-            ),
-
-            "report": datetime.now().strftime(
-                "%H%M"
-            )
-
-        }
-
-
-
-    last_id = state.get(
-        "last_history_id",
-        0
-    )
-
-
-    next_story = None
-
-
-    for story in history:
-
-        if story["id"] > last_id:
-
-            next_story = story
-
-            break
-
-
-
-    # Wenn Ende erreicht -> wieder von vorne
-
-    if next_story is None:
-
-        next_story = history[0]
-
-
-
-    state["last_history_id"] = next_story["id"]
-
-
+  if next_story and isinstance(next_story, dict):
+    # Status aktualisieren
+    state["last_history_id"] = next_story.get("id", 0)
     save_state(state)
 
+    # Text verarbeiten (unterstützt Strings oder mehrsprachige Dicts)
+    text_data = next_story.get("text", "")
+    if isinstance(text_data, dict):
+      story_text = text_data.get(
+          lang, text_data.get("de", "Keine News verfügbar.")
+      )
+    else:
+      story_text = str(text_data)
 
+    return story_text
 
-    return {
-
-        "id": next_story["id"],
-
-        "title": next_story["title"],
-
-        "text": next_story["text"],
-
-        "hashtags": "#DeFiChain #DFI",
-
-        "date": datetime.now().strftime(
-            "%d.%m.%Y %H:%M"
-        ),
-
-        "report": datetime.now().strftime(
-            "%H%M"
-        )
-
-    }
-
+  return "Keine besonderen Ereignisse im Ökosystem."
 
 
 # ==============================
-# NEWS FUNKTION
+# 4. SCHNITTSTELLEN FÜR MAIN.PY
 # ==============================
-
-def get_news():
-
-    return get_history_story()
-
+def get_dfi_news(lang="de"):
+  """Hauptschnittstelle für main.py – liefert den Nachrichtentext als String."""
+  return get_history_story(lang)
 
 
-# ==============================
-# KOMPATIBILITÄT FÜR MAIN.PY
-# ==============================
-
-def get_dfi_news():
-
-    return get_history_story()
+def get_news(lang="de"):
+  """Alternative Schnittstelle für Kompatibilität."""
+  return get_history_story(lang)
