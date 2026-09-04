@@ -6,12 +6,17 @@ import logging
 import os
 import tweepy
 
+# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
+# ==============================================================
+# HILFSFUNKTIONEN FÜR FORMATIERUNG
+# ==============================================================
 def format_large_number(val, is_de=True):
+  """Formatiert große Zahlen übersichtlich mit Mio. / M Suffix."""
   try:
     val_num = float(val)
     if val_num >= 1e6:
@@ -24,6 +29,7 @@ def format_large_number(val, is_de=True):
 
 
 def clean_text(text, max_len=180):
+  """Kürzt lange Texte sauber ab und vermeidet abgeschnittene Wörter."""
   if not text:
     return ""
   text = text.replace("\n", " ").strip()
@@ -32,6 +38,9 @@ def clean_text(text, max_len=180):
   return text[: max_len - 3].rsplit(" ", 1)[0] + "..."
 
 
+# ==============================================================
+# HAUPTFUNKTION: X THREAD ERSTELLEN & POSTEN
+# ==============================================================
 def post_x_thread_tweepy(
     dfi_data,
     btc_p,
@@ -42,8 +51,10 @@ def post_x_thread_tweepy(
     insight_text="",
     news_text="",
 ):
+  """Erstellt einen 3-teiligen X-Thread über Tweepy Client API v2."""
   is_de = lang_code.lower() == "de"
 
+  # API Keys aus GitHub Secrets / Umgebungsvariablen laden
   api_key = os.getenv("X_API_KEY")
   api_secret = os.getenv("X_API_SECRET")
   access_token = os.getenv("X_ACCESS_TOKEN")
@@ -53,6 +64,7 @@ def post_x_thread_tweepy(
     logging.warning("⚠️ X API Credentials fehlen. Posting übersprungen.")
     return
 
+  # Tweepy Client v2 initialisieren
   try:
     client = tweepy.Client(
         consumer_key=api_key,
@@ -64,24 +76,28 @@ def post_x_thread_tweepy(
     logging.error(f"❌ Fehler bei der Initialisierung des X Clients: {e}")
     return
 
+  # Indikatoren (🟢/🔴) für Marktpreise
   dfi_sig = "🟢" if dfi_data.get("price_change_24h", 0) >= 0 else "🔴"
   btc_sig = "🟢" if btc_c >= 0 else "🔴"
   eth_sig = "🟢" if eth_c >= 0 else "🔴"
 
-  # Skalierung für total_supply (prüft ob API Zahl in Einzel-DFI oder Mio sendet)
+  # Total Supply Skalierung (rechnet Rohwerte in Millionen um, falls nötig)
   raw_total = dfi_data.get("total_supply", 0)
   total_val = raw_total * 1e6 if raw_total < 1000000 else raw_total
 
+  # Formatierte Strings für Supply-Werte
+  max_supply_str = "1,20 Mrd." if is_de else "1.20B"
   total_str = format_large_number(total_val, is_de)
   circ_str = format_large_number(dfi_data.get("circulating_supply", 0), is_de)
   burned_str = format_large_number(dfi_data.get("burned_dfi", 0), is_de)
 
   # ------------------------------------------------------------
-  # TWEET 1
+  # TWEET 1: Markt, Preise & Tokenomics (inkl. 1.2B Max Cap)
   # ------------------------------------------------------------
-  header = "📊 Daily Update" if is_de else "📊 Daily Update"
+  header = "📊 Daily Update"
   lbl_gesamt = "Gesamt" if is_de else "Total"
   lbl_auflage = "Auflage" if is_de else "Circ"
+  lbl_max = "Max" if is_de else "Max"
 
   tweet_1 = f"""{header} ({lang_code.upper()})
 
@@ -89,11 +105,12 @@ def post_x_thread_tweepy(
 Ξ ETH: ${eth_p:,.2f} ({eth_sig} {eth_c:.2f}%)
 💎 DFI: ${dfi_data.get('price_usd', 0):.6f} ({dfi_sig} {dfi_data.get('price_change_24h', 0):.2f}%)
 
+🔒 {lbl_max}: {max_supply_str} DFI
 📦 {lbl_gesamt}: {total_str} DFI | 💧 {lbl_auflage}: {circ_str} DFI
 #DeFiChain #DFI"""
 
   # ------------------------------------------------------------
-  # TWEET 2
+  # TWEET 2: Burn, Mint & Daily Insight
   # ------------------------------------------------------------
   lbl_burned = "Verbrannt" if is_de else "Burned"
   lbl_mint = "Prägung" if is_de else "Minted"
@@ -112,7 +129,7 @@ def post_x_thread_tweepy(
 {short_insight}"""
 
   # ------------------------------------------------------------
-  # TWEET 3 (Mit Tages-Anzeige z.B. Tag 3/100)
+  # TWEET 3: Netzwerke & 100-Tage Daily News
   # ------------------------------------------------------------
   lbl_net = "Netzwerk" if is_de else "Network"
   lbl_news = "Tägliche Nachrichten" if is_de else "Daily News"
@@ -127,23 +144,29 @@ def post_x_thread_tweepy(
 #DeFiChain"""
 
   # ------------------------------------------------------------
-  # THREAD POSTEN
+  # THREAD POSTEN (SEQUENTIELL)
   # ------------------------------------------------------------
   try:
+    # Tweet 1 senden
     res1 = client.create_tweet(text=tweet_1)
     tweet_1_id = res1.data["id"]
-    logging.info(f"✅ Tweet 1 gesendet! ID: {tweet_1_id}")
+    logging.info(f"✅ Tweepy: Tweet 1 gesendet! ID: {tweet_1_id}")
 
+    # Tweet 2 als Antwort auf Tweet 1
     res2 = client.create_tweet(
         text=tweet_2, in_reply_to_tweet_id=tweet_1_id
     )
     tweet_2_id = res2.data["id"]
-    logging.info("✅ Tweet 2 gesendet!")
+    logging.info("✅ Tweepy: Tweet 2 gesendet!")
 
+    # Tweet 3 als Antwort auf Tweet 2
     res3 = client.create_tweet(
         text=tweet_3, in_reply_to_tweet_id=tweet_2_id
     )
-    logging.info("✅ Tweet 3 gesendet!")
+    logging.info(
+        f"✅ Tweepy: Tweet 3 gesendet! Thread ({lang_code.upper()})"
+        " komplett."
+    )
 
   except Exception as e:
     logging.error(f"❌ Fehler beim Versenden des X-Threads: {e}")
