@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# History Engine v2.2 (Fix: Type-Safe Rotation & Multilang)
+# History Engine v2.3 (Includes Chapter Metadata)
 # ======================================
 
 import json
@@ -38,7 +38,6 @@ def save_state(state):
 
 
 def get_history(lang="de"):
-  """Holt das nächste Kapitel als Dictionary und aktualisiert den State."""
   history = load_history()
   if not history:
     return None
@@ -52,13 +51,11 @@ def get_history(lang="de"):
 
   next_id = last_id + 1
 
-  # Nach dem letzten Kapitel wieder bei 1 starten
   if next_id > len(history):
     next_id = 1
 
   current = None
 
-  # Typ-sicherer Vergleich (wandelt Strings in Integer um)
   for chapter in history:
     try:
       chap_id = int(chapter.get("id"))
@@ -68,17 +65,14 @@ def get_history(lang="de"):
     except (ValueError, TypeError):
       continue
 
-  # Fallback auf erstes Kapitel, falls ID nicht existiert
   if current is None:
     current = history[0]
 
-  # Fortschritt speichern
   try:
     state["last_id"] = int(current.get("id", 1))
   except (ValueError, TypeError):
     state["last_id"] = 1
 
-  # Titel ermitteln
   title_val = current.get("title", "")
   if isinstance(title_val, dict):
     state["last_title"] = title_val.get(lang, title_val.get("de", ""))
@@ -91,20 +85,27 @@ def get_history(lang="de"):
 
 
 def get_history_text(lang="de"):
-  """Gibt direkt den formatierten Text-String für main.py, Telegram, Discord und X zurück."""
+  """Gibt den formatierten Text inklusive Tag-Anzahl (z. B. Tag 2/100) zurück."""
+  history = load_history()
+  total_count = len(history) if history else 100
   chapter = get_history(lang)
+
   if not chapter:
     return "Keine besonderen Ereignisse im Ökosystem."
 
-  # Text auslesen (unterstützt einfache Strings oder mehrsprachige Objekte)
+  chap_id = chapter.get("id", 1)
+
   text_data = chapter.get("text", "")
   if isinstance(text_data, dict):
-    return text_data.get(lang, text_data.get("de", ""))
+    story_text = text_data.get(lang, text_data.get("de", ""))
+  else:
+    story_text = str(text_data)
 
-  return str(text_data)
+  label = "Tag" if lang.lower() == "de" else "Day"
+  return f"[{label} {chap_id}/{total_count}]\n{story_text}"
 
 
-# Aliase für abwärtskompatible Imports in allen Modulen und main_v4_test.py
+# Aliase für Kompatibilität
 get_history_chapter = get_history
 get_next_history_story = get_history_text
 get_dfi_news = get_history_text
