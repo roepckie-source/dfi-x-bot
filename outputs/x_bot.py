@@ -1,802 +1,165 @@
-# ======================================
-# DeFiChain Intelligence v5
-# X Thread Bot
-# ======================================
-
 import os
-import re
 import tweepy
 
-from modules.language import load_language
-
-
-# ======================================
-# HELFER
-# ======================================
-
-def safe_float(value, default=0.0):
-
-    try:
-        return float(value)
-
-    except (TypeError, ValueError):
-
-        return default
-
-
-def safe_change(value):
-
-    try:
-        return f"{float(value):.2f}"
-
-    except (TypeError, ValueError):
-
-        return "0.00"
-
-
-def format_price(value):
-
-    try:
-
-        value = float(value)
-
-        if value < 0.01:
-            return f"{value:.8f}"
-
-        if value < 1:
-            return f"{value:.6f}"
-
-        return f"{value:,.2f}"
-
-    except (TypeError, ValueError):
-
-        return "N/A"
-
-
-def format_large_number(value):
-
-    try:
-
-        value = float(value)
-
-        if value >= 1_000_000_000:
-            return f"{value / 1_000_000_000:.2f}B"
-
-        if value >= 1_000_000:
-            return f"{value / 1_000_000:.2f}M"
-
-        if value >= 1_000:
-            return f"{value / 1_000:.1f}K"
-
-        return f"{value:.2f}"
-
-    except (TypeError, ValueError):
-
-        return "N/A"
-
-
-def change_emoji(value):
-
-    return (
-        "🟢"
-        if safe_float(value) >= 0
-        else "🔴"
-    )
-
-
-def safe_truncate(
-    text,
-    max_chars=280
-):
-
-    if not isinstance(text, str):
-        return ""
-
-    text = text.strip()
-
-    if len(text) <= max_chars:
-        return text
-
-    truncated = text[:max_chars - 3]
-
-    if " " in truncated:
-        truncated = truncated.rsplit(
-            " ",
-            1
-        )[0]
-
-    return truncated + "..."
-
-
-# ======================================
-# X CLIENT
-# ======================================
 
 def get_twitter_client():
-
-    try:
-
-        api_key = os.getenv(
-            "X_API_KEY"
-        )
-
-        api_secret = os.getenv(
-            "X_API_SECRET"
-        )
-
-        access_token = os.getenv(
-            "X_ACCESS_TOKEN"
-        )
-
-        access_token_secret = os.getenv(
-            "X_ACCESS_TOKEN_SECRET"
-        )
-
-        if not all([
-            api_key,
-            api_secret,
-            access_token,
-            access_token_secret
-        ]):
-
-            print(
-                "⚠️ X API Zugangsdaten fehlen."
-            )
-
-            return None
-
-        return tweepy.Client(
-
-            consumer_key=api_key,
-
-            consumer_secret=api_secret,
-
-            access_token=access_token,
-
-            access_token_secret=access_token_secret
-
-        )
-
-    except Exception as e:
-
-        print(
-            "⚠️ Fehler beim Initialisieren "
-            f"des X Clients: {e}"
-        )
-
-        return None
-
-
-# ======================================
-# SPRACHE
-# ======================================
-
-def detect_language(report):
-
-    if isinstance(report, str):
-
-        match = re.search(
-            r"\(([A-Z]{2})\)",
-            report
-        )
-
-        if match:
-
-            return match.group(1).lower()
-
-    return os.getenv(
-        "APP_LANG",
-        "de"
+  try:
+    client = tweepy.Client(
+        bearer_token=os.getenv("TWITTER_BEARER_TOKEN"),
+        consumer_key=os.getenv("TWITTER_API_KEY"),
+        consumer_secret=os.getenv("TWITTER_API_SECRET"),
+        access_token=os.getenv("TWITTER_ACCESS_TOKEN"),
+        access_token_secret=os.getenv("TWITTER_ACCESS_TOKEN_SECRET"),
     )
+    return client
+  except Exception as e:
+    print(f"⚠️ Fehler beim Initialisieren des Twitter Clients: {e}")
+    return None
 
 
-# ======================================
-# X THREAD
-# ======================================
+def format_large_number(num):
+  if not isinstance(num, (int, float)):
+    return "0"
+  if num >= 1_000_000_000:
+    return f"{num / 1_000_000_000:.2f}B"
+  elif num >= 1_000_000:
+    return f"{num / 1_000_000:.2f}M"
+  elif num >= 1_000:
+    return f"{num / 1_000:.1f}K"
+  return f"{num:.2f}"
+
+
+def safe_truncate(text: str, max_chars: int) -> str:
+  if not isinstance(text, str) or len(text) <= max_chars:
+    return text or ""
+
+  truncated = text[: max_chars - 3]
+  if " " in truncated:
+    truncated = truncated.rsplit(" ", 1)[0]
+  return truncated + "..."
+
 
 def send_x_thread(
-
-    report="",
-
+    insight="",
     tokenomics=None,
-
     dusd=None,
-
     network=None,
-
     intelligence=None,
-
-    current_history=None,
-
     global_crypto=None,
-
-    market=None
-
+    market=None,
+    lang_code="EN",  # NEU: Sprachcode z.B. EN, DE, RU
 ):
-
-    try:
-
-        # ==================================
-        # CLIENT
-        # ==================================
-
-        client = get_twitter_client()
-
-        if client is None:
-            return False
-
-
-        # ==================================
-        # DATEN ABSICHERN
-        # ==================================
-
-        tokenomics = (
-            tokenomics
-            if isinstance(tokenomics, dict)
-            else {}
-        )
-
-        dusd = (
-            dusd
-            if isinstance(dusd, dict)
-            else {}
-        )
-
-        network = (
-            network
-            if isinstance(network, dict)
-            else {}
-        )
-
-        intelligence = (
-            intelligence
-            if isinstance(intelligence, dict)
-            else {}
-        )
-
-        global_crypto = (
-            global_crypto
-            if isinstance(global_crypto, dict)
-            else {}
-        )
-
-        market = (
-            market
-            if isinstance(market, dict)
-            else {}
-        )
-
-
-        # ==================================
-        # SPRACHE
-        # ==================================
-
-        language = detect_language(
-            report
-        )
-
-        lang = load_language(
-            language
-        )
-
-
-        # ==================================
-        # FLAGGEN
-        # ==================================
-
-        flags = (
-            "🇩🇪 🇬🇧 🇺🇸 🇸🇻 🇺🇾 🇧🇷 🇦🇷 "
-            "🇳🇴 🇸🇪 🇫🇮 🇿🇦 🇦🇺 🇳🇿 "
-            "🇨🇳 🇯🇵 🇮🇳 🇮🇩 🇫🇷 🇪🇸 "
-            "🇵🇹 🇷🇺 🇸🇦"
-        )
-
-
-        # ==================================
-        # MARKT
-        # ==================================
-
-        btc = global_crypto.get(
-            "bitcoin",
-            {}
-        )
-
-        eth = global_crypto.get(
-            "ethereum",
-            {}
-        )
-
-        dfi = market.get(
-            "dfi",
-            {}
-        )
-
-
-        btc_price = btc.get(
-            "price",
-            "N/A"
-        )
-
-        btc_change = safe_float(
-            btc.get(
-                "change",
-                0
-            )
-        )
-
-
-        eth_price = eth.get(
-            "price",
-            "N/A"
-        )
-
-        eth_change = safe_float(
-            eth.get(
-                "change",
-                0
-            )
-        )
-
-
-        dfi_price = dfi.get(
-            "price",
-            dfi.get(
-                "usd",
-                "N/A"
-            )
-        )
-
-        dfi_change = safe_float(
-            dfi.get(
-                "change",
-                0
-            )
-        )
-
-
-        # ==================================
-        # TOKENOMICS
-        #
-        # DIE KEYS ENTSPRECHEN JETZT
-        # DIREKT tokenomics.py
-        # ==================================
-
-        burn = tokenomics.get(
-            "burn",
-            {}
-        )
-
-        if not isinstance(
-            burn,
-            dict
-        ):
-
-            burn = {}
-
-
-        burn_address = burn.get(
-            "address",
-            0
-        )
-
-        burn_fees = burn.get(
-            "fees",
-            0
-        )
-
-        burn_auction = burn.get(
-            "auction",
-            0
-        )
-
-        burn_payback = burn.get(
-            "payback",
-            0
-        )
-
-        burn_total = burn.get(
-            "total",
-            0
-        )
-
-        emission = tokenomics.get(
-            "emission",
-            0
-        )
-
-        net_change = tokenomics.get(
-            "net_change",
-            0
-        )
-
-        tokenomics_status = tokenomics.get(
-            "status",
-            "N/A"
-        )
-
-
-        # ==================================
-        # INTELLIGENCE
-        # ==================================
-
-        score = intelligence.get(
-            "total",
-            intelligence.get(
-                "score",
-                0
-            )
-        )
-
-        status = intelligence.get(
-            "status",
-            "N/A"
-        )
-
-        daily_insight = intelligence.get(
-            "daily_insight",
-            intelligence.get(
-                "insight",
-                ""
-            )
-        )
-
-
-        # ==================================
-        # DUSD
-        # ==================================
-
-        dusd_price = dusd.get(
-            "price",
-            dusd.get(
-                "usd",
-                None
-            )
-        )
-
-        peg_deviation = dusd.get(
-            "peg_deviation",
-            None
-        )
-
-
-        # ==================================
-        # SPRACH-TEXTE
-        # ==================================
-
-        header_title = lang.get(
-            "header_title",
-            "🚀 DeFiChain Intelligence"
-        )
-
-        global_title = lang.get(
-            "global_crypto",
-            "Global Crypto"
-        )
-
-        intelligence_title = lang.get(
-            "intelligence",
-            "Intelligence Score"
-        )
-
-        tokenomics_title = lang.get(
-            "tokenomics",
-            "Tokenomics"
-        )
-
-        network_title = lang.get(
-            "network",
-            "Network"
-        )
-
-        news_title = lang.get(
-            "news",
-            "News"
-        )
-
-        history_title = lang.get(
-            "history",
-            "History"
-        )
-
-
-        # ==================================
-        # TWEET 1
-        # MARKET
-        # ==================================
-
-        post1 = f"""
-{header_title} ({language.upper()})
-
-🌍 {flags}
-
-🌍 {global_title}
+  client = get_twitter_client()
+  if not client:
+    print("❌ Twitter Client nicht verfügbar. Abbruch.")
+    return
+
+  tokenomics = tokenomics or {}
+  network = network or {}
+  intelligence = intelligence or {}
+  market = market or {}
+
+  btc_price = market.get("btc_price", 0)
+  btc_change = market.get("btc_change", 0)
+  btc_signal = "🟢" if btc_change >= 0 else "🔴"
+
+  eth_price = market.get("eth_price", 0)
+  eth_change = market.get("eth_change", 0)
+  eth_signal = "🟢" if eth_change >= 0 else "🔴"
+
+  dfi_price = market.get("dfi_price", 0)
+  dfi_change = market.get("dfi_change", 0)
+  dfi_signal = "🟢" if dfi_change >= 0 else "🔴"
+
+  total_sup = format_large_number(tokenomics.get("total_supply", 0))
+  circ_sup = format_large_number(tokenomics.get("circulating_supply", 0))
+  burned_dfi = format_large_number(tokenomics.get("burned_dfi", 0))
+  daily_minted = format_large_number(tokenomics.get("daily_minted", 0))
+
+  score = intelligence.get("score", 50)
+  status = intelligence.get("status", "Neutral")
+  daily_insight = intelligence.get(
+      "insight", "Netzwerkdaten werden überwacht."
+  )
+
+  # ===================================================
+  # TWEET 1: MARKET OVERVIEW (Zeilenbasiert mit Sprach-Tag)
+  # ===================================================
+  post1 = f"""
+Crypto ({lang_code})
 
 ₿ Bitcoin:
-${format_price(btc_price)}
-{change_emoji(btc_change)} {safe_change(btc_change)}%
+${btc_price:,.2f}
+{btc_signal} {btc_change:.2f}%
 
 Ξ Ethereum:
-${format_price(eth_price)}
-{change_emoji(eth_change)} {safe_change(eth_change)}%
+${eth_price:,.2f}
+{eth_signal} {eth_change:.2f}%
 
 💎 DeFiChain DFI:
-${format_price(dfi_price)}
-{change_emoji(dfi_change)} {safe_change(dfi_change)}%
+${dfi_price:.8f}
+{dfi_signal} {dfi_change:.2f}%
+
+📦 Total Supply: {total_sup} DFI
+💧 Circulating: {circ_sup} DFI
 
 #DeFiChain #DFI
 """.strip()
 
+  if len(post1) > 280:
+    post1 = safe_truncate(post1, 280)
 
-        post1 = safe_truncate(
-            post1,
-            280
-        )
+  try:
+    result1 = client.create_tweet(text=post1)
+    tweet1_id = result1.data["id"]
+    print(f"✅ Tweet 1 ({lang_code}) erfolgreich gesendet!")
+  except Exception as e:
+    print(f"❌ Fehler beim Senden von Tweet 1: {e}")
+    return
 
+  # ===================================================
+  # TWEET 2 & 3
+  # ===================================================
+  insight_snippet = safe_truncate(daily_insight, 90)
 
-        print(
-            "DEBUG-Tweet 1:"
-        )
+  post2 = f"""
+🔥 Burned: {burned_dfi} DFI
+🪙 Daily Minted: {daily_minted} DFI
 
-        print(post1)
+🧠 Score: {score}/100 ({status})
 
-
-        result1 = client.create_tweet(
-            text=post1
-        )
-
-        tweet1_id = result1.data["id"]
-
-        print(
-            "✅ X Tweet 1 gesendet:",
-            tweet1_id
-        )
-
-
-        # ==================================
-        # TWEET 2
-        # TOKENOMICS
-        # ==================================
-
-        net_sign = (
-            "+"
-            if safe_float(net_change) >= 0
-            else ""
-        )
-
-
-        post2 = f"""
-🔥 {tokenomics_title}
-
-🔥 Total Burn: {format_large_number(burn_total)} DFI
-🪙 Emission: {format_large_number(emission)} DFI
-🔥 Net Change: {net_sign}{format_large_number(net_change)} DFI
-
-📍 Address Burn: {format_large_number(burn_address)} DFI
-💸 Fee Burn: {format_large_number(burn_fees)} DFI
-🔨 Auction Burn: {format_large_number(burn_auction)} DFI
-💰 Payback Burn: {format_large_number(burn_payback)} DFI
-
-🧠 {intelligence_title}: {score}/100
-{status}
+💡 Daily Insight:
+{insight_snippet}
 """.strip()
 
+  if len(post2) > 280:
+    post2 = safe_truncate(post2, 280)
 
-        post2 = safe_truncate(
-            post2,
-            280
-        )
+  try:
+    result2 = client.create_tweet(text=post2, in_reply_to_tweet_id=tweet1_id)
+    tweet2_id = result2.data["id"]
+  except Exception as e:
+    print(f"❌ Fehler beim Senden von Tweet 2: {e}")
+    return
 
+  network_status = network.get("network_status", "🟢 Online")
+  news_text = insight if isinstance(insight, str) else ""
+  news_snippet = safe_truncate(news_text, 130)
 
-        print(
-            "DEBUG-Tweet 2:"
-        )
+  post3 = f"""
+⛓ Network: {network_status}
 
-        print(post2)
+📰 Daily Update:
+{news_snippet}
 
-
-        result2 = client.create_tweet(
-
-            text=post2,
-
-            in_reply_to_tweet_id=tweet1_id
-
-        )
-
-        tweet2_id = result2.data["id"]
-
-        print(
-            "✅ X Tweet 2 gesendet:",
-            tweet2_id
-        )
-
-
-        # ==================================
-        # TWEET 3
-        # DUSD + NETWORK + NEWS
-        # ==================================
-
-        network_status = network.get(
-            "network_status",
-            "🟢 Online"
-        )
-
-
-        dusd_lines = []
-
-        if dusd_price is not None:
-
-            dusd_lines.append(
-                f"💵 dUSD: "
-                f"${format_price(dusd_price)}"
-            )
-
-        if peg_deviation is not None:
-
-            dusd_lines.append(
-                f"📉 Peg: "
-                f"{safe_float(peg_deviation):.2f}%"
-            )
-
-
-        # ==================================
-        # NEWS
-        # ==================================
-
-        news_text = ""
-
-        if isinstance(
-            report,
-            str
-        ):
-
-            match = re.search(
-
-                r"📰\s*News:\s*(.+?)"
-                r"(?:\n\n|📚|$)",
-
-                report,
-
-                re.DOTALL
-
-            )
-
-            if match:
-
-                news_text = (
-                    match.group(1)
-                    .strip()
-                )
-
-
-        post3 = f"""
-⛓ {network_title}
-
-{network_status}
-
-{" ".join(dusd_lines)}
-
-📰 {news_title}
-
-{news_text if news_text else "DeFiChain Daily Update"}
-
-#DeFiChain #DFI
+#DeFiChain
 """.strip()
 
+  if len(post3) > 280:
+    post3 = safe_truncate(post3, 280)
 
-        post3 = safe_truncate(
-            post3,
-            280
-        )
-
-
-        print(
-            "DEBUG-Tweet 3:"
-        )
-
-        print(post3)
-
-
-        result3 = client.create_tweet(
-
-            text=post3,
-
-            in_reply_to_tweet_id=tweet2_id
-
-        )
-
-        tweet3_id = result3.data["id"]
-
-        print(
-            "✅ X Tweet 3 gesendet:",
-            tweet3_id
-        )
-
-
-        # ==================================
-        # TWEET 4
-        # HISTORY
-        # ==================================
-
-        history_name = (
-            "DeFiChain Update"
-        )
-
-        history_text = ""
-
-        if isinstance(
-            current_history,
-            dict
-        ):
-
-            history_name = (
-                current_history.get(
-                    "title",
-                    "DeFiChain Update"
-                )
-            )
-
-            history_text = (
-                current_history.get(
-                    "text",
-                    current_history.get(
-                        "content",
-                        ""
-                    )
-                )
-            )
-
-
-        post4 = f"""
-📚 {history_title}
-
-{history_name}
-
-{history_text}
-
-#DeFiChain #DFI
-""".strip()
-
-
-        post4 = safe_truncate(
-            post4,
-            280
-        )
-
-
-        print(
-            "DEBUG-Tweet 4:"
-        )
-
-        print(post4)
-
-
-        result4 = client.create_tweet(
-
-            text=post4,
-
-            in_reply_to_tweet_id=tweet3_id
-
-        )
-
-
-        print(
-            "✅ X Tweet 4 gesendet:",
-            result4.data["id"]
-        )
-
-        print(
-            "🎉 X Thread erfolgreich gesendet!"
-        )
-
-        return True
-
-
-    except Exception as e:
-
-        print(
-            "❌ X Fehler:"
-        )
-
-        print(e)
-
-        return False
+  try:
+    client.create_tweet(text=post3, in_reply_to_tweet_id=tweet2_id)
+    print(f"✅ Thread ({lang_code}) komplett.")
+  except Exception as e:
+    print(f"❌ Fehler beim Senden von Tweet 3: {e}")
