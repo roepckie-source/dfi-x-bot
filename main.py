@@ -6,7 +6,7 @@ import os
 import logging
 import requests
 import tweepy
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -17,12 +17,12 @@ ROTATION_LANGUAGES = ["de", "en", "ru"]
 
 def get_daily_language() -> str:
     """Berechnet die Tages-Sprache anhand des Tages im Jahr."""
-    day_of_year = datetime.utcnow().timetuple().tm_yday
+    day_of_year = datetime.now(timezone.utc).timetuple().tm_yday
     return ROTATION_LANGUAGES[day_of_year % len(ROTATION_LANGUAGES)]
 
 
 def safe_float(val, default=0.0):
-    """Konvertiert Werte sicher in Float und fängt None/ungültige Strings ab (erlaubt auch 0 und negative Zahlen)."""
+    """Konvertiert Werte sicher in Float und fängt None/ungültige Strings ab (erlaubt 0 und negative Zahlen)."""
     if val is None:
         return default
     try:
@@ -92,15 +92,14 @@ def get_robust_dfi_data():
         "circulating_supply": 0.0,
     }
 
-    # 1. Primärer Abruf: DeFiLiveScan API
+    # 1. Primärer Abruf: DeFiLiveScan API (aktualisierter Endpunkt)
     try:
         defilive_res = requests.get(
-            "https://api.defilivescan.io/v1/stats", headers=headers, timeout=5
+            "https://defilivescan.io/api/stats", headers=headers, timeout=5
         ).json()
         
         stats = defilive_res.get("data", defilive_res) if isinstance(defilive_res, dict) else {}
 
-        # Abfragen aller gängigen Key-Varianten von DeFiLiveScan
         price = stats.get("dfiPrice") or stats.get("priceUsd") or stats.get("dfi_price") or stats.get("price")
         change = stats.get("priceChange24h") or stats.get("price_change_24h") or stats.get("change24h")
         burned = stats.get("burnedDfi") or stats.get("burned_dfi") or stats.get("burned")
@@ -174,10 +173,11 @@ def fetch_crypto_market_data():
         btc_c = safe_float(res.get("bitcoin", {}).get("usd_24h_change"), 0.0)
         eth_p = safe_float(res.get("ethereum", {}).get("usd"), 2495.0)
         eth_c = safe_float(res.get("ethereum", {}).get("usd_24h_change"), 0.0)
-        
-        # Sicherstellen, dass nicht 0 zurückgegeben wird
-        if btc_p <= 0: btc_p = 81145.0
-        if eth_p <= 0: eth_p = 2495.0
+
+        if btc_p <= 0:
+            btc_p = 81145.0
+        if eth_p <= 0:
+            eth_p = 2495.0
 
         return btc_p, btc_c, eth_p, eth_c
     except Exception as e:
@@ -191,7 +191,6 @@ def post_x_thread_tweepy(dfi_data, btc_p, btc_c, eth_p, eth_c, lang_code="DE", i
     if not client:
         return
 
-    # Sprachvariable absichern, falls versehentlich ein dict übergeben wird
     if isinstance(lang_code, dict):
         lang_str = str(lang_code.get("code") or lang_code.get("lang") or "DE").upper()
     elif isinstance(lang_code, str):
@@ -210,8 +209,7 @@ def post_x_thread_tweepy(dfi_data, btc_p, btc_c, eth_p, eth_c, lang_code="DE", i
     burned_dfi = format_large_number(dfi_data["burned_dfi"])
     daily_minted = format_large_number(dfi_data["daily_minted"])
 
-    # Präziser Zeitstempel verhindert den "403 Duplicate Content" Fehler
-    timestamp_str = datetime.utcnow().strftime("%d.%m.%Y %H:%M:%S UTC")
+    timestamp_str = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M:%S UTC")
 
     # Tweet 1: Market Overview
     post1 = f"""
@@ -268,7 +266,7 @@ ${dfi_price:.8f}
         logging.error(f"❌ Tweepy: Fehler beim Senden von Tweet 2: {e}")
         return
 
-    # Tweet 3: Status & Sauberer Link
+    # Tweet 3: Status & Link
     news_snippet = safe_truncate(insight_text or "DeFiChain Netzwerk läuft stabil.", 90)
     post3 = f"""
 ⛓ Network: 🟢 Online
@@ -297,6 +295,7 @@ def send_telegram(message):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     if not token or not chat_id:
+        logging.warning("⚠️ Telegram Token oder Chat-ID fehlt. Versand übersprungen.")
         return
     try:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -310,6 +309,7 @@ def send_discord(message):
     """Sendet Nachricht an Discord."""
     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
     if not webhook_url:
+        logging.warning("⚠️ Discord Webhook-URL fehlt. Versand übersprungen.")
         return
     try:
         requests.post(webhook_url, json={"content": message}, timeout=10)
@@ -339,7 +339,7 @@ def main():
     telegram_msg = f"""
 🚀 <b>DeFiChain Daily Update</b> ({str(app_lang).upper()})
 
-📅 {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+📅 {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
 
 ━━━━━━━━━━━━━━
 
