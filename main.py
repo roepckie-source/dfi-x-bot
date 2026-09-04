@@ -14,7 +14,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Modul-Importe aus deinem Repository
 from insights import get_daily_insight
-from news import get_daily_news
+from news import get_dfi_news
 from outputs.x_bot import post_x_thread_tweepy
 
 # Logging konfigurieren
@@ -46,17 +46,29 @@ def fetch_market_data():
 
   # 1. DeFiChain Ocean API
   try:
-    stats_res = requests.get(
-        f"{OCEAN_API_URL}/stats", timeout=10
-    ).json().get("data", {})
-    dfi_data["total_supply"] = float(stats_res.get("count", {}).get("tokens", {}).get("total", 1150000000))
-    dfi_data["burned_dfi"] = float(stats_res.get("burned", {}).get("total", 412500000))
-    
+    stats_res = (
+        requests.get(f"{OCEAN_API_URL}/stats", timeout=10)
+        .json()
+        .get("data", {})
+    )
+    dfi_data["total_supply"] = float(
+        stats_res.get("count", {}).get("tokens", {}).get("total", 1150000000)
+    )
+    dfi_data["burned_dfi"] = float(
+        stats_res.get("burned", {}).get("total", 412500000)
+    )
+
     # DFI Preis aus Ocean API Token-Pair holen (Pool 0 = DFI-USDT)
-    tokens_res = requests.get(f"{OCEAN_API_URL}/prices", timeout=10).json().get("data", [])
+    tokens_res = (
+        requests.get(f"{OCEAN_API_URL}/prices", timeout=10)
+        .json()
+        .get("data", [])
+    )
     for t in tokens_res:
       if t.get("currency") == "USDT":
-        dfi_data["price_usd"] = float(t.get("price", {}).get("aggregated", 0.00278))
+        dfi_data["price_usd"] = float(
+            t.get("price", {}).get("aggregated", 0.00278)
+        )
         break
     logging.info("✅ Ocean API Daten erfolgreich erfasst.")
   except Exception as e:
@@ -182,53 +194,51 @@ def main():
   # 1. Daten abrufen
   dfi_data, btc_p, btc_c, eth_p, eth_c = fetch_market_data()
 
-  # 2. Unterstützte Sprachen durchlaufen (z.B. Deutsch 'de')
-  languages = ["de"]
+  # 2. Sprache definieren (aus Umgebungsvariable APP_LANG oder Fallback 'de')
+  lang = os.getenv("APP_LANG", "de")
+  logging.info(f"⚙️ Verarbeite Sprache: {lang}")
 
-  for lang in languages:
-    logging.info(f"⚙️ Verarbeite Sprache: {lang}")
+  # Dynamische Texte laden
+  try:
+    insight_text = get_daily_insight(lang)
+  except Exception:
+    insight_text = "Netzwerk-Parameter und Tokenomics verlaufen stabil."
 
-    # Dynamische Texte laden
-    try:
-      insight_text = get_daily_insight(lang)
-    except Exception:
-      insight_text = "Netzwerk-Parameter und Tokenomics verlaufen stabil."
+  try:
+    news_text = get_dfi_news(lang)
+  except Exception:
+    news_text = "Keine besonderen Ereignisse im Ökosystem."
 
-    try:
-      news_text = get_daily_news(lang)
-    except Exception:
-      news_text = "Keine besonderen Ereignisse im Ökosystem."
+  # A) Messenger-Report generieren und senden
+  messenger_report = build_full_report(
+      lang,
+      dfi_data,
+      btc_p,
+      btc_c,
+      eth_p,
+      eth_c,
+      insight_text,
+      news_text,
+  )
 
-    # A) Messenger-Report generieren und senden
-    messenger_report = build_full_report(
-        lang,
-        dfi_data,
-        btc_p,
-        btc_c,
-        eth_p,
-        eth_c,
-        insight_text,
-        news_text,
+  send_telegram_update(messenger_report)
+  send_discord_update(messenger_report)
+
+  # B) X (Twitter) Thread versenden (mit strikter 280-Zeichen Kürzungs-Logik)
+  try:
+    logging.info("🐦 Starte X-Posting Routine...")
+    post_x_thread_tweepy(
+        dfi_data=dfi_data,
+        btc_p=btc_p,
+        btc_c=btc_c,
+        eth_p=eth_p,
+        eth_c=eth_c,
+        lang_code=lang,
+        insight_text=insight_text,
+        news_text=news_text,
     )
-
-    send_telegram_update(messenger_report)
-    send_discord_update(messenger_report)
-
-    # B) X (Twitter) Thread versenden (mit strikter 280-Zeichen Kürzungs-Logik)
-    try:
-      logging.info("🐦 Starte X-Posting Routine...")
-      post_x_thread_tweepy(
-          dfi_data=dfi_data,
-          btc_p=btc_p,
-          btc_c=btc_c,
-          eth_p=eth_p,
-          eth_c=eth_c,
-          lang_code=lang,
-          insight_text=insight_text,
-          news_text=news_text,
-      )
-    except Exception as e:
-      logging.error(f"❌ Fehler bei der Ausführung von post_x_thread_tweepy: {e}")
+  except Exception as e:
+    logging.error(f"❌ Fehler bei der Ausführung von post_x_thread_tweepy: {e}")
 
   logging.info("🎉 Bot-Durchlauf erfolgreich abgeschlossen!")
 
