@@ -1,5 +1,5 @@
 # ==============================================================
-# DeFiChain Daily Bot - main_v4_test.py / main.py
+# DeFiChain Daily Bot - main.py
 # ==============================================================
 
 import os
@@ -82,8 +82,8 @@ def get_twitter_client():
 
 
 def get_robust_dfi_data():
-    """Holt DFI-Preis, Tokenomics und Supply-Metriken via DeFiLiveScan mit Fallbacks."""
-    headers = {"User-Agent": "Mozilla/5.0"}
+    """Holt DFI-Preis, Tokenomics und Supply-Metriken primär von DeFiLiveScan mit robustem Ocean-Fallback."""
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     data = {
         "price_usd": None,
         "price_change_24h": 0.0,
@@ -98,20 +98,30 @@ def get_robust_dfi_data():
         defilive_res = requests.get(
             "https://api.defilivescan.io/v1/stats", headers=headers, timeout=5
         ).json()
-        if isinstance(defilive_res, dict) and defilive_res.get("success", True):
-            stats = defilive_res.get("data", defilive_res)
-            data["price_usd"] = safe_float(stats.get("price") or stats.get("dfi_price"))
-            data["price_change_24h"] = safe_float(stats.get("price_change_24h"))
-            data["burned_dfi"] = safe_float(stats.get("burned_dfi"))
-            data["total_supply"] = safe_float(stats.get("total_supply"))
-            data["circulating_supply"] = safe_float(stats.get("circulating_supply"))
-            data["daily_minted"] = safe_float(stats.get("daily_minted"))
-            logging.info("✅ Live-Daten erfolgreich via DeFiLiveScan geladen.")
+        
+        stats = defilive_res.get("data", defilive_res) if isinstance(defilive_res, dict) else {}
+
+        # Abfragen aller gängigen Key-Varianten von DeFiLiveScan (CamelCase vs SnakeCase)
+        price = stats.get("dfiPrice") or stats.get("priceUsd") or stats.get("dfi_price") or stats.get("price")
+        change = stats.get("priceChange24h") or stats.get("price_change_24h") or stats.get("change24h")
+        burned = stats.get("burnedDfi") or stats.get("burned_dfi") or stats.get("burned")
+        total = stats.get("totalSupply") or stats.get("total_supply")
+        circ = stats.get("circulatingSupply") or stats.get("circulating_supply")
+        minted = stats.get("dailyMinted") or stats.get("daily_minted")
+
+        if price is not None:
+            data["price_usd"] = safe_float(price)
+            data["price_change_24h"] = safe_float(change)
+            data["burned_dfi"] = safe_float(burned)
+            data["total_supply"] = safe_float(total)
+            data["circulating_supply"] = safe_float(circ)
+            data["daily_minted"] = safe_float(minted)
+            logging.info(f"✅ Live-Daten erfolgreich via DeFiLiveScan geladen: DFI = ${data['price_usd']:.6f}")
     except Exception as e:
         logging.warning(f"⚠️ DeFiLiveScan API nicht erreichbar ({e}), wechsle auf Ocean API...")
 
     # 2. Sekundärer Fallback: Ocean API
-    if not data["price_usd"] or data["total_supply"] <= 0:
+    if not data["price_usd"] or data["price_usd"] <= 0 or data["total_supply"] <= 0:
         try:
             ocean_res = requests.get(
                 "https://ocean.defichain.com/v0/mainnet/stats", headers=headers, timeout=4
@@ -134,15 +144,14 @@ def get_robust_dfi_data():
             price_res = requests.get(
                 "https://ocean.defichain.com/v0/mainnet/prices/DFI-USD", headers=headers, timeout=4
             ).json()
-            if not data["price_usd"]:
-                data["price_usd"] = safe_float(
-                    price_res.get("data", {}).get("price", {}).get("aggregated", {}).get("amount")
-                )
+            raw_p = price_res.get("data", {}).get("price", {}).get("aggregated", {}).get("amount")
+            if not data["price_usd"] or data["price_usd"] <= 0:
+                data["price_usd"] = safe_float(raw_p)
         except Exception as e:
             logging.warning(f"⚠️ Ocean Price API Fehler: {e}")
 
     # 3. Fallback-Werte gegen 0-Anzeigen
-    if data["price_usd"] <= 0:
+    if not data["price_usd"] or data["price_usd"] <= 0:
         data["price_usd"] = 0.00304145
     if data["burned_dfi"] <= 0:
         data["burned_dfi"] = 412500000.0
@@ -157,10 +166,11 @@ def get_robust_dfi_data():
 
 
 def fetch_crypto_market_data():
-    """Holt Marktpreise für BTC und ETH von CoinGecko."""
+    """Holt Marktpreise für BTC und ETH von CoinGecko mit User-Agent."""
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     try:
         url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true"
-        res = requests.get(url, timeout=5).json()
+        res = requests.get(url, headers=headers, timeout=5).json()
         btc_p = safe_float(res.get("bitcoin", {}).get("usd"), 81145.0)
         btc_c = safe_float(res.get("bitcoin", {}).get("usd_24h_change"), 0.0)
         eth_p = safe_float(res.get("ethereum", {}).get("usd"), 2495.0)
@@ -177,7 +187,13 @@ def post_x_thread_tweepy(dfi_data, btc_p, btc_c, eth_p, eth_c, lang_code="DE", i
     if not client:
         return
 
-    lang_str = lang_code.upper()
+    # Sprachvariable absichern, falls versehentlich ein dict übergeben wird
+    if isinstance(lang_code, dict):
+        lang_str = str(lang_code.get("code") or lang_code.get("lang") or "DE").upper()
+    elif isinstance(lang_code, str):
+        lang_str = lang_code.upper()
+    else:
+        lang_str = "DE"
 
     dfi_price = dfi_data["price_usd"]
     dfi_change = dfi_data["price_change_24h"]
@@ -299,12 +315,11 @@ def send_discord(message):
 
 
 def main():
-    logging.info("🚀 DeFiChain Intelligence v5 startet...")
+    logging.info("🚀 DeFiChain Intelligence startet...")
 
     # 1. Tages-Sprache ermitteln
     app_lang = os.getenv("APP_LANG", get_daily_language())
-    logging.info(f"🌐 Sprache bereits für heute: {app_lang}")
-    logging.info(f"🌍 Sprache: {app_lang}")
+    logging.info(f"🌐 Aktuelle Sprache für heute: {app_lang}")
 
     # 2. Daten laden
     dfi_data = get_robust_dfi_data()
@@ -318,7 +333,7 @@ def main():
     eth_sig = "🟢" if eth_c >= 0 else "🔴"
 
     telegram_msg = f"""
-🚀 <b>DeFiChain Daily Update</b> ({app_lang.upper()})
+🚀 <b>DeFiChain Daily Update</b> ({str(app_lang).upper()})
 
 📅 {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
 
@@ -345,7 +360,7 @@ def main():
 #DeFiChain #DFI
 """
     send_telegram(telegram_msg)
-    send_discord(f"📊 DeFiChain Update ({app_lang.upper()}):\nDFI: ${dfi_data['price_usd']:.6f} | BTC: ${btc_p:,.2f} | ETH: ${eth_p:,.2f}\nhttps://defilivescan.io")
+    send_discord(f"📊 DeFiChain Update ({str(app_lang).upper()}):\nDFI: ${dfi_data['price_usd']:.6f} | BTC: ${btc_p:,.2f} | ETH: ${eth_p:,.2f}\nhttps://defilivescan.io")
 
     # 4. Tweets via Tweepy veröffentlichen
     post_x_thread_tweepy(
@@ -354,12 +369,12 @@ def main():
         btc_c=btc_c,
         eth_p=eth_p,
         eth_c=eth_c,
-        lang_code=app_lang,
+        lang_code=str(app_lang),
         insight_text=insight_text,
     )
 
     logging.info("🐦 X Thread erfolgreich ausgeführt")
-    logging.info("✅ v5 Report vollständig gesendet!")
+    logging.info("✅ Report vollständig gesendet!")
 
 
 if __name__ == "__main__":
