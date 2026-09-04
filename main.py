@@ -1,12 +1,12 @@
 # ==============================================================
-# DeFiChain Daily Bot - Main Script (mit Tweepy Integration)
+# DeFiChain Daily Bot - main_v4_test.py / main.py
 # ==============================================================
 
-from datetime import datetime
 import os
 import logging
 import requests
 import tweepy
+from datetime import datetime
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -17,7 +17,7 @@ ROTATION_LANGUAGES = ["de", "en", "ru"]
 
 def get_daily_language() -> str:
     """Berechnet die Tages-Sprache anhand des Tages im Jahr."""
-    day_of_year = datetime.now().timetuple().tm_yday
+    day_of_year = datetime.utcnow().timetuple().tm_yday
     return ROTATION_LANGUAGES[day_of_year % len(ROTATION_LANGUAGES)]
 
 
@@ -64,7 +64,7 @@ def get_twitter_client():
     bearer_token = os.getenv("X_BEARER_TOKEN") or os.getenv("TWITTER_BEARER_TOKEN")
 
     if not all([api_key, api_secret, access_token, access_token_secret]):
-        logging.warning("⚠️ X/Twitter API Keys fehlen in den Umgebungsvariablen. Tweets werden übersprungen.")
+        logging.warning("⚠️ X/Twitter API Keys fehlen in den Umgebungsvariablen. X-Versand wird übersprungen.")
         return None
 
     try:
@@ -190,9 +190,12 @@ def post_x_thread_tweepy(dfi_data, btc_p, btc_c, eth_p, eth_c, lang_code="DE", i
     burned_dfi = format_large_number(dfi_data["burned_dfi"])
     daily_minted = format_large_number(dfi_data["daily_minted"])
 
-    # Tweet 1: Market Overview & Supply
+    # Präziser Zeitstempel verhindert den "403 Duplicate Content" Fehler
+    timestamp_str = datetime.utcnow().strftime("%d.%m.%Y %H:%M:%S UTC")
+
+    # Tweet 1: Market Overview
     post1 = f"""
-Crypto ({lang_str})
+Crypto ({lang_str}) · {timestamp_str}
 
 ₿ Bitcoin:
 ${btc_p:,.2f}
@@ -206,8 +209,7 @@ ${eth_p:,.2f}
 ${dfi_price:.8f}
 {dfi_sig} {dfi_change:.2f}%
 
-📦 Total Supply: {total_sup} DFI
-💧 Circulating: {circ_sup} DFI
+📦 Total: {total_sup} DFI | 💧 Circ: {circ_sup} DFI
 
 #DeFiChain #DFI
 """.strip()
@@ -246,7 +248,7 @@ ${dfi_price:.8f}
         logging.error(f"❌ Tweepy: Fehler beim Senden von Tweet 2: {e}")
         return
 
-    # Tweet 3: Status & Sauberer DeFiLiveScan-Link
+    # Tweet 3: Status & Sauberer Link
     news_snippet = safe_truncate(insight_text or "DeFiChain Netzwerk läuft stabil.", 90)
     post3 = f"""
 ⛓ Network: 🟢 Online
@@ -279,17 +281,30 @@ def send_telegram(message):
     try:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         requests.post(url, json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"}, timeout=10)
-        logging.info("✅ Telegram-Nachricht gesendet.")
+        logging.info("🤖 Telegram Nachricht erfolgreich gesendet")
     except Exception as e:
         logging.error(f"❌ Telegram Fehler: {e}")
 
 
+def send_discord(message):
+    """Sendet Nachricht an Discord."""
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    if not webhook_url:
+        return
+    try:
+        requests.post(webhook_url, json={"content": message}, timeout=10)
+        logging.info("💬 Discord erfolgreich gesendet")
+    except Exception as e:
+        logging.error(f"❌ Discord Fehler: {e}")
+
+
 def main():
-    logging.info("🚀 DeFiChain Daily Bot startet...")
+    logging.info("🚀 DeFiChain Intelligence v5 startet...")
 
     # 1. Tages-Sprache ermitteln
     app_lang = os.getenv("APP_LANG", get_daily_language())
-    logging.info(f"🌐 Aktive Tages-Sprache: {app_lang.upper()}")
+    logging.info(f"🌐 Sprache bereits für heute: {app_lang}")
+    logging.info(f"🌍 Sprache: {app_lang}")
 
     # 2. Daten laden
     dfi_data = get_robust_dfi_data()
@@ -297,18 +312,7 @@ def main():
 
     insight_text = f"Live-Analyse: DFI bei ${dfi_data['price_usd']:.6f} ({dfi_data['price_change_24h']:+.2f}% 24h)."
 
-    # 3. Tweets via Tweepy veröffentlichen
-    post_x_thread_tweepy(
-        dfi_data=dfi_data,
-        btc_p=btc_p,
-        btc_c=btc_c,
-        eth_p=eth_p,
-        eth_c=eth_c,
-        lang_code=app_lang,
-        insight_text=insight_text,
-    )
-
-    # 4. Telegram Formatierung & Versenden
+    # 3. Telegram & Discord versenden
     dfi_sig = "🟢" if dfi_data["price_change_24h"] >= 0 else "🔴"
     btc_sig = "🟢" if btc_c >= 0 else "🔴"
     eth_sig = "🟢" if eth_c >= 0 else "🔴"
@@ -341,8 +345,21 @@ def main():
 #DeFiChain #DFI
 """
     send_telegram(telegram_msg)
+    send_discord(f"📊 DeFiChain Update ({app_lang.upper()}):\nDFI: ${dfi_data['price_usd']:.6f} | BTC: ${btc_p:,.2f} | ETH: ${eth_p:,.2f}\nhttps://defilivescan.io")
 
-    logging.info("✅ Bot-Durchlauf komplett beendet.")
+    # 4. Tweets via Tweepy veröffentlichen
+    post_x_thread_tweepy(
+        dfi_data=dfi_data,
+        btc_p=btc_p,
+        btc_c=btc_c,
+        eth_p=eth_p,
+        eth_c=eth_c,
+        lang_code=app_lang,
+        insight_text=insight_text,
+    )
+
+    logging.info("🐦 X Thread erfolgreich ausgeführt")
+    logging.info("✅ v5 Report vollständig gesendet!")
 
 
 if __name__ == "__main__":
