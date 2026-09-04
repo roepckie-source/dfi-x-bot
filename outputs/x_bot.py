@@ -47,7 +47,7 @@ def get_twitter_client():
     bearer_token = os.getenv("X_BEARER_TOKEN") or os.getenv("TWITTER_BEARER_TOKEN")
 
     if not all([api_key, api_secret, access_token, access_token_secret]):
-        logging.warning("⚠️ X/Twitter API Keys fehlen in den Umgebungsvariablen. Versand wird übersprungen.")
+        logging.warning("⚠️ X/Twitter API Keys fehlen in den Umgebungsvariablen.")
         return None
 
     try:
@@ -81,15 +81,27 @@ def send_x_thread(
     if not client:
         return
 
-    lang_str = lang_code.upper()
+    # 🛠️ Sichere Extraktion von lang_code (fängt Dict, String oder None ab)
+    if isinstance(lang_code, dict):
+        lang_str = str(lang_code.get("code") or lang_code.get("lang") or "de").upper()
+    elif isinstance(lang_code, str):
+        lang_str = lang_code.upper()
+    else:
+        lang_str = "DE"
+
+    # Absicherung für Dictionaries
+    global_crypto = global_crypto if isinstance(global_crypto, dict) else {}
+    tokenomics = tokenomics if isinstance(tokenomics, dict) else {}
+    intelligence = intelligence if isinstance(intelligence, dict) else {}
+    network = network if isinstance(network, dict) else {}
 
     # Preissignale & Werte extrahieren
-    btc_p = global_crypto.get("btc_price", 81145.0)
-    btc_c = global_crypto.get("btc_change", 0.0)
-    eth_p = global_crypto.get("eth_price", 2495.0)
-    eth_c = global_crypto.get("eth_change", 0.0)
-    dfi_p = global_crypto.get("dfi_price", 0.00304145)
-    dfi_c = global_crypto.get("dfi_change", 0.0)
+    btc_p = float(global_crypto.get("btc_price") or 0.0)
+    btc_c = float(global_crypto.get("btc_change") or 0.0)
+    eth_p = float(global_crypto.get("eth_price") or 0.0)
+    eth_c = float(global_crypto.get("eth_change") or 0.0)
+    dfi_p = float(global_crypto.get("dfi_price") or 0.0)
+    dfi_c = float(global_crypto.get("dfi_change") or 0.0)
 
     btc_sig = "🟢" if btc_c >= 0 else "🔴"
     eth_sig = "🟢" if eth_c >= 0 else "🔴"
@@ -106,11 +118,11 @@ def send_x_thread(
     status_str = intelligence.get("status", "Stabil")
     net_status = network.get("network_status", "🟢 Online")
 
-    # WICHTIG: Sekunden-Zeitstempel verhindert den "403 Duplicate Content"-Fehler
+    # Timestamp verhindert "403 Duplicate Content" bei X
     timestamp_str = datetime.utcnow().strftime("%d.%m.%Y %H:%M:%S UTC")
 
     # ===================================================
-    # TWEET 1: MARKETS & SUPPLY (Unique Content dank Timestamp)
+    # TWEET 1: MARKETS & SUPPLY
     # ===================================================
     post1 = f"""
 Crypto ({lang_str}) · {timestamp_str}
@@ -146,7 +158,9 @@ ${dfi_p:.8f}
     # ===================================================
     # TWEET 2: TOKENOMICS & INTELLIGENCE
     # ===================================================
-    insight_snippet = safe_truncate(insight or "Netzwerkdaten werden überwacht.", 90)
+    insight_text = insight if isinstance(insight, str) else "Netzwerkdaten werden überwacht."
+    insight_snippet = safe_truncate(insight_text, 90)
+
     post2 = f"""
 🔥 Burned: {burned_dfi} DFI
 🪙 Daily Minted: {daily_minted} DFI
@@ -171,7 +185,7 @@ ${dfi_p:.8f}
     # ===================================================
     # TWEET 3: NETWORK STATUS & DEFILIVESCAN LINK
     # ===================================================
-    news_snippet = safe_truncate(insight or "DeFiChain-Netzwerk läuft stabil.", 90)
+    news_snippet = safe_truncate(insight_text, 90)
     post3 = f"""
 ⛓ Network: {net_status}
 
