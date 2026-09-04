@@ -22,7 +22,7 @@ def get_daily_language() -> str:
 
 
 def safe_float(val, default=0.0):
-    """Konvertiert Werte sicher in Float und fängt None/ungültige Strings ab (erlaubt 0 und negative Zahlen)."""
+    """Konvertiert Werte sicher in Float und fängt None/ungültige Strings ab."""
     if val is None:
         return default
     try:
@@ -32,7 +32,7 @@ def safe_float(val, default=0.0):
 
 
 def format_large_number(num):
-    """Formatiert große Zahlen kompakt (z.B. 1.15B, 829.00M, 288.0K)."""
+    """Formatiert große Zahlen kompakt (z.B. 1.15B, 829.00M, 70.3K)."""
     num = safe_float(num)
     if num >= 1_000_000_000:
         return f"{num / 1_000_000_000:.2f}B"
@@ -92,7 +92,7 @@ def get_robust_dfi_data():
         "circulating_supply": 0.0,
     }
 
-    # 1. Primärer Abruf: DeFiLiveScan API (aktualisierter Endpunkt)
+    # 1. Primärer Abruf: DeFiLiveScan API
     try:
         defilive_res = requests.get(
             "https://defilivescan.io/api/stats", headers=headers, timeout=5
@@ -133,8 +133,12 @@ def get_robust_dfi_data():
                 data["total_supply"] = safe_float(supply_data.get("total"))
             if data["circulating_supply"] <= 0:
                 data["circulating_supply"] = safe_float(supply_data.get("circulating"))
+            
+            # Ocean liefert die Emission pro Block (30s) -> 2880 Blöcke/Tag = Tagesemission
             if data["daily_minted"] <= 0:
-                data["daily_minted"] = safe_float(ocean_data.get("emission", {}).get("total"))
+                block_emission = safe_float(ocean_data.get("emission", {}).get("total"))
+                data["daily_minted"] = block_emission * 2880 if block_emission > 0 else 70300.0
+
         except Exception as e:
             logging.warning(f"⚠️ Ocean Stats API Fehler: {e}")
 
@@ -148,13 +152,13 @@ def get_robust_dfi_data():
         except Exception as e:
             logging.warning(f"⚠️ Ocean Price API Fehler: {e}")
 
-    # 3. Fallback-Werte gegen 0-Anzeigen
+    # 3. Fallback-Werte bei Ausfall aller APIs
     if not data["price_usd"] or data["price_usd"] <= 0:
-        data["price_usd"] = 0.00304145
+        data["price_usd"] = 0.00278
     if data["burned_dfi"] <= 0:
         data["burned_dfi"] = 412500000.0
     if data["daily_minted"] <= 0:
-        data["daily_minted"] = 288000.0
+        data["daily_minted"] = 70300.0
     if data["total_supply"] <= 0:
         data["total_supply"] = 1150000000.0
     if data["circulating_supply"] <= 0:
@@ -164,25 +168,25 @@ def get_robust_dfi_data():
 
 
 def fetch_crypto_market_data():
-    """Holt Marktpreise für BTC und ETH von CoinGecko mit User-Agent."""
+    """Holt Marktpreise für BTC und ETH von CoinGecko."""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     try:
         url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true"
         res = requests.get(url, headers=headers, timeout=5).json()
-        btc_p = safe_float(res.get("bitcoin", {}).get("usd"), 81145.0)
+        btc_p = safe_float(res.get("bitcoin", {}).get("usd"), 80941.0)
         btc_c = safe_float(res.get("bitcoin", {}).get("usd_24h_change"), 0.0)
-        eth_p = safe_float(res.get("ethereum", {}).get("usd"), 2495.0)
+        eth_p = safe_float(res.get("ethereum", {}).get("usd"), 2511.45)
         eth_c = safe_float(res.get("ethereum", {}).get("usd_24h_change"), 0.0)
 
         if btc_p <= 0:
-            btc_p = 81145.0
+            btc_p = 80941.0
         if eth_p <= 0:
-            eth_p = 2495.0
+            eth_p = 2511.45
 
         return btc_p, btc_c, eth_p, eth_c
     except Exception as e:
         logging.warning(f"⚠️ CoinGecko API Fehler: {e}. Nutze Standardwerte.")
-        return 81145.0, 0.0, 2495.0, 0.0
+        return 80941.0, 0.0, 2511.45, 0.0
 
 
 def post_x_thread_tweepy(dfi_data, btc_p, btc_c, eth_p, eth_c, lang_code="DE", insight_text=""):
@@ -211,7 +215,7 @@ def post_x_thread_tweepy(dfi_data, btc_p, btc_c, eth_p, eth_c, lang_code="DE", i
 
     timestamp_str = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M:%S UTC")
 
-    # Tweet 1: Market Overview
+    # Tweet 1: Marktübersicht
     post1 = f"""
 Crypto ({lang_str}) · {timestamp_str}
 
@@ -266,7 +270,7 @@ ${dfi_price:.8f}
         logging.error(f"❌ Tweepy: Fehler beim Senden von Tweet 2: {e}")
         return
 
-    # Tweet 3: Status & Link
+    # Tweet 3: Status & Link (Saubere Trennung von Link & Hashtag)
     news_snippet = safe_truncate(insight_text or "DeFiChain Netzwerk läuft stabil.", 90)
     post3 = f"""
 ⛓ Network: 🟢 Online
