@@ -1,216 +1,148 @@
-# ==============================
-# DeFiChain Daily Bot - Main Script
-# ==============================
-
 import os
+import json
+import logging
 import requests
 from datetime import datetime
 
-from modules.language import load_language
-from market import get_market_data
-from news import get_dfi_news
-from comparison import get_comparison
-from telegram_bot import send_telegram
-from discord_bot import send_discord
-from x_bot import send_x_thread, format_large_number
+# Setup Logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Sprachrotation für täglichen Wechsel
-ROTATION_LANGUAGES = ["de", "en", "ru"]
+# Configuration & API Credentials
+CONFIG = {
+    "TELEGRAM_BOT_TOKEN": os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN"),
+    "TELEGRAM_CHAT_ID": os.getenv("TELEGRAM_CHAT_ID", "@your_channel_or_chat_id"),
+    "DISCORD_WEBHOOK_URL": os.getenv("DISCORD_WEBHOOK_URL", "YOUR_DISCORD_WEBHOOK_URL"),
+    "X_API_KEY": os.getenv("X_API_KEY", "YOUR_X_API_KEY"),
+}
 
-def get_daily_language() -> str:
-    """Berechnet die Tages-Sprache anhand des Tages im Jahr."""
-    day_of_year = datetime.now().timetuple().tm_yday
-    return ROTATION_LANGUAGES[day_of_year % len(ROTATION_LANGUAGES)]
-
-def safe_float(val, default=0.0):
-    """Konvertiert Werte sicher in Float und fängt 0/None ab."""
-    if val is None:
-        return default
+def fetch_crypto_metrics():
+    """Holt aktuelle Marktdaten von öffentlichen APIs (z. B. CoinGecko)."""
+    logging.info("Hole aktuelle Kryptomarktdaten...")
     try:
-        res = float(val)
-        return res if res > 0 else default
-    except (ValueError, TypeError):
-        return default
-
-def get_robust_dfi_data():
-    """Holt DFI-Preis, Tokenomics und Supply-Metriken via DeFiLiveScan mit Fallbacks."""
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    data = {
-        "price_usd": None,
-        "price_change_24h": 0.0,
-        "burned_dfi": 0.0,
-        "daily_minted": 0.0,
-        "total_supply": 0.0,
-        "circulating_supply": 0.0
-    }
-    
-    # 1. Primärer Abruf: DeFiLiveScan API
-    try:
-        defilive_res = requests.get("https://api.defilivescan.io/v1/stats", headers=headers, timeout=5).json()
-        if isinstance(defilive_res, dict) and defilive_res.get("success", True):
-            stats = defilive_res.get("data", defilive_res)
-            data["price_usd"] = safe_float(stats.get("price") or stats.get("dfi_price"))
-            data["price_change_24h"] = safe_float(stats.get("price_change_24h"))
-            data["burned_dfi"] = safe_float(stats.get("burned_dfi"))
-            data["total_supply"] = safe_float(stats.get("total_supply"))
-            data["circulating_supply"] = safe_float(stats.get("circulating_supply"))
-            data["daily_minted"] = safe_float(stats.get("daily_minted"))
-            print("✅ Live-Daten erfolgreich via DeFiLiveScan geladen.")
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=defichain,bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true"
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        
+        return {
+            "dfi_usd": data.get("defichain", {}).get("usd", 0.0018),
+            "dfi_change": data.get("defichain", {}).get("usd_24h_change", 0.0),
+            "btc_usd": data.get("bitcoin", {}).get("usd", 76800),
+            "btc_change": data.get("bitcoin", {}).get("usd_24h_change", 0.0),
+            "eth_usd": data.get("ethereum", {}).get("usd", 2380),
+            "eth_change": data.get("ethereum", {}).get("usd_24h_change", 0.0),
+            "date": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        }
     except Exception as e:
-        print(f"⚠️ DeFiLiveScan API nicht erreichbar ({e}), wechsle auf Ocean API...")
+        logging.error(f"Fehler beim Abrufen der Marktdaten: {e}")
+        # Fallback-Daten
+        return {
+            "dfi_usd": 0.0018, "dfi_change": 0.0,
+            "btc_usd": 76800, "btc_change": 0.0,
+            "eth_usd": 2380, "eth_change": 0.0,
+            "date": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        }
 
-    # 2. Sekundärer Fallback: Ocean API
-    if not data["price_usd"] or data["total_supply"] <= 0:
-        try:
-            ocean_res = requests.get("https://ocean.defichain.com/v0/mainnet/stats", headers=headers, timeout=4).json()
-            ocean_data = ocean_res.get("data", {})
-            supply_data = ocean_data.get("tokens", {}).get("supply", {})
-            
-            if data["burned_dfi"] <= 0:
-                data["burned_dfi"] = safe_float(supply_data.get("burned"))
-            if data["total_supply"] <= 0:
-                data["total_supply"] = safe_float(supply_data.get("total"))
-            if data["circulating_supply"] <= 0:
-                data["circulating_supply"] = safe_float(supply_data.get("circulating"))
-            if data["daily_minted"] <= 0:
-                data["daily_minted"] = safe_float(ocean_data.get("emission", {}).get("total"))
-        except Exception as e:
-            print(f"⚠️ Ocean Stats API Fehler: {e}")
-            
-        try:
-            price_res = requests.get("https://ocean.defichain.com/v0/mainnet/prices/DFI-USD", headers=headers, timeout=4).json()
-            if not data["price_usd"]:
-                data["price_usd"] = safe_float(price_res.get("data", {}).get("price", {}).get("aggregated", {}).get("amount"))
-        except Exception as e:
-            print(f"⚠️ Ocean Price API Fehler: {e}")
-
-    # 3. Tertiärer Fallback: Konservative Standardwerte gegen 0-Anzeigen
-    if data["price_usd"] <= 0:
-        data["price_usd"] = 0.00304145
-    if data["burned_dfi"] <= 0:
-        data["burned_dfi"] = 412500000.0
-    if data["daily_minted"] <= 0:
-        data["daily_minted"] = 288000.0
-    if data["total_supply"] <= 0:
-        data["total_supply"] = 1150000000.0
-    if data["circulating_supply"] <= 0:
-        data["circulating_supply"] = 829000000.0
-
-    return data
-
-def main():
-    print("🚀 DeFiChain Bot startet...")
+def generate_tweets_and_posts(metrics):
+    """Generiert alle vordefinierten Social-Media-Posts/Tweets in allen unterstützten Sprachen."""
     
-    # 1. Sprache per Rotation oder Environment wählen
-    app_lang = os.getenv("APP_LANG", get_daily_language())
-    print(f"🌐 Aktive Tages-Sprache: {app_lang.upper()}")
-    
-    lang = load_language(app_lang)
-    
-    # 2. Daten abrufen
-    market = get_market_data() or {}
-    news = get_dfi_news() or {}
-    robust_dfi = get_robust_dfi_data()
-    
-    dfi_price = robust_dfi["price_usd"]
-    dfi_change = robust_dfi["price_change_24h"]
-    
-    btc = market.get("bitcoin", market.get("btc", {}))
-    eth = market.get("ethereum", market.get("eth", {}))
-    
-    btc_price = safe_float(btc.get("usd", btc.get("price")), 81145.0)
-    btc_change = safe_float(btc.get("usd_24h_change", btc.get("change")), 0.0)
-    
-    eth_price = safe_float(eth.get("usd", eth.get("price")), 2495.0)
-    eth_change = safe_float(eth.get("usd_24h_change", eth.get("change")), 0.0)
+    date_str = metrics["date"]
+    dfi_p, dfi_c = metrics["dfi_usd"], metrics["dfi_change"]
+    btc_p, btc_c = metrics["btc_usd"], metrics["btc_change"]
+    eth_p, eth_c = metrics["eth_usd"], metrics["eth_change"]
 
-    # 3. Datenstrukturen aufbauen
-    x_market_data = {
-        "btc_price": btc_price,
-        "btc_change": btc_change,
-        "eth_price": eth_price,
-        "eth_change": eth_change,
-        "dfi_price": dfi_price,
-        "dfi_change": dfi_change
-    }
-    
-    tokenomics_data = {
-        "burned_dfi": robust_dfi["burned_dfi"],
-        "daily_minted": robust_dfi["daily_minted"],
-        "total_supply": robust_dfi["total_supply"],
-        "circulating_supply": robust_dfi["circulating_supply"]
-    }
-    
-    intelligence_data = {
-        "score": 67,
-        "status": lang.get("status_stable", "Stabil"),
-        "insight": f"🟢 Live-Analyse: DFI bei ${dfi_price:.6f} ({dfi_change:+.2f}% 24h)."
-    }
-    
-    network_data = {
-        "network_status": "🟢 Online"
-    }
-
-    # 4. Telegram & Discord Ausgaben
-    comparison = get_comparison(market)
-    send_discord(market, network_data, comparison, news)
-
-    dfi_signal = "🟢" if dfi_change >= 0 else "🔴"
-    btc_signal = "🟢" if btc_change >= 0 else "🔴"
-    eth_signal = "🟢" if eth_change >= 0 else "🔴"
-
-    total_sup_str = format_large_number(robust_dfi["total_supply"])
-    circ_sup_str = format_large_number(robust_dfi["circulating_supply"])
-    burned_str = format_large_number(robust_dfi["burned_dfi"])
-    minted_str = format_large_number(robust_dfi["daily_minted"])
-
-    telegram_message = f"""
-🚀 <b>{lang.get('header_title', 'DeFiChain Daily Update')}</b> ({app_lang.upper()})
-
-📅 {news.get('date', '')}
-🤖 Report #{news.get('report', '')}
-
-━━━━━━━━━━━━━━
-
-💰 <b>{lang.get('section_dfi', 'DFI Market & Tokenomics')}</b>
-💎 {lang.get('label_price', 'Price')}: ${dfi_price:.6f} ({dfi_signal} {dfi_change:.2f}%)
-
-📦 {lang.get('label_total_supply', 'Total Supply')}: {total_sup_str} DFI
-💧 {lang.get('label_circulating', 'Circulating')}: {circ_sup_str} DFI
-🔥 {lang.get('label_burned', 'Total Burned')}: {burned_str} DFI
-🪙 {lang.get('label_minted', 'Daily Minted')}: {minted_str} DFI
-
-━━━━━━━━━━━━━━
-
-🌍 <b>{lang.get('section_crypto', 'Crypto Market')}</b>
-₿ Bitcoin: ${btc_price:,.2f} ({btc_signal} {btc_change:.2f}%)
-Ξ Ethereum: ${eth_price:,.2f} ({eth_signal} {eth_change:.2f}%)
-
-━━━━━━━━━━━━━━
-
-📰 <b>{lang.get('section_news', 'Daily Insight')}</b>
-🎯 <b>{news.get('title', '')}</b>
-{news.get('text', '')}
-
-🔍 <b>Live On-Chain Scanner:</b> https://defilivescan.io
-
-#DeFiChain #DFI
-"""
-    send_telegram(telegram_message)
-
-    # 5. X Thread ausführen
-    send_x_thread(
-        insight=news.get("text", ""),
-        tokenomics=tokenomics_data,
-        dusd={},
-        network=network_data,
-        intelligence=intelligence_data,
-        global_crypto=x_market_data,
-        market=x_market_data,
-        lang_code=app_lang
+    # 1. Deutsch (DE)
+    post_de = (
+        f"📊 **Krypto & DeFiChain Update ({date_str})**\n\n"
+        f"🔹 **DFI:** ${dfi_p:.6f} ({dfi_c:+.2f}% 24h)\n"
+        f"🔹 **BTC:** ${btc_p:,.2f} ({btc_c:+.2f}% 24h)\n"
+        f"🔹 **ETH:** ${eth_p:,.2f} ({eth_c:+.2f}% 24h)\n\n"
+        f"💡 Bleibt informiert & überprüft eure Handelsbots! #DeFiChain #DFI #Crypto #TradingBot #Bitcoin"
     )
 
-    print("✅ Bot erfolgreich ausgeführt.")
+    # 2. Englisch (EN - ru.json / en.json Struktur)
+    post_en = (
+        f"📊 **Crypto & DeFiChain Market Update ({date_str})**\n\n"
+        f"🔹 **DFI:** ${dfi_p:.6f} ({dfi_c:+.2f}% 24h)\n"
+        f"🔹 **BTC:** ${btc_p:,.2f} ({btc_c:+.2f}% 24h)\n"
+        f"🔹 **ETH:** ${eth_p:,.2f} ({eth_c:+.2f}% 24h)\n\n"
+        f"💡 Stay tuned & keep your automated strategies running! #DeFiChain #DFI #Crypto #Arbitrage #BTC"
+    )
+
+    # 3. Russisch (RU)
+    post_ru = (
+        f"📊 **Обновление рынка Crypto & DeFiChain ({date_str})**\n\n"
+        f"🔹 **DFI:** ${dfi_p:.6f} ({dfi_c:+.2f}% за 24ч)\n"
+        f"🔹 **BTC:** ${btc_p:,.2f} ({btc_c:+.2f}% за 24ч)\n"
+        f"🔹 **ETH:** ${eth_p:,.2f} ({eth_c:+.2f}% за 24ч)\n\n"
+        f"💡 Следите за обновлениями и проверяйте работу торговых ботов! #DeFiChain #DFI #Crypto #Bitcoin"
+    )
+
+    return {
+        "DE": post_de,
+        "EN": post_en,
+        "RU": post_ru
+    }
+
+def send_to_telegram(message):
+    """Sendet die Nachricht an den konfigurierten Telegram Channel/Bot."""
+    bot_token = CONFIG["TELEGRAM_BOT_TOKEN"]
+    chat_id = CONFIG["TELEGRAM_CHAT_ID"]
+    
+    if bot_token == "YOUR_TELEGRAM_BOT_TOKEN":
+        logging.warning("Telegram Bot Token nicht gesetzt. Überspringe Telegram-Versand.")
+        return
+
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
+    
+    try:
+        res = requests.post(url, json=payload, timeout=10)
+        if res.status_code == 200:
+            logging.info("Erfolgreich an Telegram gesendet!")
+        else:
+            logging.error(f"Telegram Fehler: {res.text}")
+    except Exception as e:
+        logging.error(f"Telegram Sende-Ausnahme: {e}")
+
+def send_to_discord(message):
+    """Sendet die Nachricht an den konfigurierten Discord Webhook."""
+    webhook_url = CONFIG["DISCORD_WEBHOOK_URL"]
+    
+    if webhook_url == "YOUR_DISCORD_WEBHOOK_URL":
+        logging.warning("Discord Webhook URL nicht gesetzt. Überspringe Discord-Versand.")
+        return
+
+    payload = {"content": message}
+    try:
+        res = requests.post(webhook_url, json=payload, timeout=10)
+        if res.status_code in [200, 204]:
+            logging.info("Erfolgreich an Discord gesendet!")
+        else:
+            logging.error(f"Discord Fehler: {res.text}")
+    except Exception as e:
+        logging.error(f"Discord Sende-Ausnahme: {e}")
+
+def main():
+    logging.info("Starte Live-Bot Update-Routine...")
+    
+    # 1. Metriken abrufen
+    metrics = fetch_crypto_metrics()
+    
+    # 2. Posts & Tweets generieren
+    posts = generate_tweets_and_posts(metrics)
+    
+    # 3. Ausgabe auf der Konsole (zum Testen/Review)
+    print("\n" + "="*50)
+    print("GENERIERTE TWEETS / POSTS:")
+    print("="*50)
+    for lang, text in posts.items():
+        print(f"\n--- [{lang}] ---")
+        print(text)
+    print("="*50 + "\n")
+
+    # 4. Automatisierter Versand (Hauptnachricht auf Englisch / Deutsch)
+    send_to_telegram(posts["EN"])
+    send_to_discord(posts["EN"])
 
 if __name__ == "__main__":
     main()
