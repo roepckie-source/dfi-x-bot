@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# History Engine v2.3 (Includes Chapter Metadata)
+# History Engine v2.4 (Fix: Single Increment per Run)
 # ======================================
 
 import json
@@ -37,7 +37,8 @@ def save_state(state):
     print("History State Fehler:", e)
 
 
-def get_history(lang="de"):
+def get_history(lang="de", advance_day=True):
+  """Holt den Eintrag. Advance_day=True schaltet die ID nur einmal weiter."""
   history = load_history()
   if not history:
     return None
@@ -49,10 +50,13 @@ def get_history(lang="de"):
   except (ValueError, TypeError):
     last_id = 0
 
-  next_id = last_id + 1
-
-  if next_id > len(history):
-    next_id = 1
+  # Nur hochzählen, wenn advance_day=True übergeben wird
+  if advance_day:
+    next_id = last_id + 1
+    if next_id > len(history):
+      next_id = 1
+  else:
+    next_id = last_id if last_id > 0 else 1
 
   current = None
 
@@ -68,27 +72,28 @@ def get_history(lang="de"):
   if current is None:
     current = history[0]
 
-  try:
-    state["last_id"] = int(current.get("id", 1))
-  except (ValueError, TypeError):
-    state["last_id"] = 1
+  # Nur speichern, wenn der Tag weitergeschaltet wurde
+  if advance_day:
+    try:
+      state["last_id"] = int(current.get("id", 1))
+    except (ValueError, TypeError):
+      state["last_id"] = 1
 
-  title_val = current.get("title", "")
-  if isinstance(title_val, dict):
-    state["last_title"] = title_val.get(lang, title_val.get("de", ""))
-  else:
-    state["last_title"] = str(title_val)
+    title_val = current.get("title", "")
+    if isinstance(title_val, dict):
+      state["last_title"] = title_val.get(lang, title_val.get("de", ""))
+    else:
+      state["last_title"] = str(title_val)
 
-  save_state(state)
+    save_state(state)
 
   return current
 
 
-def get_history_text(lang="de"):
-  """Gibt den formatierten Text inklusive Tag-Anzahl (z. B. Tag 2/100) zurück."""
+def get_history_text(lang="de", advance_day=True):
   history = load_history()
   total_count = len(history) if history else 100
-  chapter = get_history(lang)
+  chapter = get_history(lang, advance_day=advance_day)
 
   if not chapter:
     return "Keine besonderen Ereignisse im Ökosystem."
@@ -105,7 +110,6 @@ def get_history_text(lang="de"):
   return f"[{label} {chap_id}/{total_count}]\n{story_text}"
 
 
-# Aliase für Kompatibilität
 get_history_chapter = get_history
 get_next_history_story = get_history_text
 get_dfi_news = get_history_text
