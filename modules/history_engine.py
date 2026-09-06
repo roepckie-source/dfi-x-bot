@@ -1,6 +1,6 @@
 # ======================================
 # DeFiChain Intelligence v5
-# History Engine v2.4 (Fix: Single Increment per Run)
+# History Engine v2.4 (Single Increment Fix)
 # ======================================
 
 import json
@@ -38,7 +38,11 @@ def save_state(state):
 
 
 def get_history(lang="de", advance_day=True):
-  """Holt den Eintrag. Advance_day=True schaltet die ID nur einmal weiter."""
+  """Holt das aktuelle Kapitel aus dfi_history.json.
+
+  Advance_day=True schaltet den Zähler um 1 weiter (nur bei der 1. Sprache
+  nutzen).
+  """
   history = load_history()
   if not history:
     return None
@@ -50,7 +54,7 @@ def get_history(lang="de", advance_day=True):
   except (ValueError, TypeError):
     last_id = 0
 
-  # Nur hochzählen, wenn advance_day=True übergeben wird
+  # Nur weiterzählen, wenn advance_day=True übergeben wurde
   if advance_day:
     next_id = last_id + 1
     if next_id > len(history):
@@ -72,7 +76,7 @@ def get_history(lang="de", advance_day=True):
   if current is None:
     current = history[0]
 
-  # Nur speichern, wenn der Tag weitergeschaltet wurde
+  # State nur speichern, wenn der Tag weitergeschaltet wurde
   if advance_day:
     try:
       state["last_id"] = int(current.get("id", 1))
@@ -91,6 +95,7 @@ def get_history(lang="de", advance_day=True):
 
 
 def get_history_text(lang="de", advance_day=True):
+  """Liefert den formatierten Nachrichtentext mit Tagesanzeige (z. B. [Tag 78/100])."""
   history = load_history()
   total_count = len(history) if history else 100
   chapter = get_history(lang, advance_day=advance_day)
@@ -110,6 +115,7 @@ def get_history_text(lang="de", advance_day=True):
   return f"[{label} {chap_id}/{total_count}]\n{story_text}"
 
 
+# Aliase für Kompatibilität
 get_history_chapter = get_history
 get_next_history_story = get_history_text
 get_dfi_news = get_history_text
