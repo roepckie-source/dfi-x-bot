@@ -6,15 +6,11 @@ import logging
 import os
 import tweepy
 
-# Logging konfigurieren
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
-# ==============================================================
-# HILFSFUNKTIONEN FÜR FORMATIERUNG
-# ==============================================================
 def format_large_number(val, is_de=True):
   """Formatiert große Zahlen übersichtlich mit Mio. / M Suffix."""
   try:
@@ -29,7 +25,7 @@ def format_large_number(val, is_de=True):
 
 
 def clean_text(text, max_len=180):
-  """Kürzt lange Texte sauber ab und vermeidet abgeschnittene Wörter."""
+  """Kürzt lange Texte sauber ab."""
   if not text:
     return ""
   text = text.replace("\n", " ").strip()
@@ -38,9 +34,6 @@ def clean_text(text, max_len=180):
   return text[: max_len - 3].rsplit(" ", 1)[0] + "..."
 
 
-# ==============================================================
-# HAUPTFUNKTION: X THREAD ERSTELLEN & POSTEN
-# ==============================================================
 def post_x_thread_tweepy(
     dfi_data,
     btc_p,
@@ -51,10 +44,11 @@ def post_x_thread_tweepy(
     insight_text="",
     news_text="",
 ):
-  """Erstellt einen 3-teiligen X-Thread über Tweepy Client API v2."""
-  is_de = lang_code.lower() == "de"
+  """Erstellt einen 3-teiligen X-Thread über Tweepy Client API v2 in der gewählten Sprache."""
+  lang = lang_code.lower()
+  is_de = lang == "de"
 
-  # API Keys aus GitHub Secrets / Umgebungsvariablen laden
+  # API Keys laden
   api_key = os.getenv("X_API_KEY")
   api_secret = os.getenv("X_API_SECRET")
   access_token = os.getenv("X_ACCESS_TOKEN")
@@ -64,7 +58,6 @@ def post_x_thread_tweepy(
     logging.warning("⚠️ X API Credentials fehlen. Posting übersprungen.")
     return
 
-  # Tweepy Client v2 initialisieren
   try:
     client = tweepy.Client(
         consumer_key=api_key,
@@ -76,30 +69,59 @@ def post_x_thread_tweepy(
     logging.error(f"❌ Fehler bei der Initialisierung des X Clients: {e}")
     return
 
-  # Indikatoren (🟢/🔴) für Marktpreise
+  # Indikatoren (🟢/🔴)
   dfi_sig = "🟢" if dfi_data.get("price_change_24h", 0) >= 0 else "🔴"
   btc_sig = "🟢" if btc_c >= 0 else "🔴"
   eth_sig = "🟢" if eth_c >= 0 else "🔴"
 
-  # Total Supply Skalierung (rechnet Rohwerte in Millionen um, falls nötig)
+  # Umrechnung Rohwerte in Millionen
   raw_total = dfi_data.get("total_supply", 0)
   total_val = raw_total * 1e6 if raw_total < 1000000 else raw_total
 
-  # Formatierte Strings für Supply-Werte
-  max_supply_str = "1,20 Mrd." if is_de else "1.20B"
+  # Sprachspezifische Labels
+  if lang == "de":
+    lbl_max, lbl_gesamt, lbl_auflage = "Max", "Gesamt", "Auflage"
+    lbl_burned, lbl_mint, lbl_day = "Verbrannt", "Prägung", "Tag"
+    lbl_health, lbl_insight = "Gesundheit", "Tägliche Einblicke"
+    lbl_net, lbl_news, lbl_scan = (
+        "Netzwerk",
+        "Tägliche Nachrichten",
+        "Live-Scanner",
+    )
+    max_supply_str = "1,20 Mrd."
+  elif lang == "ru":
+    lbl_max, lbl_gesamt, lbl_auflage = "Макс", "Всего", "В обращения"
+    lbl_burned, lbl_mint, lbl_day = "Сожжено", "Эмиссия", "день"
+    lbl_health, lbl_insight = "Здоровье", "Ежедневная аналитика"
+    lbl_net, lbl_news, lbl_scan = (
+        "Сеть",
+        "Ежедневные новости",
+        "Сканер сети",
+    )
+    max_supply_str = "1.20 млрд"
+  elif lang == "zh":
+    lbl_max, lbl_gesamt, lbl_auflage = "最大", "总供应量", "流通量"
+    lbl_burned, lbl_mint, lbl_day = "已销毁", "每日铸造", "天"
+    lbl_health, lbl_insight = "健康度", "每日洞察"
+    lbl_net, lbl_news, lbl_scan = "网络", "每日新闻", "实时浏览器"
+    max_supply_str = "12亿"
+  else:  # Fallback Englisch (en)
+    lbl_max, lbl_gesamt, lbl_auflage = "Max", "Total", "Circ"
+    lbl_burned, lbl_mint, lbl_day = "Burned", "Minted", "day"
+    lbl_health, lbl_insight = "Health", "Daily Insights"
+    lbl_net, lbl_news, lbl_scan = "Network", "Daily News", "Live Scanner"
+    max_supply_str = "1.20B"
+
   total_str = format_large_number(total_val, is_de)
   circ_str = format_large_number(dfi_data.get("circulating_supply", 0), is_de)
   burned_str = format_large_number(dfi_data.get("burned_dfi", 0), is_de)
 
   # ------------------------------------------------------------
-  # TWEET 1: Markt, Preise & Tokenomics (inkl. 1.2B Max Cap)
+  # TWEET 1
   # ------------------------------------------------------------
   header = "📊 Daily Update"
-  lbl_gesamt = "Gesamt" if is_de else "Total"
-  lbl_auflage = "Auflage" if is_de else "Circ"
-  lbl_max = "Max" if is_de else "Max"
 
-  tweet_1 = f"""{header} ({lang_code.upper()})
+  tweet_1 = f"""{header} ({lang.upper()})
 
 ₿ BTC: ${btc_p:,.2f} ({btc_sig} {btc_c:.2f}%)
 Ξ ETH: ${eth_p:,.2f} ({eth_sig} {eth_c:.2f}%)
@@ -110,14 +132,8 @@ def post_x_thread_tweepy(
 #DeFiChain #DFI"""
 
   # ------------------------------------------------------------
-  # TWEET 2: Burn, Mint & Daily Insight
+  # TWEET 2
   # ------------------------------------------------------------
-  lbl_burned = "Verbrannt" if is_de else "Burned"
-  lbl_mint = "Prägung" if is_de else "Minted"
-  lbl_day = "Tag" if is_de else "day"
-  lbl_health = "Gesundheit" if is_de else "Health"
-  lbl_insight = "Tägliche Einblicke" if is_de else "Daily Insights"
-
   short_insight = clean_text(insight_text, max_len=140)
 
   tweet_2 = f"""🔥 {lbl_burned}: {burned_str} DFI
@@ -129,12 +145,8 @@ def post_x_thread_tweepy(
 {short_insight}"""
 
   # ------------------------------------------------------------
-  # TWEET 3: Netzwerke & 100-Tage Daily News
+  # TWEET 3
   # ------------------------------------------------------------
-  lbl_net = "Netzwerk" if is_de else "Network"
-  lbl_news = "Tägliche Nachrichten" if is_de else "Daily News"
-  lbl_scan = "Live-Scanner" if is_de else "Live Scanner"
-
   tweet_3 = f"""⛓ {lbl_net}: 🟢 Online
 
 📰 {lbl_news}:
@@ -144,29 +156,23 @@ def post_x_thread_tweepy(
 #DeFiChain"""
 
   # ------------------------------------------------------------
-  # THREAD POSTEN (SEQUENTIELL)
+  # THREAD POSTEN
   # ------------------------------------------------------------
   try:
-    # Tweet 1 senden
     res1 = client.create_tweet(text=tweet_1)
     tweet_1_id = res1.data["id"]
-    logging.info(f"✅ Tweepy: Tweet 1 gesendet! ID: {tweet_1_id}")
+    logging.info(f"✅ Tweet 1 ({lang.upper()}) gesendet! ID: {tweet_1_id}")
 
-    # Tweet 2 als Antwort auf Tweet 1
     res2 = client.create_tweet(
         text=tweet_2, in_reply_to_tweet_id=tweet_1_id
     )
     tweet_2_id = res2.data["id"]
-    logging.info("✅ Tweepy: Tweet 2 gesendet!")
+    logging.info(f"✅ Tweet 2 ({lang.upper()}) gesendet!")
 
-    # Tweet 3 als Antwort auf Tweet 2
     res3 = client.create_tweet(
         text=tweet_3, in_reply_to_tweet_id=tweet_2_id
     )
-    logging.info(
-        f"✅ Tweepy: Tweet 3 gesendet! Thread ({lang_code.upper()})"
-        " komplett."
-    )
+    logging.info(f"✅ Tweet 3 ({lang.upper()}) gesendet! Thread komplett.")
 
   except Exception as e:
-    logging.error(f"❌ Fehler beim Versenden des X-Threads: {e}")
+    logging.error(f"❌ Fehler beim Versenden des X-Threads ({lang.upper()}): {e}")
