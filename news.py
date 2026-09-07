@@ -1,16 +1,18 @@
-# ==============================================================
-# DeFiChain Bot News Module - news.py
-# Schnittstelle zur zentralen modules/history_engine.py
-# ==============================================================
+# ======================================
+# DeFiChain Intelligence - news.py Wrapper
+# ======================================
 
-from modules.history_engine import get_history_text
+from modules.history_engine import (
+    get_dfi_news as get_history_news_internal,
+    get_history_chapter,
+)
 
+def get_dfi_news(lang="de", advance_day=True):
+    """
+    Wrapper-Funktion, die den Aufruf aus main.py entgegennimmt
+    und advance_day an die history_engine weiterreicht.
+    """
+    return get_history_news_internal(lang=lang, advance_day=advance_day)
 
-def get_dfi_news(lang="de"):
-  """Hauptschnittstelle für main.py – liefert den aktuellen Nachrichtentext aus der History-Engine als String."""
-  return get_history_text(lang)
-
-
-def get_news(lang="de"):
-  """Alternative Schnittstelle für Kompatibilität mit anderen Skripten."""
-  return get_history_text(lang)
+# Fallback-Aliase für Rückwärtskompatibilität
+get_next_history_story = get_dfi_news
