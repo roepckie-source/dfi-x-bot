@@ -1,121 +1,57 @@
 # ======================================
-# DeFiChain Intelligence v5
-# History Engine v2.4 (Single Increment Fix)
+# DeFiChain Intelligence - History Engine
 # ======================================
 
 import json
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HISTORY_STATE_FILE = "history_state.json"
 
-HISTORY_FILE = os.path.join(BASE_DIR, "dfi_history.json")
-STATE_FILE = os.path.join(BASE_DIR, "history_state.json")
+def load_history_state():
+    if os.path.exists(HISTORY_STATE_FILE):
+        try:
+            with open(HISTORY_STATE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"current_day": 1}
 
+def save_history_state(state):
+    with open(HISTORY_STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
 
-def load_history():
-  try:
-    with open(HISTORY_FILE, "r", encoding="utf-8") as file:
-      return json.load(file)
-  except Exception as e:
-    print("History Load Fehler:", e)
-    return []
-
-
-def load_state():
-  try:
-    with open(STATE_FILE, "r", encoding="utf-8") as file:
-      return json.load(file)
-  except Exception:
-    return {"last_id": 0, "last_title": ""}
-
-
-def save_state(state):
-  try:
-    with open(STATE_FILE, "w", encoding="utf-8") as file:
-      json.dump(state, file, indent=4, ensure_ascii=False)
-  except Exception as e:
-    print("History State Fehler:", e)
-
-
-def get_history(lang="de", advance_day=True):
-  """Holt das aktuelle Kapitel aus dfi_history.json.
-
-  Advance_day=True schaltet den Zähler um 1 weiter (nur bei der 1. Sprache
-  nutzen).
-  """
-  history = load_history()
-  if not history:
-    return None
-
-  state = load_state()
-
-  try:
-    last_id = int(state.get("last_id", 0))
-  except (ValueError, TypeError):
-    last_id = 0
-
-  # Nur weiterzählen, wenn advance_day=True übergeben wurde
-  if advance_day:
-    next_id = last_id + 1
-    if next_id > len(history):
-      next_id = 1
-  else:
-    next_id = last_id if last_id > 0 else 1
-
-  current = None
-
-  for chapter in history:
+def get_history_chapter(day_num, lang="de"):
+    file_path = f"locales/{lang}.json"
+    if not os.path.exists(file_path):
+        file_path = "locales/de.json"
+        
     try:
-      chap_id = int(chapter.get("id"))
-      if chap_id == next_id:
-        current = chapter
-        break
-    except (ValueError, TypeError):
-      continue
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            history = data.get("history", {})
+            return history.get(str(day_num), None)
+    except Exception as e:
+        print(f"Fehler beim Laden des Kapitels: {e}")
+        return None
 
-  if current is None:
-    current = history[0]
-
-  # State nur speichern, wenn der Tag weitergeschaltet wurde
-  if advance_day:
-    try:
-      state["last_id"] = int(current.get("id", 1))
-    except (ValueError, TypeError):
-      state["last_id"] = 1
-
-    title_val = current.get("title", "")
-    if isinstance(title_val, dict):
-      state["last_title"] = title_val.get(lang, title_val.get("de", ""))
-    else:
-      state["last_title"] = str(title_val)
-
-    save_state(state)
-
-  return current
-
-
-def get_history_text(lang="de", advance_day=True):
-  """Liefert den formatierten Nachrichtentext mit Tagesanzeige (z. B. [Tag 78/100])."""
-  history = load_history()
-  total_count = len(history) if history else 100
-  chapter = get_history(lang, advance_day=advance_day)
-
-  if not chapter:
-    return "Keine besonderen Ereignisse im Ökosystem."
-
-  chap_id = chapter.get("id", 1)
-
-  text_data = chapter.get("text", "")
-  if isinstance(text_data, dict):
-    story_text = text_data.get(lang, text_data.get("de", ""))
-  else:
-    story_text = str(text_data)
-
-  label = "Tag" if lang.lower() == "de" else "Day"
-  return f"[{label} {chap_id}/{total_count}]\n{story_text}"
-
-
-# Aliase für Kompatibilität
-get_history_chapter = get_history
-get_next_history_story = get_history_text
-get_dfi_news = get_history_text
+def get_dfi_news(lang="de", advance_day=True):
+    """
+    Holt das aktuelle History-Kapitel. 
+    Nur wenn advance_day=True ist, wird der Tageszähler für den nächsten Lauf erhöht.
+    """
+    state = load_history_state()
+    current_day = state.get("current_day", 1)
+    
+    chapter_text = get_history_chapter(current_day, lang=lang)
+    
+    # Falls das Kapitel für den aktuellen Tag nicht existiert, auf Tag 1 zurücksetzen
+    if chapter_text is None:
+        current_day = 1
+        chapter_text = get_history_chapter(current_day, lang=lang)
+    
+    # Der Zähler wird nur erhöht, wenn advance_day explizit True ist (z. B. beim ersten Durchlauf in main.py)
+    if advance_day:
+        state["current_day"] = current_day + 1
+        save_history_state(state)
+        
+    return chapter_text or ""
