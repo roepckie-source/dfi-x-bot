@@ -16,9 +16,7 @@ def safe_float(value, default=0.0):
 
     try:
         return float(value)
-
     except (TypeError, ValueError):
-
         return default
 
 
@@ -107,9 +105,6 @@ def generate_daily_insight(lang_code=None):
     # TOKENOMICS
     # ======================================
 
-    # WICHTIG:
-    # tokenomics.py liefert "net_change"
-
     net_change = safe_float(
         tokenomics_data.get(
             "net_change",
@@ -151,9 +146,6 @@ def generate_daily_insight(lang_code=None):
     # ======================================
     # dUSD
     # ======================================
-
-    # WICHTIG:
-    # dusd.py liefert "peg_difference"
 
     peg_difference = safe_float(
         dusd_data.get(
