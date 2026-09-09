@@ -12,6 +12,16 @@ from modules.dusd import get_dusd_data
 from modules.network import get_network_data
 
 
+def safe_float(value, default=0.0):
+
+    try:
+        return float(value)
+
+    except (TypeError, ValueError):
+
+        return default
+
+
 def generate_daily_insight(lang_code=None):
 
     if lang_code is None:
@@ -31,31 +41,17 @@ def generate_daily_insight(lang_code=None):
 
     insights = []
 
-    # ==================================
+
+    # ======================================
     # MARKET
-    # ==================================
+    # ======================================
 
-    change_24h = 0.0
-
-    if isinstance(market_data, dict):
-
-        dfi_data = market_data.get(
-            "dfi",
-            {}
+    change_24h = safe_float(
+        market_data.get(
+            "change_24h",
+            0.0
         )
-
-        if isinstance(dfi_data, dict):
-
-            change_24h = dfi_data.get(
-                "change",
-                dfi_data.get(
-                    "change_24h",
-                    0.0
-                )
-            )
-
-    change_24h = float(change_24h or 0.0)
-
+    )
 
     if change_24h < -5.0:
 
@@ -71,7 +67,9 @@ def generate_daily_insight(lang_code=None):
 
         insights.append(
             f"🔴 {msg}: "
-            f"{template.format(change=abs(change_24h))}"
+            f"{template.format(
+                change=abs(change_24h)
+            )}"
         )
 
     elif change_24h > 5.0:
@@ -88,14 +86,16 @@ def generate_daily_insight(lang_code=None):
 
         insights.append(
             f"🟢 {msg}: "
-            f"{template.format(change=change_24h)}"
+            f"{template.format(
+                change=change_24h
+            )}"
         )
 
     else:
 
         msg = lang_data.get(
             "market_stable",
-            "Market stable with limited movement"
+            "Market stable, limited volatility."
         )
 
         insights.append(
@@ -103,28 +103,19 @@ def generate_daily_insight(lang_code=None):
         )
 
 
-    # ==================================
+    # ======================================
     # TOKENOMICS
-    # ==================================
+    # ======================================
 
-    net_change = 0.0
+    # WICHTIG:
+    # tokenomics.py liefert "net_change"
 
-    if isinstance(
-        tokenomics_data,
-        dict
-    ):
-
-        # WICHTIG:
-        # tokenomics.py liefert "net_change"
-        net_change = tokenomics_data.get(
+    net_change = safe_float(
+        tokenomics_data.get(
             "net_change",
             0.0
         )
-
-    net_change = float(
-        net_change or 0.0
     )
-
 
     if net_change > 0:
 
@@ -140,7 +131,9 @@ def generate_daily_insight(lang_code=None):
 
         insights.append(
             f"🔥 {msg}: "
-            f"{template.format(amount=net_change / 1_000_000)}"
+            f"{template.format(
+                amount=net_change / 1_000_000
+            )}"
         )
 
     else:
@@ -155,28 +148,21 @@ def generate_daily_insight(lang_code=None):
         )
 
 
-    # ==================================
-    # DUSD
-    # ==================================
+    # ======================================
+    # dUSD
+    # ======================================
 
-    peg_deviation = 0.0
+    # WICHTIG:
+    # dusd.py liefert "peg_difference"
 
-    if isinstance(
-        dusd_data,
-        dict
-    ):
-
-        peg_deviation = dusd_data.get(
-            "peg_deviation",
+    peg_difference = safe_float(
+        dusd_data.get(
+            "peg_difference",
             0.0
         )
-
-    peg_deviation = float(
-        peg_deviation or 0.0
     )
 
-
-    if peg_deviation < -10.0:
+    if peg_difference < -10.0:
 
         msg = lang_data.get(
             "dusd_critical",
@@ -190,14 +176,16 @@ def generate_daily_insight(lang_code=None):
 
         insights.append(
             f"⚠️ {msg}: "
-            f"{template.format(peg=peg_deviation)}"
+            f"{template.format(
+                peg=peg_difference
+            )}"
         )
 
-    elif peg_deviation < -2.0:
+    elif peg_difference < -2.0:
 
         msg = lang_data.get(
             "dusd_warning",
-            "dUSD health improving but remains under pressure"
+            "dUSD health improved but remains under pressure"
         )
 
         template = lang_data.get(
@@ -207,7 +195,9 @@ def generate_daily_insight(lang_code=None):
 
         insights.append(
             f"🟡 {msg}: "
-            f"{template.format(peg=peg_deviation)}"
+            f"{template.format(
+                peg=peg_difference
+            )}"
         )
 
     else:
@@ -222,28 +212,20 @@ def generate_daily_insight(lang_code=None):
         )
 
 
-    # ==================================
+    # ======================================
     # NETWORK
-    # ==================================
+    # ======================================
 
-    is_healthy = True
-
-    if isinstance(
-        network_data,
-        dict
-    ):
-
-        is_healthy = network_data.get(
-            "healthy",
-            True
-        )
-
+    is_healthy = network_data.get(
+        "healthy",
+        True
+    )
 
     if is_healthy:
 
         msg = lang_data.get(
             "network_health",
-            "Network healthy"
+            "Network operating normally"
         )
 
         template = lang_data.get(
