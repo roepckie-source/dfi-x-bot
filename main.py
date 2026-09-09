@@ -2,12 +2,14 @@
 # DeFiChain Intelligence v5
 # MAIN RUNNER
 #
-# Einziger Einstiegspunkt des Bots
+# Einziger Einstiegspunkt
+# Ein Report pro Tag
+# Eine Sprache pro Tag
 # Telegram + Discord + X
 # ==============================================================
- 
-import sys
+
 import logging
+import sys
 from pathlib import Path
 
 
@@ -36,10 +38,9 @@ from modules.language_engine import get_next_language
 from modules.market import get_market_data
 from modules.network import get_network_data
 from modules.tokenomics import get_tokenomics_data
+from modules.report_formatter import create_report
 
 from news import get_dfi_news
-
-from modules.report_formatter import create_report
 
 from outputs.telegram_bot import send_telegram_report
 from outputs.discord_bot import send_discord
@@ -113,6 +114,13 @@ def main():
 
         logging.info("📊 Market Daten geladen")
 
+        dfi = market.get("dfi", {})
+
+        logging.info(
+            f"💎 DFI: ${dfi.get('usd', 'N/A')} "
+            f"({dfi.get('change', 'N/A')}%)"
+        )
+
     except Exception as e:
 
         logging.error(
@@ -132,14 +140,12 @@ def main():
 
 
     # ----------------------------------------------------------
-    # 3. GLOBAL CRYPTO
+    # 3. BTC / ETH
     # ----------------------------------------------------------
 
     try:
 
         global_crypto = get_global_crypto()
-
-        logging.info("🌍 BTC / ETH Daten geladen")
 
         btc = global_crypto.get(
             "bitcoin",
@@ -192,35 +198,23 @@ def main():
             {}
         )
 
-        total_burn = burn.get(
-            "total",
-            0
-        )
-
-        emission = tokenomics.get(
-            "emission",
-            0
-        )
-
-        net_change = tokenomics.get(
-            "net_change",
-            0
+        logging.info(
+            f"🔥 Burn gesamt: "
+            f"{burn.get('total', 0):,.2f} DFI"
         )
 
         logging.info(
-            f"🔥 Burn: {total_burn:,.2f} DFI"
+            f"🪙 Emission: "
+            f"{tokenomics.get('emission', 0):,.2f} DFI"
         )
 
         logging.info(
-            f"🪙 Emission: {emission:,.2f} DFI"
+            f"📈 Net Change: "
+            f"{tokenomics.get('net_change', 0):,.2f} DFI"
         )
 
         logging.info(
-            f"📈 Net Change: {net_change:,.2f} DFI"
-        )
-
-        logging.info(
-            f"📊 Tokenomics: "
+            f"📊 Tokenomics Status: "
             f"{tokenomics.get('status', 'N/A')}"
         )
 
@@ -330,19 +324,12 @@ def main():
         )
 
         if score >= 80:
-
             status = "🟢 Sehr stark"
-
         elif score >= 60:
-
             status = "🟡 Stabil"
-
         elif score >= 40:
-
             status = "🟠 Vorsicht"
-
         else:
-
             status = "🔴 Kritisch"
 
         intelligence["status"] = status
@@ -409,7 +396,6 @@ def main():
 
     try:
 
-        # Normaler Aufruf
         news = get_dfi_news()
 
         if isinstance(news, dict):
@@ -432,7 +418,6 @@ def main():
 
     except TypeError:
 
-        # Kompatibilität mit älterer News-Funktion
         try:
 
             news = get_dfi_news(
@@ -491,64 +476,68 @@ def main():
 
 
     # ----------------------------------------------------------
-    # 12. REPORT
+    # 12. COMPARISON
+    # ----------------------------------------------------------
+
+    dfi = market.get(
+        "dfi",
+        {}
+    )
+
+    btc = global_crypto.get(
+        "bitcoin",
+        {}
+    )
+
+    eth = global_crypto.get(
+        "ethereum",
+        {}
+    )
+
+    comparison = {
+
+        "dfi": {
+            "price": dfi.get(
+                "usd",
+                0
+            ),
+            "change": dfi.get(
+                "change",
+                0
+            )
+        },
+
+        "bitcoin": {
+            "price": btc.get(
+                "price",
+                0
+            ),
+            "change": btc.get(
+                "change",
+                0
+            )
+        },
+
+        "ethereum": {
+            "price": eth.get(
+                "price",
+                0
+            ),
+            "change": eth.get(
+                "change",
+                0
+            )
+        }
+    }
+
+
+    # ----------------------------------------------------------
+    # 13. REPORT
     # ----------------------------------------------------------
 
     try:
 
-        dfi = market.get(
-            "dfi",
-            {}
-        )
-
-        btc = global_crypto.get(
-            "bitcoin",
-            {}
-        )
-
-        eth = global_crypto.get(
-            "ethereum",
-            {}
-        )
-
-        comparison = {
-
-            "dfi": {
-                "price": dfi.get(
-                    "usd",
-                    0
-                ),
-                "change": dfi.get(
-                    "change",
-                    0
-                )
-            },
-
-            "bitcoin": {
-                "price": btc.get(
-                    "price",
-                    0
-                ),
-                "change": btc.get(
-                    "change",
-                    0
-                )
-            },
-
-            "ethereum": {
-                "price": eth.get(
-                    "price",
-                    0
-                ),
-                "change": eth.get(
-                    "change",
-                    0
-                )
-            }
-        }
-
         report = create_report(
-
             market,
             tokenomics,
             dusd,
@@ -573,25 +562,17 @@ def main():
             f"❌ Report Fehler: {e}"
         )
 
-        report = None
-
-        comparison = {
-            "dfi": {
-                "price": 0,
-                "change": 0
-            }
-        }
+        report = daily_insight or ""
 
 
     # ==========================================================
-    # 13. TELEGRAM
+    # 14. TELEGRAM
     # ==========================================================
 
     try:
 
         telegram_ok = send_telegram_report(
-
-            report or daily_insight,
+            report,
             tokenomics,
             dusd,
             network,
@@ -602,13 +583,10 @@ def main():
         )
 
         if telegram_ok:
-
             logging.info(
                 "📨 Telegram erfolgreich gesendet"
             )
-
         else:
-
             logging.warning(
                 "⚠️ Telegram wurde nicht gesendet"
             )
@@ -621,27 +599,23 @@ def main():
 
 
     # ==========================================================
-    # 14. DISCORD
+    # 15. DISCORD
     # ==========================================================
 
     try:
 
         discord_ok = send_discord(
-
-            daily_insight,
+            report,
             network,
             comparison,
             news
         )
 
         if discord_ok:
-
             logging.info(
                 "💬 Discord erfolgreich gesendet"
             )
-
         else:
-
             logging.warning(
                 "⚠️ Discord wurde nicht gesendet"
             )
@@ -654,13 +628,12 @@ def main():
 
 
     # ==========================================================
-    # 15. X
+    # 16. X
     # ==========================================================
 
     try:
 
         x_ok = send_x_thread(
-
             report,
             tokenomics,
             dusd,
@@ -672,13 +645,10 @@ def main():
         )
 
         if x_ok:
-
             logging.info(
                 "🐦 X Thread erfolgreich gesendet"
             )
-
         else:
-
             logging.warning(
                 "⚠️ X Thread wurde nicht gesendet"
             )
@@ -695,7 +665,9 @@ def main():
     # ==========================================================
 
     logging.info("==================================================")
-    logging.info("🎉 DeFiChain Daily Bot abgeschlossen")
+    logging.info(
+        f"🎉 DeFiChain Daily Bot abgeschlossen ({language.upper()})"
+    )
     logging.info("==================================================")
 
 
