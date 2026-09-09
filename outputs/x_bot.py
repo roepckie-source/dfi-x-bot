@@ -5,6 +5,8 @@
 
 import os
 import time
+import re
+
 import tweepy
 
 from modules.language import load_language
@@ -137,6 +139,7 @@ def get_status_key(score):
 
 
 def get_status(language, score):
+
     translations = STATUS_TRANSLATIONS.get(
         language,
         STATUS_TRANSLATIONS["en"]
@@ -150,14 +153,13 @@ def get_status(language, score):
 
 def get_intelligence_score(intelligence):
     """
-    Liest den Score robust aus unterschiedlichen möglichen
-    Strukturen des Intelligence-Moduls.
+    Liest den Intelligence Score robust aus
+    unterschiedlichen möglichen Datenstrukturen.
     """
 
     if intelligence is None:
         return 0
 
-    # Falls direkt eine Zahl übergeben wurde
     if isinstance(intelligence, (int, float)):
         return intelligence
 
@@ -176,22 +178,27 @@ def get_intelligence_score(intelligence):
     ]
 
     for key in possible_keys:
+
         value = intelligence.get(key)
 
         if isinstance(value, (int, float)):
             return value
 
         if isinstance(value, str):
+
             try:
                 return float(value)
             except ValueError:
                 pass
 
-    # Falls der Score verschachtelt ist
+    # Verschachtelte Daten durchsuchen
     for value in intelligence.values():
 
         if isinstance(value, dict):
-            nested = get_intelligence_score(value)
+
+            nested = get_intelligence_score(
+                value
+            )
 
             if nested != 0:
                 return nested
@@ -200,17 +207,13 @@ def get_intelligence_score(intelligence):
 
 
 def detect_language(text):
+
     if not text:
         return "en"
 
-    text = str(text)
-
-    # Unser Report enthält z.B. "(ES)"
-    import re
-
     match = re.search(
         r"\(([a-zA-Z]{2})\)",
-        text
+        str(text)
     )
 
     if match:
@@ -220,6 +223,7 @@ def detect_language(text):
 
 
 def get_news(insight):
+
     if not insight:
         return ""
 
@@ -238,17 +242,27 @@ def get_news(insight):
 
         if marker in text:
 
-            part = text.split(marker, 1)[1]
+            part = text.split(
+                marker,
+                1
+            )[1]
 
             if "📚" in part:
-                part = part.split("📚", 1)[0]
+                part = part.split(
+                    "📚",
+                    1
+                )[0]
 
             return part.strip()
 
     return ""
 
 
-def get_history(insight, current_history=None):
+def get_history(
+    insight,
+    current_history=None
+):
+
     if insight:
 
         text = str(insight)
@@ -265,7 +279,11 @@ def get_history(insight, current_history=None):
         for marker in markers:
 
             if marker in text:
-                return text.split(marker, 1)[1].strip()
+
+                return text.split(
+                    marker,
+                    1
+                )[1].strip()
 
     if isinstance(current_history, dict):
 
@@ -282,36 +300,10 @@ def get_history(insight, current_history=None):
     return ""
 
 
-def create_client():
-
-    api_key = os.getenv("X_API_KEY")
-    api_secret = os.getenv("X_API_SECRET")
-    access_token = os.getenv("X_ACCESS_TOKEN")
-    access_token_secret = os.getenv("X_ACCESS_TOKEN_SECRET")
-
-    if not all([
-        api_key,
-        api_secret,
-        access_token,
-        access_token_secret
-    ]):
-        print("❌ X API Zugangsdaten fehlen.")
-        return None
-
-    return tweepy.Client(
-        consumer_key=api_key,
-        consumer_secret=api_secret,
-        access_token=access_token,
-        access_token_secret=access_token_secret
-    )
-
-
-def limit_tweet(text, maximum=260):
-    """
-    Konservative Begrenzung.
-    260 statt 280 gibt etwas Sicherheitsreserve,
-    insbesondere wegen Emojis und X-Zeichenbewertung.
-    """
+def smart_short_text(
+    text,
+    maximum
+):
 
     if not text:
         return ""
@@ -321,7 +313,111 @@ def limit_tweet(text, maximum=260):
     if len(text) <= maximum:
         return text
 
-    return text[:maximum - 3].rstrip() + "..."
+    # Zeilenumbrüche entfernen
+    text = text.replace(
+        "\n",
+        " "
+    )
+
+    # Nach Sätzen suchen
+    sentences = text.split(". ")
+
+    result = ""
+
+    for sentence in sentences:
+
+        candidate = (
+            sentence
+            if not result
+            else result + ". " + sentence
+        )
+
+        if len(candidate) <= maximum:
+
+            result = candidate
+
+        else:
+
+            break
+
+    if result:
+
+        if not result.endswith("."):
+            result += "."
+
+        return result
+
+    # Falls kein kompletter Satz passt:
+    shortened = text[
+        :maximum - 3
+    ].rsplit(
+        " ",
+        1
+    )[0]
+
+    return shortened + "..."
+
+
+def limit_tweet(
+    text,
+    maximum=270
+):
+
+    if not text:
+        return ""
+
+    text = str(text).strip()
+
+    if len(text) <= maximum:
+        return text
+
+    shortened = text[
+        :maximum - 3
+    ].rsplit(
+        " ",
+        1
+    )[0]
+
+    return shortened + "..."
+
+
+def create_client():
+
+    api_key = os.getenv(
+        "X_API_KEY"
+    )
+
+    api_secret = os.getenv(
+        "X_API_SECRET"
+    )
+
+    access_token = os.getenv(
+        "X_ACCESS_TOKEN"
+    )
+
+    access_token_secret = os.getenv(
+        "X_ACCESS_TOKEN_SECRET"
+    )
+
+    if not all([
+        api_key,
+        api_secret,
+        access_token,
+        access_token_secret
+    ]):
+
+        print(
+            "❌ X API Zugangsdaten fehlen."
+        )
+
+        return None
+
+    return tweepy.Client(
+        consumer_key=api_key,
+        consumer_secret=api_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret
+    )
 
 
 # -------------------------------------------------
@@ -355,29 +451,51 @@ def send_x_thread(
     global_crypto = global_crypto or {}
     market = market or {}
 
-    language = detect_language(insight)
+    # -------------------------------------------------
+    # Sprache
+    # -------------------------------------------------
 
-    lang = load_language(language)
+    language = detect_language(
+        insight
+    )
 
-    print(f"🌍 X Sprache: {language.upper()}")
+    lang = load_language(
+        language
+    )
+
+    print(
+        f"🌍 X Sprache: {language.upper()}"
+    )
 
     # -------------------------------------------------
     # Markt
     # -------------------------------------------------
 
-    dfi = market.get("dfi", {})
+    dfi = market.get(
+        "dfi",
+        {}
+    )
 
-    if not isinstance(dfi, dict):
+    if not isinstance(
+        dfi,
+        dict
+    ):
         dfi = {}
 
     dfi_price = dfi.get(
         "usd",
-        market.get("price", "N/A")
+        market.get(
+            "price",
+            "N/A"
+        )
     )
 
     dfi_change = dfi.get(
         "change",
-        market.get("change_24h", 0)
+        market.get(
+            "change_24h",
+            0
+        )
     )
 
     btc = global_crypto.get(
@@ -390,43 +508,81 @@ def send_x_thread(
         {}
     )
 
-    btc_price = btc.get("price", "N/A")
-    btc_change = btc.get("change", 0)
+    btc_price = btc.get(
+        "price",
+        "N/A"
+    )
 
-    eth_price = eth.get("price", "N/A")
-    eth_change = eth.get("change", 0)
+    btc_change = btc.get(
+        "change",
+        0
+    )
+
+    eth_price = eth.get(
+        "price",
+        "N/A"
+    )
+
+    eth_change = eth.get(
+        "change",
+        0
+    )
 
     # -------------------------------------------------
     # Tokenomics
     # -------------------------------------------------
 
-    burn = tokenomics.get("burn", {})
+    burn = tokenomics.get(
+        "burn",
+        {}
+    )
 
-    if not isinstance(burn, dict):
+    if not isinstance(
+        burn,
+        dict
+    ):
         burn = {}
 
     total_burn = safe_float(
-        burn.get("total", 0)
+        burn.get(
+            "total",
+            0
+        )
     )
 
     address_burn = safe_float(
-        burn.get("address", 0)
+        burn.get(
+            "address",
+            0
+        )
     )
 
     fees_burn = safe_float(
-        burn.get("fees", 0)
+        burn.get(
+            "fees",
+            0
+        )
     )
 
     auction_burn = safe_float(
-        burn.get("auction", 0)
+        burn.get(
+            "auction",
+            0
+        )
     )
 
     payback_burn = safe_float(
-        burn.get("payback", 0)
+        burn.get(
+            "payback",
+            0
+        )
     )
 
     emission = safe_float(
-        tokenomics.get("emission", 0)
+        tokenomics.get(
+            "emission",
+            0
+        )
     )
 
     net_change = safe_float(
@@ -451,7 +607,7 @@ def send_x_thread(
 
     print(
         f"🧠 X Intelligence Score: "
-        f"{score}/100"
+        f"{score:.0f}/100"
     )
 
     # -------------------------------------------------
@@ -593,7 +749,7 @@ def send_x_thread(
     )
 
     # -------------------------------------------------
-    # Tweet 1 – Markt
+    # TWEET 1 – Global Crypto + DFI
     # -------------------------------------------------
 
     tweet1 = (
@@ -607,7 +763,8 @@ def send_x_thread(
         f"{change_emoji(eth_change)} "
         f"{safe_float(eth_change):+.2f}%\n\n"
         f"💎 DeFiChain DFI\n"
-        f"{price_label}: {format_dfi_price(dfi_price)}\n"
+        f"{price_label}: "
+        f"{format_dfi_price(dfi_price)}\n"
         f"{change_label}: "
         f"{change_emoji(dfi_change)} "
         f"{safe_float(dfi_change):+.2f}%\n\n"
@@ -615,26 +772,34 @@ def send_x_thread(
     )
 
     # -------------------------------------------------
-    # Tweet 2 – Tokenomics + Intelligence
+    # TWEET 2 – Tokenomics + Intelligence
     # -------------------------------------------------
 
     tweet2 = (
-        f"🔥 {tokenomics_label}\n"
-        f"{burn_label}: {total_burn / 1_000_000:.2f}M DFI\n"
-        f"{emission_label}: {emission / 1_000_000:.2f}M DFI\n"
-        f"{net_burn_label}: {net_change / 1_000_000:.2f}M DFI\n"
-        f"• Address: {address_burn / 1_000_000:.2f}M\n"
-        f"• Fees: {fees_burn / 1_000:.2f}K\n"
-        f"• Auction: {auction_burn / 1_000_000:.2f}M\n"
-        f"• Payback: {payback_burn / 1_000_000:.2f}M\n\n"
+        f"🔥 {tokenomics_label}\n\n"
+        f"{burn_label}: "
+        f"{total_burn / 1_000_000:.2f}M DFI\n"
+        f"{emission_label}: "
+        f"{emission / 1_000_000:.2f}M DFI\n"
+        f"{net_burn_label}: "
+        f"{net_change / 1_000_000:.2f}M DFI\n\n"
+        f"• Address: "
+        f"{address_burn / 1_000_000:.2f}M\n"
+        f"• Fees: "
+        f"{fees_burn / 1_000:.2f}K\n"
+        f"• Auction: "
+        f"{auction_burn / 1_000_000:.2f}M\n"
+        f"• Payback: "
+        f"{payback_burn / 1_000_000:.2f}M\n\n"
         f"🧠 {intelligence_label}\n"
-        f"{score_label}: {safe_float(score):.0f}/100\n"
-        f"{status_label}: {status}"
+        f"{score_label}: "
+        f"{safe_float(score):.0f}/100\n"
+        f"{status_label}: "
+        f"{status}"
     )
 
     # -------------------------------------------------
-    # Tweet 3 – Network + dUSD
-    # Bewusst kurz halten!
+    # TWEET 3 – Network + dUSD
     # -------------------------------------------------
 
     tweet3 = (
@@ -651,14 +816,19 @@ def send_x_thread(
     # Tweet 4 – Insight + News + History
     # -------------------------------------------------
 
-    news_text = get_news(insight)
+    news_text = get_news(
+        insight
+    )
+
     history_text = get_history(
         insight,
         current_history
     )
 
-    # Nur den eigentlichen Insight-Text extrahieren,
-    # nicht den kompletten Report.
+    # -------------------------------------------------
+    # Insight aus dem Report extrahieren
+    # -------------------------------------------------
+
     insight_text = ""
 
     if insight:
@@ -666,18 +836,21 @@ def send_x_thread(
         text = str(insight)
 
         if "💡 Insight:" in text:
+
             insight_text = text.split(
                 "💡 Insight:",
                 1
             )[1]
 
             if "📰" in insight_text:
+
                 insight_text = insight_text.split(
                     "📰",
                     1
                 )[0]
 
             if "📚" in insight_text:
+
                 insight_text = insight_text.split(
                     "📚",
                     1
@@ -685,39 +858,88 @@ def send_x_thread(
 
             insight_text = insight_text.strip()
 
+    # -------------------------------------------------
+    # Inhalte intelligent kürzen
+    # -------------------------------------------------
+
+    short_insight = smart_short_text(
+        insight_text,
+        100
+    )
+
+    short_news = smart_short_text(
+        news_text,
+        70
+    )
+
+    short_history = smart_short_text(
+        history_text,
+        55
+    )
+
+    # -------------------------------------------------
+    # Tweet 4 aufbauen
+    # -------------------------------------------------
+
     tweet4 = (
         f"💡 {insight_label}\n"
-        f"{insight_text[:100] if insight_text else 'N/A'}\n\n"
+        f"{short_insight or 'N/A'}\n\n"
         f"📰 {update_label}\n"
-        f"{news_text[:80] if news_text else 'N/A'}\n\n"
+        f"{short_news or 'N/A'}\n\n"
         f"📚 {history_label}\n"
-        f"{history_text[:70] if history_text else 'N/A'}"
+        f"{short_history or 'N/A'}"
     )
 
     # -------------------------------------------------
     # Sicherheitsbegrenzung
     # -------------------------------------------------
 
+    tweet1 = limit_tweet(
+        tweet1
+    )
+
+    tweet2 = limit_tweet(
+        tweet2
+    )
+
+    tweet3 = limit_tweet(
+        tweet3
+    )
+
+    tweet4 = limit_tweet(
+        tweet4
+    )
+
     tweets = [
-        limit_tweet(tweet1, 260),
-        limit_tweet(tweet2, 260),
-        limit_tweet(tweet3, 260),
-        limit_tweet(tweet4, 260),
+        tweet1,
+        tweet2,
+        tweet3,
+        tweet4
     ]
 
     # -------------------------------------------------
-    # Debug
+    # Debug-Ausgabe
     # -------------------------------------------------
 
-    for index, text in enumerate(tweets, start=1):
+    for index, text in enumerate(
+        tweets,
+        start=1
+    ):
 
         print()
-        print(f"DEBUG Tweet {index}:")
+        print(
+            f"DEBUG Tweet {index}:"
+        )
+
         print(text)
+
         print(
             f"Zeichen: {len(text)}"
         )
-        print("-" * 60)
+
+        print(
+            "-" * 60
+        )
 
     # -------------------------------------------------
     # Thread senden
@@ -756,6 +978,7 @@ def send_x_thread(
             )
 
             if index < len(tweets):
+
                 time.sleep(3)
 
         except Exception as e:
