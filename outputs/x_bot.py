@@ -4,16 +4,14 @@
 # ============================================
 
 import os
-import re
 import time
-
 import tweepy
 
 from modules.language import load_language
 
 
 # -------------------------------------------------
-# Sprachabhängige Statuswerte
+# Status-Übersetzungen
 # -------------------------------------------------
 
 STATUS_TRANSLATIONS = {
@@ -111,6 +109,18 @@ def format_dfi_price(value):
         return "N/A"
 
 
+def change_emoji(value):
+    value = safe_float(value)
+
+    if value > 0:
+        return "🟢"
+
+    if value < 0:
+        return "🔴"
+
+    return "⚪"
+
+
 def get_status_key(score):
     score = safe_float(score)
 
@@ -126,27 +136,81 @@ def get_status_key(score):
     return "critical"
 
 
-def get_localized_status(language, score, fallback=None):
-    status_key = get_status_key(score)
-
+def get_status(language, score):
     translations = STATUS_TRANSLATIONS.get(
         language,
         STATUS_TRANSLATIONS["en"]
     )
 
     return translations.get(
-        status_key,
-        fallback or status_key.title()
+        get_status_key(score),
+        "Stable"
     )
 
 
-def detect_language_from_text(text):
+def get_intelligence_score(intelligence):
+    """
+    Liest den Score robust aus unterschiedlichen möglichen
+    Strukturen des Intelligence-Moduls.
+    """
+
+    if intelligence is None:
+        return 0
+
+    # Falls direkt eine Zahl übergeben wurde
+    if isinstance(intelligence, (int, float)):
+        return intelligence
+
+    if not isinstance(intelligence, dict):
+        return 0
+
+    possible_keys = [
+        "score",
+        "intelligence_score",
+        "intelligenceScore",
+        "index",
+        "value",
+        "rating",
+        "total_score",
+        "total",
+    ]
+
+    for key in possible_keys:
+        value = intelligence.get(key)
+
+        if isinstance(value, (int, float)):
+            return value
+
+        if isinstance(value, str):
+            try:
+                return float(value)
+            except ValueError:
+                pass
+
+    # Falls der Score verschachtelt ist
+    for value in intelligence.values():
+
+        if isinstance(value, dict):
+            nested = get_intelligence_score(value)
+
+            if nested != 0:
+                return nested
+
+    return 0
+
+
+def detect_language(text):
     if not text:
         return "en"
 
+    text = str(text)
+
+    # Unser Report enthält z.B. "(ES)"
+    import re
+
     match = re.search(
         r"\(([a-zA-Z]{2})\)",
-        str(text)
+        text
     )
 
     if match:
@@ -155,75 +219,71 @@ def detect_language_from_text(text):
     return "en"
 
 
-def get_change_emoji(change):
-    change = safe_float(change)
-
-    if change > 0:
-        return "🟢"
-
-    if change < 0:
-        return "🔴"
-
-    return "⚪"
-
-
-def extract_news(insight):
+def get_news(insight):
     if not insight:
         return ""
 
     text = str(insight)
 
-    # Unterstützt unseren aktuellen Report
-    patterns = [
-        r"📰\s*News:\s*(.*?)(?=\n\n📚|\Z)",
-        r"📰\s*Noticias:\s*(.*?)(?=\n\n📚|\Z)",
-        r"📰\s*Actualités:\s*(.*?)(?=\n\n📚|\Z)",
-        r"📰\s*Новости:\s*(.*?)(?=\n\n📚|\Z)",
-        r"📰\s*ニュース:\s*(.*?)(?=\n\n📚|\Z)",
+    markers = [
+        "📰 News:",
+        "📰 Noticias:",
+        "📰 Actualités:",
+        "📰 Новости:",
+        "📰 ニュース:",
+        "📰 Noticias:",
     ]
 
-    for pattern in patterns:
-        match = re.search(
-            pattern,
-            text,
-            flags=re.DOTALL
-        )
+    for marker in markers:
 
-        if match:
-            return match.group(1).strip()
+        if marker in text:
+
+            part = text.split(marker, 1)[1]
+
+            if "📚" in part:
+                part = part.split("📚", 1)[0]
+
+            return part.strip()
 
     return ""
 
 
-def extract_history(insight):
-    if not insight:
-        return ""
+def get_history(insight, current_history=None):
+    if insight:
 
-    text = str(insight)
+        text = str(insight)
 
-    patterns = [
-        r"📚\s*History:\s*(.*)$",
-        r"📚\s*Historia:\s*(.*)$",
-        r"📚\s*Histoire:\s*(.*)$",
-        r"📚\s*Geschichte:\s*(.*)$",
-        r"📚\s*История:\s*(.*)$",
-        r"📚\s*歴史:\s*(.*)$",
-    ]
+        markers = [
+            "📚 History:",
+            "📚 Historia:",
+            "📚 Histoire:",
+            "📚 Geschichte:",
+            "📚 История:",
+            "📚 歴史:",
+        ]
 
-    for pattern in patterns:
-        match = re.search(
-            pattern,
-            text,
-            flags=re.DOTALL
+        for marker in markers:
+
+            if marker in text:
+                return text.split(marker, 1)[1].strip()
+
+    if isinstance(current_history, dict):
+
+        return (
+            current_history.get("title")
+            or current_history.get("text")
+            or current_history.get("content")
+            or ""
         )
 
-        if match:
-            return match.group(1).strip()
+    if current_history:
+        return str(current_history)
 
     return ""
 
 
 def create_client():
+
     api_key = os.getenv("X_API_KEY")
     api_secret = os.getenv("X_API_SECRET")
     access_token = os.getenv("X_ACCESS_TOKEN")
@@ -244,6 +304,24 @@ def create_client():
         access_token=access_token,
         access_token_secret=access_token_secret
     )
+
+
+def limit_tweet(text, maximum=260):
+    """
+    Konservative Begrenzung.
+    260 statt 280 gibt etwas Sicherheitsreserve,
+    insbesondere wegen Emojis und X-Zeichenbewertung.
+    """
+
+    if not text:
+        return ""
+
+    text = str(text).strip()
+
+    if len(text) <= maximum:
+        return text
+
+    return text[:maximum - 3].rstrip() + "..."
 
 
 # -------------------------------------------------
@@ -277,18 +355,14 @@ def send_x_thread(
     global_crypto = global_crypto or {}
     market = market or {}
 
-    # -------------------------------------------------
-    # Sprache bestimmen
-    # -------------------------------------------------
-
-    language = detect_language_from_text(insight)
+    language = detect_language(insight)
 
     lang = load_language(language)
 
     print(f"🌍 X Sprache: {language.upper()}")
 
     # -------------------------------------------------
-    # Market
+    # Markt
     # -------------------------------------------------
 
     dfi = market.get("dfi", {})
@@ -331,53 +405,53 @@ def send_x_thread(
     if not isinstance(burn, dict):
         burn = {}
 
-    total_burn = burn.get(
-        "total",
-        0
+    total_burn = safe_float(
+        burn.get("total", 0)
     )
 
-    address_burn = burn.get(
-        "address",
-        0
+    address_burn = safe_float(
+        burn.get("address", 0)
     )
 
-    fees_burn = burn.get(
-        "fees",
-        0
+    fees_burn = safe_float(
+        burn.get("fees", 0)
     )
 
-    auction_burn = burn.get(
-        "auction",
-        0
+    auction_burn = safe_float(
+        burn.get("auction", 0)
     )
 
-    payback_burn = burn.get(
-        "payback",
-        0
+    payback_burn = safe_float(
+        burn.get("payback", 0)
     )
 
-    emission = tokenomics.get(
-        "emission",
-        0
+    emission = safe_float(
+        tokenomics.get("emission", 0)
     )
 
-    net_change = tokenomics.get(
-        "net_change",
-        total_burn - safe_float(emission)
+    net_change = safe_float(
+        tokenomics.get(
+            "net_change",
+            total_burn - emission
+        )
     )
 
     # -------------------------------------------------
     # Intelligence
     # -------------------------------------------------
 
-    score = intelligence.get(
-        "score",
-        intelligence.get("intelligence_score", 0)
+    score = get_intelligence_score(
+        intelligence
     )
 
-    status = get_localized_status(
+    status = get_status(
         language,
         score
+    )
+
+    print(
+        f"🧠 X Intelligence Score: "
+        f"{score}/100"
     )
 
     # -------------------------------------------------
@@ -400,12 +474,15 @@ def send_x_thread(
     )
 
     # -------------------------------------------------
-    # Network
+    # Netzwerk
     # -------------------------------------------------
 
     block = network.get(
         "block",
-        network.get("block_height", "N/A")
+        network.get(
+            "block_height",
+            "N/A"
+        )
     )
 
     masternodes = network.get(
@@ -414,37 +491,25 @@ def send_x_thread(
     )
 
     # -------------------------------------------------
-    # News / History
+    # Übersetzungen
     # -------------------------------------------------
 
-    news_text = extract_news(insight)
-
-    if not news_text:
-        news_text = lang.get(
-            "content_update",
-            "Daily DeFiChain update"
+    title = lang.get(
+        "x_title_daily",
+        lang.get(
+            "header_title",
+            "🚀 DeFiChain Daily"
         )
+    )
 
-    history_text = extract_history(insight)
+    flags = lang.get(
+        "header_line1",
+        "🌍 🇩🇪 🇬🇧 🇺🇸 🇪🇸 🇵🇹 🇷🇺 🇯🇵 🇨🇳 🇮🇳 🇮🇩 🇫🇷 🇸🇦"
+    )
 
-    if not history_text and current_history:
-        if isinstance(current_history, dict):
-            history_text = (
-                current_history.get("title")
-                or current_history.get("text")
-                or current_history.get("content")
-                or ""
-            )
-        else:
-            history_text = str(current_history)
-
-    # -------------------------------------------------
-    # Übersetzte Labels
-    # -------------------------------------------------
-
-    market_label = lang.get(
-        "market",
-        "Market"
+    global_crypto_label = lang.get(
+        "global_crypto",
+        "Global Crypto"
     )
 
     price_label = lang.get(
@@ -455,11 +520,6 @@ def send_x_thread(
     change_label = lang.get(
         "change",
         "Change"
-    )
-
-    global_crypto_label = lang.get(
-        "global_crypto",
-        "Global Crypto"
     )
 
     tokenomics_label = lang.get(
@@ -527,66 +587,54 @@ def send_x_thread(
         "DeFiChain History"
     )
 
-    # -------------------------------------------------
-    # Flaggenkette
-    # -------------------------------------------------
-
-    flags = lang.get(
-        "header_line1",
-        "🌍 🇩🇪 🇬🇧 🇺🇸 🇪🇸 🇵🇹 🇷🇺 🇯🇵 🇨🇳 🇮🇳 🇮🇩 🇫🇷 🇸🇦"
+    update_label = lang.get(
+        "content_update",
+        "Daily Update"
     )
 
     # -------------------------------------------------
-    # Tweet 1
+    # Tweet 1 – Markt
     # -------------------------------------------------
-
-    title = lang.get(
-        "x_title_daily",
-        lang.get(
-            "header_title",
-            "🚀 DeFiChain Daily"
-        )
-    )
 
     tweet1 = (
         f"{title} ({language.upper()})\n"
         f"{flags}\n\n"
         f"🌍 {global_crypto_label}\n"
         f"₿ Bitcoin: ${format_number(btc_price)} "
-        f"{get_change_emoji(btc_change)} "
+        f"{change_emoji(btc_change)} "
         f"{safe_float(btc_change):+.2f}%\n"
         f"Ξ Ethereum: ${format_number(eth_price)} "
-        f"{get_change_emoji(eth_change)} "
+        f"{change_emoji(eth_change)} "
         f"{safe_float(eth_change):+.2f}%\n\n"
         f"💎 DeFiChain DFI\n"
         f"{price_label}: {format_dfi_price(dfi_price)}\n"
         f"{change_label}: "
-        f"{get_change_emoji(dfi_change)} "
+        f"{change_emoji(dfi_change)} "
         f"{safe_float(dfi_change):+.2f}%\n\n"
         f"#DeFiChain #DFI"
     )
 
     # -------------------------------------------------
-    # Tweet 2
+    # Tweet 2 – Tokenomics + Intelligence
     # -------------------------------------------------
 
     tweet2 = (
-        f"🔥 {tokenomics_label}\n\n"
-        f"{burn_label}: {safe_float(total_burn) / 1_000_000:.2f}M DFI\n"
-        f"{emission_label}: {safe_float(emission) / 1_000_000:.2f}M DFI\n"
-        f"{net_burn_label}: "
-        f"{safe_float(net_change) / 1_000_000:.2f}M DFI\n\n"
-        f"• Address: {safe_float(address_burn) / 1_000_000:.2f}M\n"
-        f"• Fees: {safe_float(fees_burn) / 1_000:.2f}K\n"
-        f"• Auction: {safe_float(auction_burn) / 1_000_000:.2f}M\n"
-        f"• Payback: {safe_float(payback_burn) / 1_000_000:.2f}M\n\n"
-        f"🧠 {intelligence_label}:\n"
-        f"{score_label}: {score}/100\n"
+        f"🔥 {tokenomics_label}\n"
+        f"{burn_label}: {total_burn / 1_000_000:.2f}M DFI\n"
+        f"{emission_label}: {emission / 1_000_000:.2f}M DFI\n"
+        f"{net_burn_label}: {net_change / 1_000_000:.2f}M DFI\n"
+        f"• Address: {address_burn / 1_000_000:.2f}M\n"
+        f"• Fees: {fees_burn / 1_000:.2f}K\n"
+        f"• Auction: {auction_burn / 1_000_000:.2f}M\n"
+        f"• Payback: {payback_burn / 1_000_000:.2f}M\n\n"
+        f"🧠 {intelligence_label}\n"
+        f"{score_label}: {safe_float(score):.0f}/100\n"
         f"{status_label}: {status}"
     )
 
     # -------------------------------------------------
-    # Tweet 3
+    # Tweet 3 – Network + dUSD
+    # Bewusst kurz halten!
     # -------------------------------------------------
 
     tweet3 = (
@@ -596,28 +644,80 @@ def send_x_thread(
         f"💵 {dusd_label}\n"
         f"{price_label}: ${dusd_price}\n"
         f"Health: {dusd_health}\n"
-        f"Peg: {peg_difference}\n\n"
-        f"💡 {insight_label}:\n"
-        f"{insight[:450] if insight else 'N/A'}"
+        f"Peg: {peg_difference}"
     )
 
     # -------------------------------------------------
-    # Tweet 4
+    # Tweet 4 – Insight + News + History
     # -------------------------------------------------
+
+    news_text = get_news(insight)
+    history_text = get_history(
+        insight,
+        current_history
+    )
+
+    # Nur den eigentlichen Insight-Text extrahieren,
+    # nicht den kompletten Report.
+    insight_text = ""
+
+    if insight:
+
+        text = str(insight)
+
+        if "💡 Insight:" in text:
+            insight_text = text.split(
+                "💡 Insight:",
+                1
+            )[1]
+
+            if "📰" in insight_text:
+                insight_text = insight_text.split(
+                    "📰",
+                    1
+                )[0]
+
+            if "📚" in insight_text:
+                insight_text = insight_text.split(
+                    "📚",
+                    1
+                )[0]
+
+            insight_text = insight_text.strip()
 
     tweet4 = (
-        f"📰 {lang.get('content_update', 'Daily Update')}\n\n"
-        f"{news_text[:500]}\n\n"
+        f"💡 {insight_label}\n"
+        f"{insight_text[:100] if insight_text else 'N/A'}\n\n"
+        f"📰 {update_label}\n"
+        f"{news_text[:80] if news_text else 'N/A'}\n\n"
         f"📚 {history_label}\n"
-        f"{history_text[:350] if history_text else 'N/A'}"
+        f"{history_text[:70] if history_text else 'N/A'}"
     )
 
+    # -------------------------------------------------
+    # Sicherheitsbegrenzung
+    # -------------------------------------------------
+
     tweets = [
-        tweet1,
-        tweet2,
-        tweet3,
-        tweet4
+        limit_tweet(tweet1, 260),
+        limit_tweet(tweet2, 260),
+        limit_tweet(tweet3, 260),
+        limit_tweet(tweet4, 260),
     ]
+
+    # -------------------------------------------------
+    # Debug
+    # -------------------------------------------------
+
+    for index, text in enumerate(tweets, start=1):
+
+        print()
+        print(f"DEBUG Tweet {index}:")
+        print(text)
+        print(
+            f"Zeichen: {len(text)}"
+        )
+        print("-" * 60)
 
     # -------------------------------------------------
     # Thread senden
@@ -625,14 +725,12 @@ def send_x_thread(
 
     previous_tweet_id = None
 
-    for index, text in enumerate(tweets, start=1):
+    for index, text in enumerate(
+        tweets,
+        start=1
+    ):
 
         try:
-
-            print()
-            print(f"DEBUG Tweet {index}:")
-            print(text)
-            print("-" * 60)
 
             if previous_tweet_id is None:
 
@@ -652,13 +750,13 @@ def send_x_thread(
             previous_tweet_id = tweet_id
 
             print(
-                f"✅ Tweet {index} ({language.upper()}) "
+                f"✅ Tweet {index} "
+                f"({language.upper()}) "
                 f"gesendet: {tweet_id}"
             )
 
-            # Kleine Pause zwischen den Tweets
             if index < len(tweets):
-                time.sleep(2)
+                time.sleep(3)
 
         except Exception as e:
 
