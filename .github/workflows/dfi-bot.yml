@@ -14,18 +14,18 @@ jobs:
 
     steps:
 
-      # --------------------------------------------
-      # Repository
-      # --------------------------------------------
+      # ============================================
+      # Repository auschecken
+      # ============================================
 
       - name: Code aus Repository auschecken
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # --------------------------------------------
+      # ============================================
       # Python
-      # --------------------------------------------
+      # ============================================
 
       - name: Python 3.12 einrichten
         uses: actions/setup-python@v5
@@ -33,9 +33,9 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      # --------------------------------------------
+      # ============================================
       # Abhängigkeiten
-      # --------------------------------------------
+      # ============================================
 
       - name: Abhängigkeiten installieren
         run: |
@@ -47,9 +47,9 @@ jobs:
             pip install requests tweepy
           fi
 
-      # --------------------------------------------
-      # Bot ausführen
-      # --------------------------------------------
+      # ============================================
+      # DeFiChain Daily Bot
+      # ============================================
 
       - name: DeFiChain Daily Bot starten
         env:
@@ -67,35 +67,35 @@ jobs:
 
         run: |
           echo "=================================================="
-          echo "STARTING DEFICHAIN DAILY BOT"
+          echo "🚀 STARTING DEFICHAIN INTELLIGENCE v5"
           echo "=================================================="
 
           python main.py
 
           echo "=================================================="
-          echo "BOT EXECUTION FINISHED"
+          echo "🎉 BOT EXECUTION FINISHED"
           echo "=================================================="
 
-      # --------------------------------------------
-      # Sprachstatus speichern
-      # --------------------------------------------
+      # ============================================
+      # Sprachstatus anzeigen
+      # ============================================
 
       - name: Sprachstatus prüfen
         if: always()
         run: |
           echo "=================================================="
-          echo "LANGUAGE STATE"
+          echo "🌍 LANGUAGE STATE"
           echo "=================================================="
 
           if [ -f language_state.json ]; then
             cat language_state.json
           else
-            echo "language_state.json nicht gefunden"
+            echo "⚠️ language_state.json nicht gefunden"
           fi
 
-      # --------------------------------------------
-      # Sprachstatus zurück ins Repository schreiben
-      # --------------------------------------------
+      # ============================================
+      # Sprachstatus dauerhaft speichern
+      # ============================================
 
       - name: Sprachstatus speichern
         if: always()
@@ -106,7 +106,7 @@ jobs:
           git add language_state.json
 
           if git diff --cached --quiet; then
-            echo "Keine Änderung am Sprachstatus."
+            echo "ℹ️ Keine Änderung am Sprachstatus."
           else
             git commit -m "Update language rotation state"
             git push
